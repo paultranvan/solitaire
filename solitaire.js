@@ -1,4 +1,3 @@
-var types = require('./types.js');
 var express = require('express');
 var http = require('http');
 
@@ -13,7 +12,6 @@ _ comment déplacer une carte, ou un groupe de carte?
 var port = process.env.PORT || 8080;
 var host = process.env.HOST || "127.0.0.1";
 var nCards = 52;
-var imageBackPath = "card_back.png";
 
 var cards = [];
 var deck_cards = [];
@@ -22,7 +20,7 @@ var foundation_last_cards = []; //tableau de 4 cases, chacune correspondant à l
 var plateau_cards = []; //tableau de cartes pouvant être jouées, c'est à dire celles du tableau
 
 //this is needed to access the images
-app.use(express.static(__dirname + '/classic-cards'));
+//app.use(express.static(__dirname + '/classic-cards'));
 
 app.get('/solitaire', function(req, res) 
 {

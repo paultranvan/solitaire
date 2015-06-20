@@ -1,11 +1,20 @@
 {
-	"name" : "solitaire-paul", 
-	"version" : "0.1.0", 
-	"dependencies" : 
-	{
-		"express" : "4.x", 
-		"ejs" : "1.x"
-	},
-	"author" : "paul", 
-	"description" : "un super jeu de solitaire"
+  "name": "solitaire",
+  "version": "0.0.1",
+  "author": "paul",
+  "description": "Classic klondike game card",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gara64/solitiare.git"
+  },
+  "main": "server.js",
+  "dependencies": {
+    "jade": "~0.35.0"
+  },
+  "engines": [
+    "node = 0.8.x"
+  ],
+  "scripts": {
+    "start": "node server.js"
+  }
 }
