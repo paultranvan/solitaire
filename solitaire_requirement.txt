@@ -1,0 +1,78 @@
+﻿
+Jeu solitaire
+Cahier des charges
+
+Contraintes graphiques
+_ 4 emplacements pour les cartes a placer (en haut a droite)
+_ une donne de 24 cartes en haut a gauche, une carte visible a la fois
+_ des cartes pré-placées, sur 7 colonnes, 1 carte sur la colonne la + a gauche, puis 2 sur colonne suivante, jusqu'a 7 pour la dernière
+On appelle ces cartes les cartes plateau
+
+Contraintes de jeu
+_ les cartes de la donne s'affichent une par une. Une fois atteinte la fin de la donne, on recommence du début.
+Une fausse carte indique la fin de la donne (qui ne compte pas pour un coup).
+_ les cartes du plateau peuvent être mises séquentiellement du roi jusqu'a l'as en alternant les couleurs rouge/noir 
+_ les cartes placées doivent être mises séqueniellement de l'as jusqu'au roi en alternant les couleurs rouge/noir
+_ on peut mettre des cartes ainsi : donne->plateau, donne->placée, plateau<->placées
+_ quand une colonne est vide, on ne peut que démarrer par un roi
+_ une fois toutes les cartes placées, le jeu est gagné
+_ si la donne est vide, et qu'il n'y a plus de cartes cachées sur le playeau, c'est gagné
+
+Challenges : 
+_ nodejs
+_ déplacement des cartes
+_ calculs pour placer une carte facilement (on ne doit pas etre au pixel pret) => quand le joueur déplace une carte et qu'il relache le clic de la souris, 
+appel d'un callback pour vérifier si elle peut etre placée. Si true, placement, si false, retour de la carte.
+_ algo pour choisir les cartes au début : aléatoire ou calculé?
+
+Structure de données : 
+struct cards
+ NUMBER number;
+ TYPE type;
+ COLOR color = COLOR_BY_TYPE;
+ SIZE size;
+ COORDINATES pos;
+ 
+struct SIZE
+	int width;
+	int length;
+	
+struct COORDINATES
+	int x; //center
+	int y; //center
+	
+enum TYPE{CARREAU, TREFLE, PIQUE, COEUR};
+DEFINE COLOR_BY_TYPE if type==CARREAU return RED...
+
+function check_card_move(CARD card)
+{
+	CARD associate_card = find_closest_card(card.pos.x, card.pos.y);
+	if(associate_card == null)
+		return false;
+
+	bool correct_card_move = card_check(card);
+	return bool;
+}
+
+function graphical_card_check(card)
+{
+	var card =  find_closest_card(card.pos.x, card.pos.y);
+	if(card == null)
+		return false;
+	
+	
+		return true;
+	else return false;
+}
+
+
+function find_closest_card(var x, var y)
+{
+	//need an array containing all the placed cards.
+	foreach (CARD c in tab_pos_placed_cards
+	{
+		if(abs(c.pos.x -  x) < DISTANCE_MAX_X && y - c.pos.y < DISTANCE_MAX_Y && y -pos > 0)
+			return c;
+	}
+	return null;
+}

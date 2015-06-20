@@ -1,0 +1,11 @@
+{
+	"name" : "solitaire-paul", 
+	"version" : "0.1.0", 
+	"dependencies" : 
+	{
+		"express" : "4.x", 
+		"ejs" : "1.x"
+	},
+	"author" : "paul", 
+	"description" : "un super jeu de solitaire"
+}
