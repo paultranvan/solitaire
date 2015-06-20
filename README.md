@@ -1,4 +1,4 @@
 # solitaire
 Classic solitaire card game in Node.js
 
-* Still in developement *
+**Still in developement and experimentation**
