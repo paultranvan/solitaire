@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import Deck from './components/Deck.jsx';
+import React, { Component } from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import Deck from "./components/Deck.jsx";
 
 class App extends Component {
   render() {
@@ -14,7 +14,7 @@ class App extends Component {
         <p className="App-intro">
           Soon... An amazing unique disruptive experience
         </p>
-        <Deck></Deck>
+        <Deck />
       </div>
     );
   }
