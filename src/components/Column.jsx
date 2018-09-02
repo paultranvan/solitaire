@@ -9,7 +9,6 @@ class Column extends Component {
   }
 
   renderCard = (card, className, visible) => {
-    console.log("render card column");
     return (
       <div key={card.id} className={className}>
         <Card
