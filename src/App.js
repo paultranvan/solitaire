@@ -8,6 +8,7 @@ import Foundation from "./components/Foundation";
 import Column from "./components/Column";
 import Deck from "./lib/deck";
 import { Grid, Segment, Container, Image } from "semantic-ui-react";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 
 class App extends Component {
   constructor(props) {
@@ -36,6 +37,14 @@ class App extends Component {
     console.log("stock : ", JSON.stringify(this.state.stock));
     console.log("piles : ", JSON.stringify(this.state.piles));
   }
+
+  onDragStart = () => {
+    console.log("start drag !");
+  };
+  onDragUpdate = () => {};
+  onDragEnd = () => {
+    console.log("stop drag !");
+  };
 
   popStockCard = id => {
     const lastCard = this.state.stock[this.state.stock.length - 1];
@@ -89,11 +98,18 @@ class App extends Component {
 
   renderColumns = () => {
     const { columns } = this.state;
-    console.log("columns : ", JSON.stringify(columns));
+
     return columns.map((c, i) => {
       return (
         <Grid.Column key={i} floated="left" width="2">
-          <Column cards={columns[i]} />
+          <Droppable droppableId="root">
+            {(provided, snapshot) => (
+              <div ref={provided.innerRef}>
+                <Column cards={columns[i]} />
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
         </Grid.Column>
       );
     });
@@ -122,17 +138,22 @@ class App extends Component {
     return (
       <div className="App">
         <Header />
-        <Container>
-          <Grid columns="equal">
-            <Grid.Row>
-              {this.renderStock()}
-              {this.renderTalon()}
-              <Grid.Column width="4" />
-              {this.renderFoundation()}
-            </Grid.Row>
-            <Grid.Row>{this.renderColumns()}</Grid.Row>
-          </Grid>
-        </Container>
+        <DragDropContext
+          onDragStart={this.onDragStart}
+          onDragEnd={this.onDragEnd}
+        >
+          <Container>
+            <Grid columns="equal">
+              <Grid.Row>
+                {this.renderStock()}
+                {this.renderTalon()}
+                <Grid.Column width="4" />
+                {this.renderFoundation()}
+              </Grid.Row>
+              <Grid.Row>{this.renderColumns()}</Grid.Row>
+            </Grid>
+          </Container>
+        </DragDropContext>
       </div>
     );
   }

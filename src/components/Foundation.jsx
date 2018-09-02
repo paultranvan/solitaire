@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 class Foundation extends Component {
   render() {
     const { renderTopCard, cards } = this.props;
+
     return <div>{renderTopCard(cards)}</div>;
   }
 }
