@@ -49,12 +49,75 @@ class App extends Component {
   };
 
   renderStock = () => {
-    return this.state.stock.cards.map(card => card);
+    const { stock } = this.state;
+    return (
+      <Grid.Column floated="left" width="2">
+        <Stock
+          cards={stock}
+          onClick={this.popStockCard}
+          renderTopCard={this.renderTopCard}
+        />
+      </Grid.Column>
+    );
+  };
+
+  renderTalon = () => {
+    const { talon } = this.state;
+
+    return (
+      <Grid.Column floated="left" width="2">
+        <Talon cards={talon} renderTopCard={this.renderTopCard} />
+      </Grid.Column>
+    );
+  };
+
+  renderFoundation = () => {
+    const { foundations } = this.state;
+
+    return foundations.map((f, i) => {
+      return (
+        <Grid.Column key={i} floated="right" width="2">
+          <Foundation
+            cards={foundations[i]}
+            renderTopCard={this.renderTopCard}
+          />
+        </Grid.Column>
+      );
+    });
+  };
+
+  renderColumns = () => {
+    const { columns } = this.state;
+    console.log("columns : ", JSON.stringify(columns));
+    return columns.map((c, i) => {
+      return (
+        <Grid.Column key={i} floated="left" width="2">
+          <Column cards={columns[i]} />
+        </Grid.Column>
+      );
+    });
+  };
+
+  renderTopCard = (cards, onClick) => {
+    if (cards.length > 0) {
+      const topCard = cards[cards.length - 1];
+      return (
+        <Card
+          id={topCard.id}
+          value={topCard.value}
+          color={topCard.color}
+          onClick={() => onClick(topCard.id)}
+        />
+      );
+    }
+    return (
+      <Segment>
+        <Image src="./assets/cards/b1fv.png" alt="" size="tiny" />
+      </Segment>
+    );
   };
 
   render() {
-    const { stock, talon } = this.state;
-
     return (
       <div className="App">
         <Header />
