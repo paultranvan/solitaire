@@ -6,14 +6,16 @@ class Card extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      cardsPath: "./assets/cards/",
-      status: ""
+      cardsPath: "./assets/cards/"
     };
   }
 
   render() {
-    const { value, color, onClick } = this.props;
-    const cardPath = this.state.cardsPath + color + "_" + value + ".png";
+    const { value, color, onClick, visible } = this.props;
+
+    const cardPath = visible
+      ? this.state.cardsPath + color + "_" + value + ".png"
+      : this.state.cardsPath + "card_back.png";
 
     return (
       <Segment>
@@ -32,6 +34,10 @@ Card.propTypes = {
   value: PropTypes.number.isRequired,
   color: PropTypes.string.isRequired,
   onClick: PropTypes.func
+};
+
+Card.defaultProps = {
+  visible: true
 };
 
 export default Card;
