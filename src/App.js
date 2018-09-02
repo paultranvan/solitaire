@@ -122,9 +122,6 @@ class App extends Component {
     return (
       <div className="App">
         <Header />
-        <p className="App-intro">
-          Soon... An amazing unique disruptive experience
-        </p>
         <Container>
           <Grid columns="equal">
             <Grid.Row>

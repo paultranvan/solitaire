@@ -2,7 +2,7 @@ import React, { Component } from "react";
 
 class Header extends Component {
   render() {
-    const logo = "./assets/logo.svg";
+    const logo = "./assets/cards/53.png";
 
     return (
       <header className="App-header">
