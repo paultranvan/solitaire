@@ -1,27 +1,28 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import { Image, Segment } from "semantic-ui-react";
 
 class Card extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      path: "./assets/cards/",
+      cardsPath: "./assets/cards/",
       status: ""
     };
   }
 
   render() {
     const { value, color, onClick } = this.props;
-    const file = this.state.path + color + "_" + value + ".png";
+    const cardPath = this.state.cardsPath + color + "_" + value + ".png";
 
     return (
-      <div>
+      <Segment>
         {onClick !== undefined ? (
-          <img src={file} alt="" onClick={onClick} />
+          <Image src={cardPath} alt="" onClick={onClick} size="tiny" />
         ) : (
-          <img src={file} alt="" />
+          <Image src={cardPath} alt="" size="tiny" />
         )}
-      </div>
+      </Segment>
     );
   }
 }
