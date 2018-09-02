@@ -1,42 +1,43 @@
 import React, { Component } from "react";
 import "./App.css";
 import Header from "./components/Header";
+import Card from "./components/Card";
 import Stock from "./components/Stock";
 import Talon from "./components/Talon";
-//import Card from "./components/Card";
+import Foundation from "./components/Foundation";
+import Column from "./components/Column";
 import Deck from "./lib/deck";
-import Stack from "./lib/stack";
+import { Grid, Segment, Container, Image } from "semantic-ui-react";
 
 class App extends Component {
   constructor(props) {
     super(props);
-    //let card1 = <Card value="10" color="spade" />;
-    //  let card2 = <Card value="10" color="heart" />;
 
     let deck = new Deck();
-    let piles = [];
+    let columns = [];
 
     for (let i = 0; i < 7; i++) {
-      let pileCards = [];
-      for (let j = 7 - i; j > 0; j--) {
-        pileCards.push(deck.pickRandomCard());
+      let columnCards = [];
+      for (let j = 0; j < i + 1; j++) {
+        columnCards.push(deck.pickRandomCard());
       }
-      let pile = new Stack(pileCards);
-      piles.push(pile);
+      columns.push(columnCards);
     }
+
+    let foundations = Array.from({ length: 4 }, (x, i) => []);
 
     this.state = {
       stock: deck.cards,
-      piles: piles,
+      columns: columns,
       talon: [],
-      foundations: []
+      foundations: foundations
     };
 
     console.log("stock : ", JSON.stringify(this.state.stock));
     console.log("piles : ", JSON.stringify(this.state.piles));
   }
 
-  popCard = id => {
+  popStockCard = id => {
     const lastCard = this.state.stock[this.state.stock.length - 1];
     // Remove card from stock
     this.setState(prevState => ({
@@ -124,10 +125,17 @@ class App extends Component {
         <p className="App-intro">
           Soon... An amazing unique disruptive experience
         </p>
-        <div>
-          <Stock cards={stock} onClick={this.popCard} />
-          <Talon cards={talon} />
-        </div>
+        <Container>
+          <Grid columns="equal">
+            <Grid.Row>
+              {this.renderStock()}
+              {this.renderTalon()}
+              <Grid.Column width="4" />
+              {this.renderFoundation()}
+            </Grid.Row>
+            <Grid.Row>{this.renderColumns()}</Grid.Row>
+          </Grid>
+        </Container>
       </div>
     );
   }
