@@ -33,7 +33,7 @@
 
 .Column-card {
   position: relative;
-  margin-top: -90%;
+  /*margin-top: -90%;*/
 }
 
 .Column-card.first {

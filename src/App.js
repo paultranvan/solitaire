@@ -41,9 +41,15 @@ class App extends Component {
   onDragStart = () => {
     console.log("start drag !");
   };
-  onDragUpdate = () => {};
-  onDragEnd = () => {
-    console.log("stop drag !");
+  onDragUpdate = () => {
+    console.log("drag update");
+  };
+  onDragEnd = result => {
+    const { source, destination } = result;
+
+    console.log("source :", source);
+    console.log("destination :", destination);
+    console.log("stop drag!");
   };
 
   popStockCard = id => {
@@ -88,6 +94,7 @@ class App extends Component {
       return (
         <Grid.Column key={i} floated="right" width="2">
           <Foundation
+            id={i}
             cards={foundations[i]}
             renderTopCard={this.renderTopCard}
           />
@@ -102,10 +109,10 @@ class App extends Component {
     return columns.map((c, i) => {
       return (
         <Grid.Column key={i} floated="left" width="2">
-          <Droppable droppableId="root">
+          <Droppable droppableId={"column_" + i} type="to_drop">
             {(provided, snapshot) => (
               <div ref={provided.innerRef}>
-                <Column cards={columns[i]} />
+                <Column id={i} cards={columns[i]} />
                 {provided.placeholder}
               </div>
             )}
@@ -140,6 +147,7 @@ class App extends Component {
         <Header />
         <DragDropContext
           onDragStart={this.onDragStart}
+          onDragUpdate={this.onDragUpdate}
           onDragEnd={this.onDragEnd}
         >
           <Container>
