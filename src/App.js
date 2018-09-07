@@ -8,6 +8,8 @@ import Foundation from "./components/Foundation";
 import Column from "./components/Column";
 import Deck from "./lib/deck";
 import { Grid, Segment, Container, Image } from "semantic-ui-react";
+import { DragDropContext } from "react-dnd";
+import HTML5Backend from "react-dnd-html5-backend";
 
 class App extends Component {
   constructor(props) {
@@ -103,18 +105,22 @@ class App extends Component {
     if (cards.length > 0) {
       const topCard = cards[cards.length - 1];
       return (
-        <Card
-          id={topCard.id}
-          value={topCard.value}
-          color={topCard.color}
-          onClick={() => onClick(topCard.id)}
-        />
+        <div>
+          <Card
+            id={topCard.id}
+            value={topCard.value}
+            color={topCard.color}
+            onClick={() => onClick(topCard.id)}
+          />
+        </div>
       );
     }
     return (
-      <Segment>
-        <Image src="./assets/cards/b1fv.png" alt="" size="tiny" />
-      </Segment>
+      <div>
+        <Segment>
+          <Image src="./assets/cards/b1fv.png" alt="" size="tiny" />
+        </Segment>
+      </div>
     );
   };
 
@@ -138,4 +144,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default DragDropContext(HTML5Backend)(App);
