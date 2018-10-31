@@ -81,6 +81,7 @@ class App extends Component {
       return (
         <Grid.Column key={i} floated="right" width="2">
           <Foundation
+            id={i}
             cards={foundations[i]}
             renderTopCard={this.renderTopCard}
           />

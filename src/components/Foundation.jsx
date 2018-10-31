@@ -34,7 +34,7 @@ class Foundation extends Component {
 }
 
 Foundation.propTypes = {
-  id: PropTypes.string.isRequired,
+  id: PropTypes.number.isRequired,
   cards: PropTypes.array.isRequired,
   renderTopCard: PropTypes.func.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
