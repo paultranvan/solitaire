@@ -1,12 +1,12 @@
 import { colors, values } from "./consts"
 
-export function initGame() {
+export function initDeck() {
   const cards = {}
 
   let deck = Array.from({ length: 52 }, (v, i) => {
     const value = values[i % 13]
     const color = colors[Math.floor(i / 13)]
-    return { i, value, color }
+    return { id: i, value, color }
   })
   deck = shuffle(deck)
 
@@ -18,13 +18,10 @@ export function initGame() {
       columnCards.push(pickRandomCard(deck))
     }
     columns.push(columnCards)
-    cards["column" + i] = columnCards
+    //cards["column" + i] = columnCards
   }
-
-  for (let i = 0; i < 4; i++) {
-    cards["foundation" + i] = []
-  }
-
+  cards['columns'] = columns
+  cards["foundations"] = [[], [], [], []]
   cards["stock"] = deck
   cards["talon"] = []
 

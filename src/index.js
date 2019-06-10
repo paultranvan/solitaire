@@ -2,16 +2,16 @@ import React from "react"
 import ReactDOM from "react-dom"
 import { Provider } from "react-redux"
 import { createStore } from "redux"
-import { initGame } from "./lib/init"
+import { initDeck } from "./lib/init"
 import "./index.css"
 import App from "./App"
-import rootReducer from "./reducers"
+import game from "./reducers"
 import "semantic-ui-css/semantic.min.css"
 import registerServiceWorker from "./registerServiceWorker"
 
-const cards = initGame()
-console.log("cards init : ", JSON.stringify(cards))
-const store = createStore(rootReducer, cards)
+const cards = {cards: initDeck()}
+// Init the store with the cards
+const store = createStore(game, cards)
 
 ReactDOM.render(
   <Provider store={store}>

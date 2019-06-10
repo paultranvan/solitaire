@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import PropTypes from "prop-types"
 import { Types } from "../lib/consts"
 import { DropTarget } from "react-dnd"
-import { moveCard } from "../actions/index"
 
 const foundationTarget = {
   drop(props, monitor, component) {
@@ -10,7 +9,6 @@ const foundationTarget = {
     console.log("Droped ! ")
     console.log("item source : ", src)
     console.log("item dest : ", JSON.stringify(component.props.cards))
-    moveCard(src, component.props.id)
   },
   canDrop(props, monitor) {
     const item = monitor.getItem()

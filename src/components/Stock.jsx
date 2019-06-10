@@ -1,17 +1,22 @@
-import React, { Component } from "react"
-import PropTypes from "prop-types"
+import React from "react"
+import { connect } from 'react-redux'
+import { getFromStock } from '../actions/actions'
+import Card from './Card'
 
-class Stock extends Component {
-  render() {
-    const { renderTopCard, cards, onClick } = this.props
-    return <div>{renderTopCard(cards, onClick)}</div>
-  }
+
+const Stock = ({ stock, getFromStock }) => {
+  const topCard = stock[stock.length - 1]
+
+  return(
+    <div>
+      <Card
+        id={topCard.id}
+        value={topCard.value}
+        color={topCard.color}
+        onClick={() => getFromStock()}
+      />
+    </div>
+  )
 }
 
-Stock.propTypes = {
-  cards: PropTypes.array.isRequired,
-  onClick: PropTypes.func.isRequired,
-  renderTopCard: PropTypes.func.isRequired
-}
-
-export default Stock
+export default connect(null, { getFromStock })(Stock)

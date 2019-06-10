@@ -1,6 +1,8 @@
-import { combineReducers } from "redux";
-import cards from "./cards";
+import { combineReducers } from "redux"
+import cards from "./cards"
 
-export default combineReducers({
+const game = combineReducers({
   cards
-});
+})
+
+export default game
