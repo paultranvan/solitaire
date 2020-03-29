@@ -7,6 +7,8 @@ import Foundation from "./components/Foundation"
 import Column from "./components/Column"
 import { Grid, Container } from "semantic-ui-react"
 import { connect } from 'react-redux'
+import { DndProvider } from 'react-dnd'
+import Backend from 'react-dnd-html5-backend'
 
 // https://react-redux.js.org/introduction/basic-tutorial
 // https://codesandbox.io/s/9on71rvnyo
@@ -55,18 +57,20 @@ const App = ({cards}) => {
   console.log('app function with cards : ', cards)
   return (
     <div className="App">
-      <Header />
-      <Container>
-        <Grid columns="equal">
-          <Grid.Row>
-            {renderStock(cards.stock)}
-            {renderTalon(cards.talon)}
-            <Grid.Column width="4" />
-            {renderFoundation(cards.foundations)}
-          </Grid.Row>
-          <Grid.Row>{renderColumns(cards.columns)}</Grid.Row>
-        </Grid>
-      </Container>
+      <DndProvider backend={Backend}>
+        <Header />
+        <Container>
+          <Grid columns="equal">
+            <Grid.Row>
+              {renderStock(cards.stock)}
+              {renderTalon(cards.talon)}
+              <Grid.Column width="4" />
+              {renderFoundation(cards.foundations)}
+            </Grid.Row>
+            <Grid.Row>{renderColumns(cards.columns)}</Grid.Row>
+          </Grid>
+        </Container>
+      </DndProvider>
     </div>
   )
 }
