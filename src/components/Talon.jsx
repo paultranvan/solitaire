@@ -1,34 +1,24 @@
-import React, { Component } from "react"
-import PropTypes from "prop-types"
-import { Types } from "../lib/consts"
-import { DragSource } from "react-dnd"
+import React from "react"
+import { connect } from 'react-redux'
+import Card from './Card'
+import Empty from './Empty'
 
-const talonSource = {
-  beginDrag(props) {
-    const card = props.cards[props.cards.length - 1]
-    return { card }
-  }
+const Talon = ({ talon }) => {
+  const topCard = talon.length > 0 ? talon[talon.length - 1] : null
+
+  return topCard
+    ? (
+        <div>
+          <Card
+            id={topCard.id}
+            value={topCard.value}
+            color={topCard.color}
+          />
+        </div>
+      )
+    : (
+      <Empty />
+    )
 }
 
-function collect(connect, monitor) {
-  return {
-    connectDragSource: connect.dragSource(),
-    isDragging: monitor.isDragging()
-  }
-}
-
-class Talon extends Component {
-  render() {
-    const { renderTopCard, cards, connectDragSource } = this.props
-    return <div>{connectDragSource(renderTopCard(cards))}</div>
-  }
-}
-
-Talon.propTypes = {
-  cards: PropTypes.array.isRequired,
-  renderTopCard: PropTypes.func.isRequired,
-  connectDragSource: PropTypes.func.isRequired,
-  isDragging: PropTypes.bool.isRequired
-}
-
-export default DragSource(Types.TALON, talonSource, collect)(Talon)
+export default connect(null, null)(Talon)
