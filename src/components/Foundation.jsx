@@ -37,7 +37,25 @@ const Foundation = ({ id, cards, dropCard }) => {
   } else {
     color = 'white'
   }
-}
+  return (
+      <div
+        ref={drop}
+        style={{
+          color: isOver ? 'green' : 'white'
+        }}
+      >
+      {topCard
+        ?
+          (<Card
+            id={topCard.id}
+            value={topCard.value}
+            color={topCard.color}
+          />)
+        :
+          (<Empty color={color}/>)
+      }
+      </div>
+    )
 
 }
 
