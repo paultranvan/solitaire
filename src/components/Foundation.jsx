@@ -1,42 +1,44 @@
 import React, { Component } from "react"
 import PropTypes from "prop-types"
 import { Types } from "../lib/consts"
-import { DropTarget } from "react-dnd"
+import { useDrop } from 'react-dnd'
+import { connect } from 'react-redux'
+import Card from "./Card"
+import Empty from './Empty'
+import { moveCard } from '../actions/actions'
 
-const foundationTarget = {
-  drop(props, monitor, component) {
-    const src = monitor.getItem().card
-    console.log("Droped ! ")
-    console.log("item source : ", src)
-    console.log("item dest : ", JSON.stringify(component.props.cards))
-  },
-  canDrop(props, monitor) {
-    const item = monitor.getItem()
-    console.log("CAN DROP ? ", item.card)
-    return true
-  }
-}
-
-function collect(connect, monitor) {
+const mapDispatchToProps = dispatch => {
   return {
-    connectDropTarget: connect.dropTarget(),
-    isOver: monitor.isOver()
+    dropCard: (id, card) => {
+      dispatch(moveCard(card, {type: Types.FOUNDATION, id}))
+    }
   }
 }
 
-class Foundation extends Component {
-  render() {
-    const { renderTopCard, cards, connectDropTarget } = this.props
-    return <div>{connectDropTarget(renderTopCard(cards))}</div>
+const Foundation = ({ id, cards, dropCard }) => {
+  //console.log('cards foundaiton : ', cards)
+  const [{ isOver, canDrop }, drop] = useDrop({
+    accept: Types.CARD,
+    //canDrop: () => canMoveOnFoundation(), //compare incoming card and topcard + its origin
+    drop: (item) => dropCard(id, item),
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+      canDrop: !!monitor.canDrop(),
+    }),
+  })
+
+  const topCard = cards.length > 0 ? cards[cards.length - 1] : null
+
+  let color
+  if (canDrop && !isOver) {
+    color = 'yellow'
+  } else if (canDrop && isOver) {
+    color = 'green'
+  } else {
+    color = 'white'
   }
 }
 
-Foundation.propTypes = {
-  id: PropTypes.number.isRequired,
-  cards: PropTypes.array.isRequired,
-  renderTopCard: PropTypes.func.isRequired,
-  connectDropTarget: PropTypes.func.isRequired,
-  isOver: PropTypes.bool.isRequired
 }
 
-export default DropTarget(Types.TALON, foundationTarget, collect)(Foundation)
+export default connect(null, mapDispatchToProps)(Foundation)

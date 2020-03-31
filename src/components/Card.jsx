@@ -5,7 +5,7 @@ import { Types } from "../lib/consts"
 
 const Card = ({id, value, color, onClick, visible = true}) => {
   const [{ isDragging }, drag] = useDrag({
-    item: { type: Types.CARD },
+    item: { type: Types.CARD, id, value, color },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),

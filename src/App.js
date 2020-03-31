@@ -35,7 +35,7 @@ const renderFoundation = (foundations) => {
   return foundations.map((f, i) => {
     return (
       <Grid.Column key={i} floated="right" width="2">
-        <Foundation foundation={foundations[i]} />
+        <Foundation id={i} cards={foundations[i]} />
       </Grid.Column>
     )
   })

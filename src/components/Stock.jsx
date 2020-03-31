@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import { getFromStock } from '../actions/actions'
 import Card from './Card'
 
-
 const Stock = ({ stock, getFromStock }) => {
   const topCard = stock[stock.length - 1]
 
@@ -13,7 +12,7 @@ const Stock = ({ stock, getFromStock }) => {
         id={topCard.id}
         value={topCard.value}
         color={topCard.color}
-        onClick={() => getFromStock()}
+        onClick={() => getFromStock() }
       />
     </div>
   )

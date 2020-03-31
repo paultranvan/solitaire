@@ -1,20 +1,15 @@
-import { GET_FROM_STOCK } from './types'
+import { GET_FROM_STOCK, MOVE_CARD } from './types'
 
 export const getFromStock = () => {
-  console.log('action get from stock ', GET_FROM_STOCK)
   return {
     type: GET_FROM_STOCK
   }
 }
 
-
-
-/*
-export const addTodo = content => ({
-  type: ADD_TODO,
-  payload: {
-    id: ++nextTodoId,
-    content
+export const moveCard = (card, destination) => {
+  return {
+    type: MOVE_CARD,
+    card,
+    destination
   }
-});
-*/
+}
