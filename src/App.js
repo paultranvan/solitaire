@@ -18,7 +18,7 @@ const renderStock = (stock) => {
   console.log('from stock : ', stock)
   return (
     <Grid.Column floated="left" width="2">
-      <Stock stock={stock} />
+      <Stock cards={stock} />
     </Grid.Column>
   )
 }
@@ -26,7 +26,7 @@ const renderStock = (stock) => {
 const renderTalon = (talon) => {
   return (
     <Grid.Column floated="left" width="2">
-      <Talon talon={talon} />
+      <Talon cards={talon} />
     </Grid.Column>
   )
 }
@@ -46,7 +46,7 @@ const renderColumns = (columns) => {
 
     return (
       <Grid.Column key={i} floated="left" width="2">
-        <Column cards={columns[i]} />
+        <Column id={i} cards={columns[i]} />
       </Grid.Column>
     )
   })

@@ -1,5 +1,4 @@
-import React, { Component } from "react"
-import PropTypes from "prop-types"
+import React from "react"
 import { Types } from "../lib/consts"
 import { useDrop } from 'react-dnd'
 import { connect } from 'react-redux'
@@ -10,13 +9,12 @@ import { moveCard } from '../actions/actions'
 const mapDispatchToProps = dispatch => {
   return {
     dropCard: (id, card) => {
-      dispatch(moveCard(card, {type: Types.FOUNDATION, id}))
+      dispatch(moveCard(card, {type: Types.FOUNDATIONS, id}))
     }
   }
 }
 
 const Foundation = ({ id, cards, dropCard }) => {
-  //console.log('cards foundaiton : ', cards)
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: Types.CARD,
     //canDrop: () => canMoveOnFoundation(), //compare incoming card and topcard + its origin
@@ -50,6 +48,7 @@ const Foundation = ({ id, cards, dropCard }) => {
             id={topCard.id}
             value={topCard.value}
             color={topCard.color}
+            position={{type: Types.FOUNDATIONS, id: id}}
           />)
         :
           (<Empty color={color}/>)

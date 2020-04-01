@@ -3,9 +3,9 @@ import { Image, Segment } from "semantic-ui-react"
 import { useDrag } from 'react-dnd'
 import { Types } from "../lib/consts"
 
-const Card = ({id, value, color, onClick, visible = true}) => {
+const Card = ({id, value, color, position, onClick, visible = true}) => {
   const [{ isDragging }, drag] = useDrag({
-    item: { type: Types.CARD, id, value, color },
+    item: { type: Types.CARD, value, color, position },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),

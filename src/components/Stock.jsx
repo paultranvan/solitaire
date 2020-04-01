@@ -2,20 +2,26 @@ import React from "react"
 import { connect } from 'react-redux'
 import { getFromStock } from '../actions/actions'
 import Card from './Card'
+import Empty from './Empty'
 
-const Stock = ({ stock, getFromStock }) => {
-  const topCard = stock[stock.length - 1]
+const Stock = ({ cards, getFromStock }) => {
+  const topCard = cards.length > 0 ? cards[cards.length - 1] : null
 
-  return(
-    <div>
-      <Card
-        id={topCard.id}
-        value={topCard.value}
-        color={topCard.color}
-        onClick={() => getFromStock() }
-      />
-    </div>
-  )
+  return topCard
+    ? (
+        <div>
+          <Card
+            id={topCard.id}
+            value={topCard.value}
+            color={topCard.color}
+            visible={false}
+            onClick={() => getFromStock() }
+          />
+        </div>
+      )
+    : (
+      <Empty />
+    )
 }
 
 export default connect(null, { getFromStock })(Stock)
