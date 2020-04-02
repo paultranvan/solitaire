@@ -1,44 +1,46 @@
 import { colors, values } from "./consts"
 
-export function initDeck() {
+export const initDeck = () => {
   const cards = {}
 
-  let deck = Array.from({ length: 52 }, (v, i) => {
+  const deck = Array.from({length: 52}, (_, i) => {
     const value = values[i % 13]
     const color = colors[Math.floor(i / 13)]
     return { id: i, value, color }
   })
-  deck = shuffle(deck)
+  const shuffledDeck = shuffle(deck)
 
-  let columns = []
-
+  const columns = []
   for (let i = 0; i < 7; i++) {
-    let columnCards = []
+    const columnCards = []
     for (let j = 0; j < i + 1; j++) {
-      columnCards.push(pickRandomCard(deck))
+      columnCards.push(pickRandomCard(shuffledDeck))
     }
     columns.push(columnCards)
-    //cards["column" + i] = columnCards
   }
   cards['columns'] = columns
   cards["foundations"] = [[], [], [], []]
-  cards["stock"] = deck
+  cards["stock"] = shuffledDeck
   cards["talon"] = []
 
   return cards
 }
 
-function shuffle(c) {
+// Shuffle the cards of the deck
+const shuffle = (deck) => {
+  // if deck is direclty used, it is modified BEFORE calling shuffle. Why ?!
+  const c = [...deck]
   for (let i = c.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
+    const tmp = c[i]
     c[i] = c[j]
-    c[j] = c[i]
+    c[j] = tmp
   }
   return c
 }
 
 // Pick a random card from a deck and remove it
-function pickRandomCard(cards) {
+const pickRandomCard = (cards) => {
   const i = Math.floor(Math.random() * cards.length)
   const card = cards[i]
   cards.splice(i, 1)

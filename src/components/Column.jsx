@@ -27,7 +27,7 @@ class Column extends Component {
     const { cards, id } = this.props
 
     if (cards.length === 1) {
-      return this.renderCard(cards[0], "Column-card first", true)
+      return this.renderCard(id, cards[0], "Column-card first", true)
     }
 
     return cards.map((card, i) => {

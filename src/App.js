@@ -54,7 +54,7 @@ const renderColumns = (columns) => {
 
 
 const App = ({cards}) => {
-  console.log('app function with cards : ', cards)
+  console.log('store with cards : ', cards)
   return (
     <div className="App">
       <DndProvider backend={Backend}>
