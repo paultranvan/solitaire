@@ -13,7 +13,6 @@ import Backend from 'react-dnd-html5-backend'
 // https://react-redux.js.org/introduction/basic-tutorial
 // https://codesandbox.io/s/9on71rvnyo
 
-
 const renderStock = (stock) => {
   console.log('from stock : ', stock)
   return (
