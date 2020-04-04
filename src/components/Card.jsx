@@ -9,6 +9,10 @@ const Card = ({value, color, container, onClick, visible = true}) => {
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
+    canDrag: (monitor) => {
+      // Hidden card cannot be dragged
+      return visible
+    }
   })
 
   const cardPath = visible
