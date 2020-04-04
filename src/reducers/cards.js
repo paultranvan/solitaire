@@ -7,15 +7,17 @@ function moveCard(state, card, destination) {
 
   // The source can be talon, column or foundation
   const sourceCards = [...state[sourceType]]
-  const newSource = card.position.id
-    ? sourceCards[card.position.id].splice(0, sourceCards.length - 1)
-    : sourceCards.splice(0, sourceCards.length - 1)
+  if (card.position.id) {
+    sourceCards[card.position.id].splice(sourceCards[card.position.id].length - 1, 1)
+  } else {
+    sourceCards.splice(sourceCards.length - 1, 1)
+  }
 
   // The target is either a column, or a foundation
   const targetCards = [...state[targetType]]
   const newTarget = [...targetCards[destination.id], card]
   targetCards[destination.id] = newTarget
-  return {...state, [sourceType]: newSource, [targetType]: targetCards}
+  return {...state, [sourceType]: sourceCards, [targetType]: targetCards}
 }
 
 const getCardFromStock = (state) => {
