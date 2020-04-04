@@ -7,10 +7,10 @@ const moveCard = (state, card, destination) => {
 
   // The source can be talon, column or foundation
   const sourceCards = [...state[sourceType]]
-  if (card.position.id) {
-    sourceCards[card.position.id].splice(sourceCards[card.position.id].length - 1, 1)
+  if (card.position.hasOwnProperty('id')) {
+    sourceCards[card.position.id].splice(sourceCards[card.position.id].length - 1)
   } else {
-    sourceCards.splice(sourceCards.length - 1, 1)
+    sourceCards.splice(sourceCards.length - 1)
   }
 
   // The target is either a column, or a foundation
