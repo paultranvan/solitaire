@@ -2,13 +2,13 @@ import { GET_FROM_STOCK, MOVE_CARD, REFILL_STOCK } from '../actions/types'
 
 const moveCard = (state, card, destination) => {
   console.log('move card : ', card, ' to ', destination)
-  const sourceType = card.position.type
+  const sourceType = card.container.type
   const targetType = destination.type
 
   // The source can be talon, column or foundation
   const sourceCards = [...state[sourceType]]
-  if (card.position.hasOwnProperty('id')) {
-    sourceCards[card.position.id].splice(sourceCards[card.position.id].length - 1)
+  if (card.container.hasOwnProperty('id')) {
+    sourceCards[card.container.id].splice(sourceCards[card.container.id].length - 1)
   } else {
     sourceCards.splice(sourceCards.length - 1)
   }

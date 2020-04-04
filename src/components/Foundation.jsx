@@ -48,7 +48,7 @@ const Foundation = ({ id, cards, dropCard }) => {
             id={topCard.id}
             value={topCard.value}
             color={topCard.color}
-            position={{type: Types.FOUNDATIONS, id: id}}
+            container={{type: Types.FOUNDATIONS, id: id, position: cards.length - 1}}
           />)
         :
           (<Empty color={color}/>)

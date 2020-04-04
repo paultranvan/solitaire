@@ -1,6 +1,7 @@
 import React from "react"
 import { connect } from 'react-redux'
 import { getFromStock, refillStock } from '../actions/actions'
+import { Types } from '../lib/consts'
 import Card from './Card'
 import Empty from './Empty'
 
@@ -22,6 +23,7 @@ const Stock = ({ cards, getFromStock, refillStock }) => {
             value={topCard.value}
             color={topCard.color}
             visible={false}
+            container={{type: Types.STOCK}}
             onClick={getFromStock}
           />
         </div>

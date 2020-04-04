@@ -15,7 +15,7 @@ const Talon = ({ cards }) => {
             id={topCard.id}
             value={topCard.value}
             color={topCard.color}
-            position={{type: Types.TALON}}
+            container={{type: Types.TALON, position: cards.length -1}}
           />
         </div>
       )
