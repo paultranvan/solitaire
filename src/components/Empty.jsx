@@ -1,9 +1,12 @@
 import React from "react"
 import { Segment } from 'semantic-ui-react'
 
-const Empty = ({color = 'white'}) => {
+const Empty = ({color = 'white', onClick}) => {
   return(
-    <Segment style={{ height: 136, width: 116, backgroundColor: color }} />
+    <Segment
+      style={{ height: 136, width: 116, backgroundColor: color }}
+      onClick={onClick}
+    />
   )
 }
 

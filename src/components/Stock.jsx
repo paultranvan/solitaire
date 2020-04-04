@@ -1,10 +1,17 @@
 import React from "react"
 import { connect } from 'react-redux'
-import { getFromStock } from '../actions/actions'
+import { getFromStock, refillStock } from '../actions/actions'
 import Card from './Card'
 import Empty from './Empty'
 
-const Stock = ({ cards, getFromStock }) => {
+const mapDispatchToProps = dispatch => {
+  return {
+    getFromStock: () => dispatch(getFromStock()),
+    refillStock: () => dispatch(refillStock())
+  }
+}
+
+const Stock = ({ cards, getFromStock, refillStock }) => {
   const topCard = cards.length > 0 ? cards[cards.length - 1] : null
 
   return topCard
@@ -15,13 +22,15 @@ const Stock = ({ cards, getFromStock }) => {
             value={topCard.value}
             color={topCard.color}
             visible={false}
-            onClick={() => getFromStock() }
+            onClick={getFromStock}
           />
         </div>
       )
     : (
-      <Empty />
+      <Empty
+        onClick={refillStock}
+      />
     )
 }
 
-export default connect(null, { getFromStock })(Stock)
+export default connect(null, mapDispatchToProps)(Stock)

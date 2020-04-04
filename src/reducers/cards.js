@@ -1,6 +1,6 @@
-import { GET_FROM_STOCK, MOVE_CARD } from '../actions/types'
+import { GET_FROM_STOCK, MOVE_CARD, REFILL_STOCK } from '../actions/types'
 
-function moveCard(state, card, destination) {
+const moveCard = (state, card, destination) => {
   console.log('move card : ', card, ' to ', destination)
   const sourceType = card.position.type
   const targetType = destination.type
@@ -21,12 +21,16 @@ function moveCard(state, card, destination) {
 }
 
 const getCardFromStock = (state) => {
-    // TODO should refill stock from talon when no more card
-  console.log('get card from stock')
   const topStock = state.stock[state.stock.length - 1]
   const stock = state.stock.splice(0, state.stock.length - 1)
   const talon = [...state.talon, topStock]
   return {...state, stock, talon }
+}
+
+const refillStock = (state) => {
+  const stock = [...state.talon]
+  const talon = []
+  return {...state, stock, talon}
 }
 
 
@@ -37,8 +41,8 @@ const cards = (state = {}, action) => {
       return moveCard(state, action.card, action.destination);
     case GET_FROM_STOCK:
       return getCardFromStock(state)
-    case "INIT":
-      return state
+    case REFILL_STOCK:
+      return refillStock(state)
     default:
       return state
   }
