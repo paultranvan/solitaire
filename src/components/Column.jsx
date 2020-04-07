@@ -4,9 +4,14 @@ import { moveCard, revealLastColumnCard } from '../actions/actions'
 import Card from "./Card"
 import { Types } from "../lib/consts"
 import { Segment } from "semantic-ui-react"
+import { useDrop } from 'react-dnd'
 
 const mapDispatchToProps = dispatch => {
   return {
+    dropCard: (id, card) => {
+      console.log('go drop card in column')
+      dispatch(moveCard(card, {type: Types.COLUMNS, id}))
+    },
     makeLastCardVisible: (id) => {
       dispatch(revealLastColumnCard(id))
     }
@@ -35,12 +40,20 @@ const renderColumn = (id, cards) => {
   })
 }
 
-    if (i === 0) {
-      return renderCard(id, card, i, "Column-card first", visible)
-    } else if (i === cards.length - 1) {
-      return renderCard(id, card, i, "Column-card", visible)
-    } else {
-      return renderCard(id, card, i, "Column-card", visible)
+const Column = ({id, cards, dropCard, makeLastCardVisible}) => {
+  const [{ isOver, canDrop }, drop] = useDrop({
+    accept: Types.CARD,
+    drop: (item) => dropCard(id, item),
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+      canDrop: !!monitor.canDrop(),
+    }),
+  })
+
+  useEffect(() => {
+    // Make last column cards visible
+    if (cards.length > 0 && !cards[cards.length - 1].visible) {
+      makeLastCardVisible(id)
     }
   })
 

@@ -24,7 +24,7 @@ const Card = ({value, color, container, onClick, visible = true}) => {
       ref={drag}
       style={{
         cursor: 'move',
-        opacity: isDragging ? 0 : 1,
+        opacity: isDragging ? 0.1 : 1,
       }}
     >
       <Segment>
