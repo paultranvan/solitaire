@@ -1,19 +1,28 @@
-import React from "react"
+import React, { useEffect } from "react"
+import { connect } from 'react-redux'
+import { moveCard, revealLastColumnCard } from '../actions/actions'
 import Card from "./Card"
 import { Types } from "../lib/consts"
 import { Segment } from "semantic-ui-react"
 
-const isVisible = (cards, card) => {
-  return cards.indexOf(card) === cards.length - 1
+const mapDispatchToProps = dispatch => {
+  return {
+    makeLastCardVisible: (id) => {
+      dispatch(revealLastColumnCard(id))
+    }
+  }
 }
 
-const renderCard = (id, card, position, className, visible) => {
+const renderCard = (id, card, position, className) => {
   return (
-    <div key={card.id} className={className}>
+    <div
+      key={card.id}
+      className={position === 0 ? "Column-card first" : "Column-card"}
+    >
       <Card
         value={card.value}
         color={card.color}
-        visible={visible}
+        visible={!!card.visible}
         container={{type: Types.COLUMNS, id, position}}
       />
     </div>
@@ -21,11 +30,10 @@ const renderCard = (id, card, position, className, visible) => {
 }
 
 const renderColumn = (id, cards) => {
-  if (cards.length === 1) {
-    return renderCard(id, cards[0], 0, "Column-card first", true)
-  }
   return cards.map((card, i) => {
-    const visible = isVisible(cards, card)
+    return renderCard(id, card, i)
+  })
+}
 
     if (i === 0) {
       return renderCard(id, card, i, "Column-card first", visible)
@@ -35,10 +43,16 @@ const renderColumn = (id, cards) => {
       return renderCard(id, card, i, "Column-card", visible)
     }
   })
+
+  return (
+      <Segment.Group>
+        <div
+          ref={drop}
+        >
+          {renderColumn(id, cards)}
+        </div>
+      </Segment.Group>
+  )
 }
 
-const Column = ({id, cards}) => {
-  return <Segment.Group>{renderColumn(id, cards)}</Segment.Group>
-}
-
-export default Column
+export default connect(null, mapDispatchToProps)(Column)

@@ -1,4 +1,4 @@
-import { GET_FROM_STOCK, MOVE_CARD, REFILL_STOCK } from './types'
+import { GET_FROM_STOCK, MOVE_CARD, REFILL_STOCK, REVEAL_LAST_COLUMN_CARD } from './types'
 
 export const getFromStock = () => {
   return {
@@ -17,5 +17,12 @@ export const moveCard = (card, destination) => {
     type: MOVE_CARD,
     card,
     destination
+  }
+}
+
+export const revealLastColumnCard = (columnId) => {
+  return {
+    type: REVEAL_LAST_COLUMN_CARD,
+    columnId
   }
 }

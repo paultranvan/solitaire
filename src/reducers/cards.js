@@ -1,4 +1,5 @@
-import { GET_FROM_STOCK, MOVE_CARD, REFILL_STOCK } from '../actions/types'
+import { GET_FROM_STOCK, MOVE_CARD, REFILL_STOCK, REVEAL_LAST_COLUMN_CARD } from '../actions/types'
+import { Types } from "../lib/consts"
 
 const moveCard = (state, card, destination) => {
   console.log('move card : ', card, ' to ', destination)
@@ -33,6 +34,13 @@ const refillStock = (state) => {
   return {...state, stock, talon}
 }
 
+const revealLastColumnCard = (state, columnId) => {
+  const newColumns = [...state[Types.COLUMNS]]
+  const column = [...newColumns[columnId]]
+  column[column.length - 1].visible = true
+  newColumns[columnId] = column
+  return {...state, columns: newColumns}
+}
 
 const cards = (state = {}, action) => {
   console.log('enter reducer card with action ', action.type)
@@ -43,6 +51,8 @@ const cards = (state = {}, action) => {
       return getCardFromStock(state)
     case REFILL_STOCK:
       return refillStock(state)
+    case REVEAL_LAST_COLUMN_CARD:
+      return revealLastColumnCard(state, action.columnId)
     default:
       return state
   }
