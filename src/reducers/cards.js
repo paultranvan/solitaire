@@ -1,4 +1,4 @@
-import { GET_FROM_STOCK, MOVE_CARD, REFILL_STOCK, REVEAL_LAST_COLUMN_CARD } from '../actions/types'
+import { GET_FROM_STOCK, MOVE_CARD, MOVE_COLUMN_CARD, REFILL_STOCK, REVEAL_LAST_COLUMN_CARD } from '../actions/types'
 import { Types } from "../lib/consts"
 
 const moveCard = (state, card, destination) => {
@@ -41,6 +41,16 @@ const revealLastColumnCard = (state, columnId) => {
   newColumns[columnId] = column
   return {...state, columns: newColumns}
 }
+
+export const isLastContainerCard = (state, card) => {
+  const sourceType = card.container.type
+  const container = [...state[sourceType]]
+  if (card.container.hasOwnProperty('id')) {
+    return container[card.container.id].length - 1 === card.container.position
+  }
+  return container.length - 1 === card.container.position
+}
+
 
 const cards = (state = {}, action) => {
   console.log('enter reducer card with action ', action.type)
