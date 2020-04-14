@@ -1,8 +1,8 @@
-import React from "react"
-import { Image, Segment } from "semantic-ui-react"
+import React from 'react'
+import { Image, Segment } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import { useDrag } from 'react-dnd'
-import { Types } from "../lib/consts"
+import { Types } from '../lib/consts'
 import { isLastContainerCard } from '../reducers/cards'
 
 const mapStateToProps = (state, ownProps) => {
@@ -11,13 +11,20 @@ const mapStateToProps = (state, ownProps) => {
   return { isLastCard }
 }
 
-const Card = ({value, color, container, visible = true, onClick, isLastCard}) => {
+const Card = ({
+  value,
+  color,
+  container,
+  visible = true,
+  onClick,
+  isLastCard
+}) => {
   const [{ isDragging }, drag] = useDrag({
     item: { type: Types.CARD, value, color, container },
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
+    collect: monitor => ({
+      isDragging: !!monitor.isDragging()
     }),
-    canDrag: (monitor) => {
+    canDrag: () => {
       // Only accept last card to be dragged. Multiple cards drag is handled by
       // the Column component
       return isLastCard
@@ -25,15 +32,15 @@ const Card = ({value, color, container, visible = true, onClick, isLastCard}) =>
   })
 
   const cardPath = visible
-    ? "./assets/cards/" + color + "_" + value + ".png"
-    : "./assets/cards/card_back.png"
+    ? './assets/cards/' + color + '_' + value + '.png'
+    : './assets/cards/card_back.png'
 
   return (
     <div
       ref={drag}
       style={{
         cursor: 'move',
-        opacity: isDragging ? 0.1 : 1,
+        opacity: isDragging ? 0.1 : 1
       }}
     >
       <Segment>
@@ -47,4 +54,7 @@ const Card = ({value, color, container, visible = true, onClick, isLastCard}) =>
   )
 }
 
-export default connect(mapStateToProps, null)(Card)
+export default connect(
+  mapStateToProps,
+  null
+)(Card)

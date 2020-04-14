@@ -1,8 +1,8 @@
-import React from "react"
+import React from 'react'
 import { Segment } from 'semantic-ui-react'
 
-const Empty = ({color = 'white', onClick}) => {
-  return(
+const Empty = ({ color = 'white', onClick }) => {
+  return (
     <Segment
       style={{ height: 136, width: 116, backgroundColor: color }}
       onClick={onClick}

@@ -1,4 +1,10 @@
-import { GET_FROM_STOCK, MOVE_CARD, REFILL_STOCK, REVEAL_LAST_COLUMN_CARD } from './types'
+import {
+  GET_FROM_STOCK,
+  MOVE_CARD,
+  REFILL_STOCK,
+  REVEAL_LAST_COLUMN_CARD,
+  MOVE_COLUMN_CARD
+} from './types'
 
 export const getFromStock = () => {
   return {
@@ -20,7 +26,15 @@ export const moveCard = (card, destination) => {
   }
 }
 
-export const revealLastColumnCard = (columnId) => {
+export const moveColumnCards = (cards, destination) => {
+  return {
+    type: MOVE_COLUMN_CARD,
+    cards,
+    destination
+  }
+}
+
+export const revealLastColumnCard = columnId => {
   return {
     type: REVEAL_LAST_COLUMN_CARD,
     columnId

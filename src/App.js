@@ -1,19 +1,16 @@
-import React from "react"
-import "./App.css"
-import Header from "./components/Header"
-import Stock from "./components/Stock"
-import Talon from "./components/Talon"
-import Foundation from "./components/Foundation"
-import Column from "./components/Column"
-import { Grid, Container } from "semantic-ui-react"
+import React from 'react'
+import './App.css'
+import Header from './components/Header'
+import Stock from './components/Stock'
+import Talon from './components/Talon'
+import Foundation from './components/Foundation'
+import Column from './components/Column'
+import { Grid, Container } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import { DndProvider } from 'react-dnd'
 import Backend from 'react-dnd-html5-backend'
 
-// https://react-redux.js.org/introduction/basic-tutorial
-// https://codesandbox.io/s/9on71rvnyo
-
-const renderStock = (stock) => {
+const renderStock = stock => {
   console.log('from stock : ', stock)
   return (
     <Grid.Column floated="left" width="2">
@@ -22,7 +19,7 @@ const renderStock = (stock) => {
   )
 }
 
-const renderTalon = (talon) => {
+const renderTalon = talon => {
   return (
     <Grid.Column floated="left" width="2">
       <Talon cards={talon} />
@@ -30,7 +27,7 @@ const renderTalon = (talon) => {
   )
 }
 
-const renderFoundation = (foundations) => {
+const renderFoundation = foundations => {
   return foundations.map((f, i) => {
     return (
       <Grid.Column key={i} floated="right" width="2">
@@ -40,9 +37,8 @@ const renderFoundation = (foundations) => {
   })
 }
 
-const renderColumns = (columns) => {
+const renderColumns = columns => {
   return columns.map((c, i) => {
-
     return (
       <Grid.Column key={i} floated="left" width="2">
         <Column id={i} cards={columns[i]} />
@@ -51,8 +47,7 @@ const renderColumns = (columns) => {
   })
 }
 
-
-const App = ({cards}) => {
+const App = ({ cards }) => {
   console.log('store with cards : ', cards)
   return (
     <div className="App">
@@ -74,11 +69,10 @@ const App = ({cards}) => {
   )
 }
 
-const mapStateToProps = (state) => {
-  const cards  = state
+const mapStateToProps = state => {
+  const cards = state
   console.log('call map state')
   return cards
 }
 
-//export default DragDropContext(HTML5Backend)(App)
 export default connect(mapStateToProps)(App)
