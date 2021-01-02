@@ -38,20 +38,9 @@ const Foundation = ({ id, cards, dropCard, canDropInFoundation }) => {
 
   const topCard = cards.length > 0 ? cards[cards.length - 1] : null
 
-  let color
-  if (canDrop && !isOver) {
-    color = 'yellow'
-  } else if (canDrop && isOver) {
-    color = 'green'
-  } else {
-    color = 'white'
-  }
   return (
     <div
       ref={drop}
-      style={{
-        color: isOver ? 'green' : 'white'
-      }}
     >
       {topCard ? (
         <Card
@@ -63,6 +52,7 @@ const Foundation = ({ id, cards, dropCard, canDropInFoundation }) => {
             id: id,
             position: cards.length - 1
           }}
+          isOver={isOver}
         />
       ) : (
         <Empty isOver={isOver} />
