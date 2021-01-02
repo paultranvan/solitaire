@@ -5,26 +5,36 @@ import {
   REFILL_STOCK,
   REVEAL_LAST_COLUMN_CARD
 } from '../actions/types'
-import { Types } from '../lib/consts'
+import { Types } from '../../lib/consts'
+import { getColumnChildCards } from '../helpers'
 
 const moveCard = (state, card, destination) => {
   console.log('move card : ', card, ' to ', destination)
   const sourceType = card.container.type
   const targetType = destination.type
 
+  let cards = [card]
+  if (sourceType === Types.COLUMNS) {
+    cards = getColumnChildCards(state, card)
+    console.log("cards column : ", cards)
+  }
+
   // The source can be talon, column or foundation
-  const sourceCards = [...state[sourceType]]
+  let sourceCards = [...state[sourceType]]
   if (card.container.hasOwnProperty('id')) {
-    sourceCards[card.container.id].splice(
-      sourceCards[card.container.id].length - 1
-    )
+    let sourceContainer = sourceCards[card.container.id]
+    console.log('source container : ', sourceContainer)
+    console.log('cards length : ', cards.length)
+    sourceCards[card.container.id].splice(sourceCards[card.container.id].length - cards.length)
   } else {
     sourceCards.splice(sourceCards.length - 1)
   }
 
   // The target is either a column, or a foundation
   const targetCards = [...state[targetType]]
-  const newTarget = [...targetCards[destination.id], card]
+  console.log('old target : ', targetCards[destination.id])
+  const newTarget = [...targetCards[destination.id], ...cards]
+  console.log('new target : ', newTarget)
   targetCards[destination.id] = newTarget
   return { ...state, [sourceType]: sourceCards, [targetType]: targetCards }
 }
@@ -59,21 +69,11 @@ const refillStock = state => {
 }
 
 const revealLastColumnCard = (state, columnId) => {
-  console.log('state reveal : ', state)
   const newColumns = [...state[Types.COLUMNS]]
   const column = [...newColumns[columnId]]
   column[column.length - 1].visible = true
   newColumns[columnId] = column
   return { ...state, columns: newColumns }
-}
-
-export const isLastContainerCard = (state, card) => {
-  const sourceType = card.container.type
-  const container = [...state[sourceType]]
-  if (card.container.hasOwnProperty('id')) {
-    return container[card.container.id].length - 1 === card.container.position
-  }
-  return container.length - 1 === card.container.position
 }
 
 const cards = (state = {}, action) => {

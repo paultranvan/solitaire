@@ -5,7 +5,7 @@ import { createStore } from 'redux'
 import { initDeck } from './lib/init'
 import './index.css'
 import App from './App'
-import game from './reducers'
+import game from './redux/reducers'
 import 'semantic-ui-css/semantic.min.css'
 import registerServiceWorker from './registerServiceWorker'
 

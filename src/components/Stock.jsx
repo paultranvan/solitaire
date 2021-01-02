@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { getFromStock, refillStock } from '../actions/actions'
+import { getFromStock, refillStock } from '../redux/actions/actions'
 import { Types } from '../lib/consts'
 import Card from './Card'
 import Empty from './Empty'

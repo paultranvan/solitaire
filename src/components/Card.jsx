@@ -3,7 +3,7 @@ import { Image, Segment } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import { useDrag } from 'react-dnd'
 import { Types } from '../lib/consts'
-import { isLastContainerCard } from '../reducers/cards'
+import { isLastContainerCard } from '../redux/helpers'
 
 const mapStateToProps = (state, ownProps) => {
   const { cards } = state

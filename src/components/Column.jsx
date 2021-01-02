@@ -4,11 +4,11 @@ import {
   moveCard,
   moveColumnCards,
   revealLastColumnCard
-} from '../actions/actions'
+} from '../redux/actions/actions'
 import Card from './Card'
 import { Types } from '../lib/consts'
 import { Segment } from 'semantic-ui-react'
-import { useDrop, useDrag } from 'react-dnd'
+import { useDrop } from 'react-dnd'
 
 const mapDispatchToProps = dispatch => {
   return {
