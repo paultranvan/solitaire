@@ -25,7 +25,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const renderCard = (id, card, position, children) => {
+const renderCard = (id, card, position, isOver, children) => {
   return (
     <div
       key={card.id}
@@ -36,6 +36,7 @@ const renderCard = (id, card, position, children) => {
         color={card.color}
         visible={!!card.visible}
         container={{ type: Types.COLUMNS, id, position }}
+        isOver={isOver}
       >
       {children}
       </Card>
@@ -43,19 +44,19 @@ const renderCard = (id, card, position, children) => {
   )
 }
 
-const buildColumn = (id, cards, children) => {
+const buildColumn = (id, cards, isOver, children) => {
   if (cards.length < 1) {
     return children
   }
   const lastCard = cards[cards.length -1]
-  const newCardsTree = renderCard(id, lastCard, cards.length - 1, children)
+  const newCardsTree = renderCard(id, lastCard, cards.length - 1, isOver, children)
   cards.splice(cards.length - 1)
-  return buildColumn(id, cards, newCardsTree)
+  return buildColumn(id, cards, isOver, newCardsTree)
 }
 
-const renderColumn = (id, cards) => {
+const renderColumn = (id, cards, isOver) => {
   const cardsToRender = [...cards]
-  const tree = buildColumn(id, cardsToRender, null)
+  const tree = buildColumn(id, cardsToRender, isOver, null)
   return tree
 }
 
@@ -88,7 +89,7 @@ const Column = ({
   return (
     <Segment.Group>
       <div ref={drop}>
-        <div>{renderColumn(id, cards)}</div>
+        <div>{renderColumn(id, cards, isOver)}</div>
       </div>
     </Segment.Group>
   )
