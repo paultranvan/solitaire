@@ -6,6 +6,7 @@ import {
   revealLastColumnCard
 } from '../redux/actions/actions'
 import Card from './Card'
+import Empty from './Empty'
 import { Types } from '../lib/consts'
 import { Segment } from 'semantic-ui-react'
 import { useDrop } from 'react-dnd'
@@ -55,6 +56,9 @@ const buildColumn = (id, cards, isOver, children) => {
 }
 
 const renderColumn = (id, cards, isOver) => {
+  if (cards.length < 1) {
+    return <Empty isOver={isOver} />
+  }
   const cardsToRender = [...cards]
   const tree = buildColumn(id, cardsToRender, isOver, null)
   return tree

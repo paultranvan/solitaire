@@ -65,7 +65,7 @@ const Foundation = ({ id, cards, dropCard, canDropInFoundation }) => {
           }}
         />
       ) : (
-        <Empty color={color} />
+        <Empty isOver={isOver} />
       )}
     </div>
   )
