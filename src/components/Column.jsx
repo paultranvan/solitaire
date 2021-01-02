@@ -25,7 +25,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const renderCard = (id, card, position) => {
+const renderCard = (id, card, position, children) => {
   return (
     <div
       key={card.id}
@@ -36,15 +36,27 @@ const renderCard = (id, card, position) => {
         color={card.color}
         visible={!!card.visible}
         container={{ type: Types.COLUMNS, id, position }}
-      />
+      >
+      {children}
+      </Card>
     </div>
   )
 }
 
+const buildColumn = (id, cards, children) => {
+  if (cards.length < 1) {
+    return children
+  }
+  const lastCard = cards[cards.length -1]
+  const newCardsTree = renderCard(id, lastCard, cards.length - 1, children)
+  cards.splice(cards.length - 1)
+  return buildColumn(id, cards, newCardsTree)
+}
+
 const renderColumn = (id, cards) => {
-  return cards.map((card, i) => {
-    return renderCard(id, card, i)
-  })
+  const cardsToRender = [...cards]
+  const tree = buildColumn(id, cardsToRender, null)
+  return tree
 }
 
 const Column = ({
@@ -55,7 +67,7 @@ const Column = ({
   makeLastCardVisible
 }) => {
   const [{ isOver, canDrop }, drop] = useDrop({
-    accept: [Types.CARD, Types.COLUMN],
+    accept: [Types.CARD],
     drop: item =>
       item.type === Types.COLUMN
         ? dropColumnCards(id, item.cards)
@@ -63,12 +75,6 @@ const Column = ({
     collect: monitor => ({
       isOver: !!monitor.isOver(),
       canDrop: !!monitor.canDrop()
-    })
-  })
-  const [{ isDragging }, drag] = useDrag({
-    item: { type: Types.COLUMN, cards }, //TODO: this drag the whole column
-    collect: monitor => ({
-      isDragging: !!monitor.isDragging()
     })
   })
 
@@ -82,7 +88,7 @@ const Column = ({
   return (
     <Segment.Group>
       <div ref={drop}>
-        <div ref={drag}>{renderColumn(id, cards)}</div>
+        <div>{renderColumn(id, cards)}</div>
       </div>
     </Segment.Group>
   )

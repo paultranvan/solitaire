@@ -4,7 +4,15 @@ import { useDrop } from 'react-dnd'
 import { connect } from 'react-redux'
 import Card from './Card'
 import Empty from './Empty'
-import { moveCard } from '../actions/actions'
+import { moveCard } from '../redux/actions/actions'
+import { isSingleCardDrop } from '../redux/helpers'
+
+
+const mapStateToProps = (state) => {
+  const { cards } = state
+  return { canDropInFoundation: (item) => isSingleCardDrop(cards, item) }
+}
+
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -14,11 +22,14 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const Foundation = ({ id, cards, dropCard }) => {
+const Foundation = ({ id, cards, dropCard, canDropInFoundation }) => {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: Types.CARD,
     //canDrop: () =>  //compare incoming card and topcard + its origin
     drop: item => dropCard(id, item),
+    canDrop: item => {
+      return canDropInFoundation(item)
+    },
     collect: monitor => ({
       isOver: !!monitor.isOver(),
       canDrop: !!monitor.canDrop()
@@ -61,6 +72,6 @@ const Foundation = ({ id, cards, dropCard }) => {
 }
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(Foundation)

@@ -48,7 +48,6 @@ const renderColumns = columns => {
 }
 
 const App = ({ cards }) => {
-  console.log('store with cards : ', cards)
   return (
     <div className="App">
       <DndProvider backend={Backend}>
@@ -71,7 +70,6 @@ const App = ({ cards }) => {
 
 const mapStateToProps = state => {
   const cards = state
-  console.log('call map state')
   return cards
 }
 

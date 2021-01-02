@@ -14,7 +14,8 @@ export const initDeck = () => {
   for (let i = 0; i < 7; i++) {
     const columnCards = []
     for (let j = 0; j < i + 1; j++) {
-      columnCards.push(pickRandomCard(shuffledDeck))
+      const card = pickRandomCard(shuffledDeck)
+      columnCards.push(card)
     }
     columns.push(columnCards)
   }

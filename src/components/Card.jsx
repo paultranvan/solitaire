@@ -17,6 +17,7 @@ const Card = ({
   container,
   visible = true,
   onClick,
+  children,
   isLastCard
 }) => {
   const [{ isDragging }, drag] = useDrag({
@@ -25,12 +26,15 @@ const Card = ({
       isDragging: !!monitor.isDragging()
     }),
     canDrag: () => {
-      // Only accept last card to be dragged. Multiple cards drag is handled by
-      // the Column component
-      return isLastCard
+      return visible
     }
   })
 
+  if(isDragging) {
+    console.log('ok for drag')
+  }
+  
+  
   const cardPath = visible
     ? './assets/cards/' + color + '_' + value + '.png'
     : './assets/cards/card_back.png'
@@ -40,16 +44,19 @@ const Card = ({
       ref={drag}
       style={{
         cursor: 'move',
-        opacity: isDragging ? 0.1 : 1
+        opacity: isDragging ? 0.1 : 1,
+        border: isDragging ? '3px dashed gray' : 'none'
       }}
     >
       <Segment>
-        {onClick !== undefined ? (
-          <Image src={cardPath} alt="" onClick={onClick} size="tiny" />
-        ) : (
-          <Image src={cardPath} alt="" size="tiny" />
-        )}
+          {onClick !== undefined ? (
+            <Image src={cardPath} alt="" onClick={onClick} size="tiny" />
+          ) : (
+            <Image src={cardPath} alt="" size="tiny"  />
+          )}
       </Segment>
+  
+      {children} 
     </div>
   )
 }
