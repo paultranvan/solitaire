@@ -7,8 +7,14 @@ import Foundation from './components/Foundation'
 import Column from './components/Column'
 import { Grid, Container } from 'semantic-ui-react'
 import { connect } from 'react-redux'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+import { TouchBackend } from 'react-dnd-touch-backend'
 import { DndProvider } from 'react-dnd'
-import Backend from 'react-dnd-html5-backend'
+
+
+const isTouchDevice = (navigator.maxTouchPoints || 'ontouchstart' in document.documentElement);
+const backend = isTouchDevice ? TouchBackend : HTML5Backend
+console.log('is touch device : ', isTouchDevice)
 
 const renderStock = stock => {
   return (
@@ -50,7 +56,7 @@ const App = ({ cards }) => {
   //console.log('cards : ', cards)
   return (
     <div className="App">
-      <DndProvider backend={Backend}>
+      <DndProvider backend={backend}>
         <Header />
         <Container>
           <Grid columns="equal">
