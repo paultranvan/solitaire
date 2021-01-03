@@ -18,7 +18,7 @@ const Card = ({
   visible = true,
   onClick,
   children,
-  isOver,
+  canDrop,
   isLastCard
 }) => {
   const [{ isDragging }, drag] = useDrag({
@@ -48,7 +48,7 @@ const Card = ({
         border: isDragging ? '3px dashed gray' : 'none'
       }}
     >
-      <Segment style={isOver && isLastCard ? style : null}>
+      <Segment style={canDrop && isLastCard ? style : null}>
           {onClick !== undefined ? (
             <Image src={cardPath} alt="" onClick={onClick} size="tiny" />
           ) : (

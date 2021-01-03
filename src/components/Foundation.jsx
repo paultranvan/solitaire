@@ -52,10 +52,10 @@ const Foundation = ({ id, cards, dropCard, canDropInFoundation }) => {
             id: id,
             position: cards.length - 1
           }}
-          isOver={isOver}
+          canDrop={canDrop}
         />
       ) : (
-        <Empty isOver={isOver} />
+        <Empty canDrop={canDrop} />
       )}
     </div>
   )

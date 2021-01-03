@@ -15,15 +15,11 @@ const moveCard = (state, card, destination) => {
   let cards = [card]
   if (sourceType === Types.COLUMNS) {
     cards = getColumnChildCards(state, card)
-    console.log("cards column : ", cards)
   }
 
   // The source can be talon, column or foundation
   let sourceCards = [...state[sourceType]]
   if (card.container.type === Types.COLUMNS || card.container.type === Types.FOUNDATION) {
-    let sourceContainer = sourceCards[card.container.id]
-    console.log('source container : ', sourceContainer)
-    console.log('cards length : ', cards.length)
     sourceCards[card.container.id].splice(sourceCards[card.container.id].length - cards.length)
   } else {
     sourceCards.splice(sourceCards.length - 1)
@@ -31,9 +27,7 @@ const moveCard = (state, card, destination) => {
 
   // The target is either a column, or a foundation
   const targetCards = [...state[targetType]]
-  console.log('old target : ', targetCards[destination.id])
   const newTarget = [...targetCards[destination.id], ...cards]
-  console.log('new target : ', newTarget)
   targetCards[destination.id] = newTarget
   return { ...state, [sourceType]: sourceCards, [targetType]: targetCards }
 }

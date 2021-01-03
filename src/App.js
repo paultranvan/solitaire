@@ -11,7 +11,6 @@ import { DndProvider } from 'react-dnd'
 import Backend from 'react-dnd-html5-backend'
 
 const renderStock = stock => {
-  console.log('from stock : ', stock)
   return (
     <Grid.Column floated="left" width="2">
       <Stock cards={stock} />
@@ -48,6 +47,7 @@ const renderColumns = columns => {
 }
 
 const App = ({ cards }) => {
+  console.log('cards : ', cards)
   return (
     <div className="App">
       <DndProvider backend={Backend}>

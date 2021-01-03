@@ -4,11 +4,17 @@ import {
   moveCard,
   revealLastColumnCard
 } from '../redux/actions/actions'
+import { canDropHere } from '../redux/game'
 import Card from './Card'
 import Empty from './Empty'
 import { Types } from '../lib/consts'
 import { Segment } from 'semantic-ui-react'
 import { useDrop } from 'react-dnd'
+
+const mapStateToProps = (state, ownProps) => {
+  const { cards } = state
+  return { canDropInColumn: (item) => canDropHere(cards, item, {id: ownProps.id, type: Types.COLUMNS}) }
+}
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -21,7 +27,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const renderCard = (id, card, position, isOver, children) => {
+const renderCard = (id, card, position, canDrop, children) => {
   return (
     <div
       key={card.id}
@@ -32,7 +38,7 @@ const renderCard = (id, card, position, isOver, children) => {
         color={card.color}
         visible={!!card.visible}
         container={{ type: Types.COLUMNS, id, position }}
-        isOver={isOver}
+        canDrop={canDrop}
       >
       {children}
       </Card>
@@ -40,22 +46,22 @@ const renderCard = (id, card, position, isOver, children) => {
   )
 }
 
-const buildColumn = (id, cards, isOver, children) => {
+const buildColumn = (id, cards, canDrop, children) => {
   if (cards.length < 1) {
     return children
   }
   const lastCard = cards[cards.length -1]
-  const newCardsTree = renderCard(id, lastCard, cards.length - 1, isOver, children)
+  const newCardsTree = renderCard(id, lastCard, cards.length - 1, canDrop, children)
   cards.splice(cards.length - 1)
-  return buildColumn(id, cards, isOver, newCardsTree)
+  return buildColumn(id, cards, canDrop, newCardsTree)
 }
 
-const renderColumn = (id, cards, isOver) => {
+const renderColumn = (id, cards, canDrop) => {
   if (cards.length < 1) {
-    return <Empty isOver={isOver} />
+    return <Empty canDrop={canDrop} />
   }
   const cardsToRender = [...cards]
-  const tree = buildColumn(id, cardsToRender, isOver, null)
+  const tree = buildColumn(id, cardsToRender, canDrop, null)
   return tree
 }
 
@@ -63,7 +69,8 @@ const Column = ({
   id,
   cards,
   dropCard,
-  makeLastCardVisible
+  makeLastCardVisible,
+  canDropInColumn
 }) => {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: [Types.CARD],
@@ -71,7 +78,8 @@ const Column = ({
     collect: monitor => ({
       isOver: !!monitor.isOver(),
       canDrop: !!monitor.canDrop()
-    })
+    }),
+    canDrop: item => canDropInColumn(item)
   })
 
   useEffect(() => {
@@ -84,13 +92,13 @@ const Column = ({
   return (
     <Segment.Group>
       <div ref={drop}>
-        <div>{renderColumn(id, cards, isOver)}</div>
+        <div>{renderColumn(id, cards, canDrop)}</div>
       </div>
     </Segment.Group>
   )
 }
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(Column)
