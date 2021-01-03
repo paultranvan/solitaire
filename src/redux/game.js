@@ -52,9 +52,7 @@ export const canPlayInFoundation = (state, sourceCard, containerTarget) => {
   } else {
     // Check if source card is allowed to be played on target
     const lastTargetCard = targetCards[targetCards.length - 1]
-    const canPlay = canPlayOnFoundationCard(sourceCard, lastTargetCard)
-    console.log('can play : ', canPlay)
-    return canPlay
+    return canPlayOnFoundationCard(sourceCard, lastTargetCard)
   }
 }
 

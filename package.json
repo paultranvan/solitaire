@@ -2,6 +2,7 @@
   "name": "solitaire-react",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "react": "^16.8.0",
     "react-dnd": "^10.0.0",

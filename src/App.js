@@ -47,7 +47,7 @@ const renderColumns = columns => {
 }
 
 const App = ({ cards }) => {
-  console.log('cards : ', cards)
+  //console.log('cards : ', cards)
   return (
     <div className="App">
       <DndProvider backend={Backend}>

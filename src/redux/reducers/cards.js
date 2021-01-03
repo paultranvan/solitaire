@@ -8,7 +8,6 @@ import { Types } from '../../lib/consts'
 import { getColumnChildCards } from '../helpers'
 
 const moveCard = (state, card, destination) => {
-  console.log('move card : ', card, ' to ', destination)
   const sourceType = card.container.type
   const targetType = destination.type
 
@@ -55,7 +54,7 @@ const revealLastColumnCard = (state, columnId) => {
 }
 
 const cards = (state = {}, action) => {
-  console.log('enter reducer card with action ', action.type)
+  //console.log('enter reducer card with action ', action.type)
   switch (action.type) {
     case MOVE_CARD:
       return moveCard(state, action.card, action.destination)
