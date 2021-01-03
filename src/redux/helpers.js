@@ -1,16 +1,13 @@
 import { Types } from '../lib/consts'
 
-
-// TODO move these export functions elsewhere ?
 export const isLastContainerCard = (state, card) => {
   const sourceType = card.container.type
   const container = [...state[sourceType]]
-  if (card.container.hasOwnProperty('id')) {
+  if (card.container.type === Types.COLUMNS || card.container.type === Types.FOUNDATION) {
     return container[card.container.id].length - 1 === card.container.position
   }
   return container.length - 1 === card.container.position
 }
-
 
 export const getColumnChildCards = (state, card) => {
   const column = state.columns[card.container.id]

@@ -1,7 +1,6 @@
 import {
   GET_FROM_STOCK,
   MOVE_CARD,
-  MOVE_COLUMN_CARD,
   REFILL_STOCK,
   REVEAL_LAST_COLUMN_CARD
 } from '../actions/types'
@@ -21,7 +20,7 @@ const moveCard = (state, card, destination) => {
 
   // The source can be talon, column or foundation
   let sourceCards = [...state[sourceType]]
-  if (card.container.hasOwnProperty('id')) {
+  if (card.container.type === Types.COLUMNS || card.container.type === Types.FOUNDATION) {
     let sourceContainer = sourceCards[card.container.id]
     console.log('source container : ', sourceContainer)
     console.log('cards length : ', cards.length)

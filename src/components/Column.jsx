@@ -63,15 +63,11 @@ const Column = ({
   id,
   cards,
   dropCard,
-  dropColumnCards,
   makeLastCardVisible
 }) => {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: [Types.CARD],
-    drop: item =>
-      item.type === Types.COLUMN
-        ? dropColumnCards(id, item.cards)
-        : dropCard(id, item),
+    drop: item => dropCard(id, item),
     collect: monitor => ({
       isOver: !!monitor.isOver(),
       canDrop: !!monitor.canDrop()
