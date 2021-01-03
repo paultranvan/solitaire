@@ -14,10 +14,10 @@ export const ColorsType = {
 
 export const getColorType = (color) => {
   if (color === Colors.HEART || color === Colors.DIAMOND) {
-      return ColorsType.RED
+    return ColorsType.RED
   }
   if (color === Colors.SPADE || color === Colors.CLUB) {
-      return ColorsType.BLACK
+    return ColorsType.BLACK
   }
 }
 

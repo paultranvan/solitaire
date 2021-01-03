@@ -27,7 +27,7 @@ export const initDeck = () => {
 }
 
 // Shuffle the cards of the deck
-const shuffle = deck => {
+const shuffle = (deck) => {
   // if deck is direclty used, it is modified BEFORE calling shuffle. Why ?!
   const c = [...deck]
   for (let i = c.length - 1; i > 0; i--) {
@@ -40,7 +40,7 @@ const shuffle = deck => {
 }
 
 // Pick a random card from a deck and remove it
-const pickRandomCard = cards => {
+const pickRandomCard = (cards) => {
   const i = Math.floor(Math.random() * cards.length)
   const card = cards[i]
   cards.splice(i, 1)

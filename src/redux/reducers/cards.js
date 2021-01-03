@@ -18,8 +18,13 @@ const moveCard = (state, card, destination) => {
 
   // The source can be talon, column or foundation
   let sourceCards = [...state[sourceType]]
-  if (card.container.type === Types.COLUMNS || card.container.type === Types.FOUNDATION) {
-    sourceCards[card.container.id].splice(sourceCards[card.container.id].length - cards.length)
+  if (
+    card.container.type === Types.COLUMNS ||
+    card.container.type === Types.FOUNDATION
+  ) {
+    sourceCards[card.container.id].splice(
+      sourceCards[card.container.id].length - cards.length
+    )
   } else {
     sourceCards.splice(sourceCards.length - 1)
   }
@@ -31,15 +36,14 @@ const moveCard = (state, card, destination) => {
   return { ...state, [sourceType]: sourceCards, [targetType]: targetCards }
 }
 
-
-const getCardFromStock = state => {
+const getCardFromStock = (state) => {
   const topStock = state.stock[state.stock.length - 1]
   const stock = state.stock.splice(0, state.stock.length - 1)
   const talon = [...state.talon, topStock]
   return { ...state, stock, talon }
 }
 
-const refillStock = state => {
+const refillStock = (state) => {
   const stock = [...state.talon]
   const talon = []
   return { ...state, stock, talon }

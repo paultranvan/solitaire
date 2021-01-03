@@ -25,7 +25,7 @@ export const moveCard = (card, destination) => {
   }
 }
 
-export const revealLastColumnCard = columnId => {
+export const revealLastColumnCard = (columnId) => {
   return {
     type: REVEAL_LAST_COLUMN_CARD,
     columnId

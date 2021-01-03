@@ -9,7 +9,7 @@ const isSameColorType = (sourceCard, targetCard) => {
 }
 
 const isPreviousValue = (sourceCard, targetCard) => {
-    return sourceCard.value === targetCard.value - 1
+  return sourceCard.value === targetCard.value - 1
 }
 
 const isNextValue = (sourceCard, targetCard) => {
@@ -25,11 +25,16 @@ const isAce = (value) => {
 }
 
 const canPlayOnColumnCard = (sourceCard, targetCard) => {
-  return (!isSameColorType(sourceCard, targetCard) && isPreviousValue(sourceCard, targetCard))
+  return (
+    !isSameColorType(sourceCard, targetCard) &&
+    isPreviousValue(sourceCard, targetCard)
+  )
 }
 
 const canPlayOnFoundationCard = (sourceCard, targetCard) => {
-  return (isSameColor(sourceCard, targetCard) && isNextValue(sourceCard, targetCard))
+  return (
+    isSameColor(sourceCard, targetCard) && isNextValue(sourceCard, targetCard)
+  )
 }
 
 export const canPlayInColumn = (state, sourceCard, containerTarget) => {
@@ -60,16 +65,16 @@ export const canPlayInFoundation = (state, sourceCard, containerTarget) => {
 export const findAutoMoveTarget = (state, sourceCard) => {
   const foundations = [...state[Types.FOUNDATIONS]]
   for (let i = 0; i < foundations.length; i++) {
-    if (canPlayInFoundation(state, sourceCard, {id: i})) {
-      return {type: Types.FOUNDATIONS, id: i}
+    if (canPlayInFoundation(state, sourceCard, { id: i })) {
+      return { type: Types.FOUNDATIONS, id: i }
     }
   }
   const columns = [...state[Types.COLUMNS]]
   for (let i = 0; i < columns.length; i++) {
-    if (canPlayInColumn(state, sourceCard, {id: i})) {
-      return {type: Types.COLUMNS, id: i}
+    if (canPlayInColumn(state, sourceCard, { id: i })) {
+      return { type: Types.COLUMNS, id: i }
     }
   }
-  // No auto-move found 
+  // No auto-move found
   return null
 }

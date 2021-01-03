@@ -11,12 +11,12 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import { TouchBackend } from 'react-dnd-touch-backend'
 import { DndProvider } from 'react-dnd'
 
-
-const isTouchDevice = (navigator.maxTouchPoints || 'ontouchstart' in document.documentElement);
+const isTouchDevice =
+  navigator.maxTouchPoints || 'ontouchstart' in document.documentElement
 const backend = isTouchDevice ? TouchBackend : HTML5Backend
 console.log('is touch device : ', isTouchDevice)
 
-const renderStock = stock => {
+const renderStock = (stock) => {
   return (
     <Grid.Column floated="left" width="2">
       <Stock cards={stock} />
@@ -24,7 +24,7 @@ const renderStock = stock => {
   )
 }
 
-const renderTalon = talon => {
+const renderTalon = (talon) => {
   return (
     <Grid.Column floated="left" width="2">
       <Talon cards={talon} />
@@ -32,7 +32,7 @@ const renderTalon = talon => {
   )
 }
 
-const renderFoundation = foundations => {
+const renderFoundation = (foundations) => {
   return foundations.map((f, i) => {
     return (
       <Grid.Column key={i} floated="right" width="2">
@@ -42,7 +42,7 @@ const renderFoundation = foundations => {
   })
 }
 
-const renderColumns = columns => {
+const renderColumns = (columns) => {
   return columns.map((c, i) => {
     return (
       <Grid.Column key={i} floated="left" width="2">
@@ -74,7 +74,7 @@ const App = ({ cards }) => {
   )
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const cards = state
   return cards
 }

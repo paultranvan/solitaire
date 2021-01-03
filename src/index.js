@@ -7,7 +7,6 @@ import './index.css'
 import App from './App'
 import game from './redux/reducers'
 import 'semantic-ui-css/semantic.min.css'
-import registerServiceWorker from './registerServiceWorker'
 
 const cards = { cards: initDeck() }
 // Init the store with the cards
@@ -19,4 +18,3 @@ ReactDOM.render(
   </Provider>,
   document.getElementById('root')
 )
-registerServiceWorker()
