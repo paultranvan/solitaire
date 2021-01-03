@@ -39,21 +39,6 @@ const moveCard = (state, card, destination) => {
   return { ...state, [sourceType]: sourceCards, [targetType]: targetCards }
 }
 
-const moveColumnCards = (state, cards, destination) => {
-  console.log('move column cards : ', cards, ' to ', destination)
-  const sourceColumnId = cards[0].container.id
-  const newSourceColumn = [...state.columns[sourceColumnId]]
-  newSourceColumn.slice(0, cards[0].container.position)
-
-  const targetColumn = [...state.columns[destination.id]]
-  const newTargetColumn = [...targetColumn, cards]
-  console.log('target column : ', newTargetColumn)
-
-  const newColumns = [...state.columns]
-  newColumns[sourceColumnId] = newSourceColumn
-  newColumns[destination.id] = newTargetColumn
-  return { ...state, columns: newColumns }
-}
 
 const getCardFromStock = state => {
   const topStock = state.stock[state.stock.length - 1]
@@ -81,8 +66,6 @@ const cards = (state = {}, action) => {
   switch (action.type) {
     case MOVE_CARD:
       return moveCard(state, action.card, action.destination)
-    case MOVE_COLUMN_CARD:
-      return moveColumnCards(state, action.cards, action.destination)
     case GET_FROM_STOCK:
       return getCardFromStock(state)
     case REFILL_STOCK:

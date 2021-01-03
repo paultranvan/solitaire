@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import {
   moveCard,
-  moveColumnCards,
   revealLastColumnCard
 } from '../redux/actions/actions'
 import Card from './Card'
@@ -15,10 +14,6 @@ const mapDispatchToProps = dispatch => {
   return {
     dropCard: (id, card) => {
       dispatch(moveCard(card, { type: Types.COLUMNS, id }))
-    },
-    dropColumnCards: (id, cards) => {
-      console.log('move cards : ', cards)
-      dispatch(moveColumnCards(cards, { type: Types.COLUMNS, id }))
     },
     makeLastCardVisible: id => {
       dispatch(revealLastColumnCard(id))
