@@ -4,7 +4,6 @@ export const initDeck = () => {
   const cards = {}
   const deck = Array.from({ length: 52 }, (_, i) => {
     const value = Values[i % 13]
-    console.log('color : ', Object.values(Colors))
     const color = Object.values(Colors)[Math.floor(i / 13)]
     return { id: i, value, color }
   })

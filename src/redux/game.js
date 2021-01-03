@@ -57,3 +57,21 @@ export const canPlayInFoundation = (state, sourceCard, containerTarget) => {
     return canPlay
   }
 }
+
+// Auto-move first checks the foundations, then the columns
+export const findAutoMoveTarget = (state, sourceCard) => {
+  const foundations = [...state[Types.FOUNDATIONS]]
+  for (let i = 0; i < foundations.length; i++) {
+    if (canPlayInFoundation(state, sourceCard, {id: i})) {
+      return {type: Types.FOUNDATIONS, id: i}
+    }
+  }
+  const columns = [...state[Types.COLUMNS]]
+  for (let i = 0; i < columns.length; i++) {
+    if (canPlayInColumn(state, sourceCard, {id: i})) {
+      return {type: Types.COLUMNS, id: i}
+    }
+  }
+  // No auto-move found 
+  return null
+}

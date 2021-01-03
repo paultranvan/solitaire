@@ -23,15 +23,13 @@ const mapDispatchToProps = dispatch => {
 }
 
 const Foundation = ({ id, cards, dropCard, canDropInFoundation }) => {
-  const [{ isOver, canDrop }, drop] = useDrop({
+  const [{ canDrop }, drop] = useDrop({
     accept: Types.CARD,
-    //canDrop: () =>  //compare incoming card and topcard + its origin
     drop: item => dropCard(id, item),
     canDrop: item => {
       return canDropInFoundation(item)
     },
     collect: monitor => ({
-      isOver: !!monitor.isOver(),
       canDrop: !!monitor.canDrop()
     })
   })

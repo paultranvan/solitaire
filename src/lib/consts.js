@@ -26,6 +26,5 @@ export const Types = {
   TALON: 'talon',
   FOUNDATIONS: 'foundations',
   COLUMNS: 'columns',
-  COLUMN: 'column',
   CARD: 'card'
 }

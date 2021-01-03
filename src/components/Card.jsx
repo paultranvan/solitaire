@@ -4,11 +4,25 @@ import { connect } from 'react-redux'
 import { useDrag } from 'react-dnd'
 import { Types } from '../lib/consts'
 import { isLastContainerCard } from '../redux/helpers'
+import { findAutoMoveTarget } from '../redux/game'
+import {  moveCard } from '../redux/actions/actions'
 
 const mapStateToProps = (state, ownProps) => {
   const { cards } = state
-  const isLastCard = isLastContainerCard(cards, ownProps)
-  return { isLastCard }
+  return { 
+    isLastCard: isLastContainerCard(cards, ownProps),
+    findTarget: () => {
+      return findAutoMoveTarget(cards, ownProps)
+    }
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    autoMoveCard: (card, target) => {
+      dispatch(moveCard(card, target))
+    }
+  }
 }
 
 const Card = ({
@@ -19,7 +33,9 @@ const Card = ({
   onClick,
   children,
   canDrop,
-  isLastCard
+  isLastCard, // useful to avoid highlight the whole column
+  findTarget,
+  autoMoveCard
 }) => {
   const [{ isDragging }, drag] = useDrag({
     item: { type: Types.CARD, value, color, container },
@@ -30,7 +46,7 @@ const Card = ({
       return visible
     }
   })
-  
+
   const style = {
     backgroundColor: 'green'
   }
@@ -38,6 +54,24 @@ const Card = ({
   const cardPath = visible
     ? './assets/cards/' + color + '_' + value + '.png'
     : './assets/cards/card_back.png'
+
+  const autoMove = () => {
+    const card = {value, color, container}
+    const target = findTarget(card)
+    if (target) {
+      autoMoveCard(card, target)
+    }
+  }
+
+  const fireOnClick = () => {
+    if (onClick) {
+      return onClick()
+    }
+    if (container.type === Types.COLUMNS || container.type === Types.TALON) {
+      return autoMove()
+    }
+    return
+  }
 
   return (
     <div
@@ -49,11 +83,7 @@ const Card = ({
       }}
     >
       <Segment style={canDrop && isLastCard ? style : null}>
-          {onClick !== undefined ? (
-            <Image src={cardPath} alt="" onClick={onClick} size="tiny" />
-          ) : (
-            <Image src={cardPath} alt="" size="tiny"  />
-          )}
+        <Image src={cardPath} alt="" onClick={fireOnClick} size="tiny" />
       </Segment>
   
       {children} 
@@ -63,5 +93,5 @@ const Card = ({
 
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(Card)

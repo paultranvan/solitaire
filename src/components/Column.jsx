@@ -13,7 +13,9 @@ import { useDrop } from 'react-dnd'
 
 const mapStateToProps = (state, ownProps) => {
   const { cards } = state
-  return { canDropInColumn: (item) => canPlayInColumn(cards, item, ownProps) }
+  return { 
+    canDropInColumn: (item) => canPlayInColumn(cards, item, ownProps)
+  }
 }
 
 const mapDispatchToProps = dispatch => {
@@ -27,56 +29,17 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const renderCard = (id, card, position, canDrop, children) => {
-  return (
-    <div
-      key={card.id}
-      className={position === 0 ? 'Column-card first' : 'Column-card'}
-    >
-      <Card
-        value={card.value}
-        color={card.color}
-        visible={!!card.visible}
-        container={{ type: Types.COLUMNS, id, position }}
-        canDrop={canDrop}
-      >
-      {children}
-      </Card>
-    </div>
-  )
-}
-
-const buildColumn = (id, cards, canDrop, children) => {
-  if (cards.length < 1) {
-    return children
-  }
-  const lastCard = cards[cards.length -1]
-  const newCardsTree = renderCard(id, lastCard, cards.length - 1, canDrop, children)
-  cards.splice(cards.length - 1)
-  return buildColumn(id, cards, canDrop, newCardsTree)
-}
-
-const renderColumn = (id, cards, canDrop) => {
-  if (cards.length < 1) {
-    return <Empty canDrop={canDrop} />
-  }
-  const cardsToRender = [...cards]
-  const tree = buildColumn(id, cardsToRender, canDrop, null)
-  return tree
-}
-
 const Column = ({
   id,
   cards,
   dropCard,
   makeLastCardVisible,
-  canDropInColumn
+  canDropInColumn,
 }) => {
-  const [{ isOver, canDrop }, drop] = useDrop({
+  const [{ canDrop }, drop] = useDrop({
     accept: [Types.CARD],
     drop: item => dropCard(id, item),
     collect: monitor => ({
-      isOver: !!monitor.isOver(),
       canDrop: !!monitor.canDrop()
     }),
     canDrop: item => canDropInColumn(item)
@@ -88,6 +51,44 @@ const Column = ({
       makeLastCardVisible(id)
     }
   })
+
+  const renderCard = (card, position, children) => {
+    return (
+      <div
+        key={card.id}
+        className={position === 0 ? 'Column-card first' : 'Column-card'}
+      >
+        <Card
+          value={card.value}
+          color={card.color}
+          visible={!!card.visible}
+          container={{ type: Types.COLUMNS, id, position }}
+          canDrop={canDrop}
+        >
+        {children}
+        </Card>
+      </div>
+    )
+  }
+
+  const buildColumn = (cards, children) => {
+    if (cards.length < 1) {
+      return children
+    }
+    const lastCard = cards[cards.length -1]
+    const newCardsTree = renderCard(lastCard, cards.length - 1, children)
+    cards.splice(cards.length - 1)
+    return buildColumn(cards, newCardsTree)
+  }
+
+  const renderColumn = () => {
+    if (cards.length < 1) {
+      return <Empty canDrop={canDrop} />
+    }
+    const cardsToRender = [...cards]
+    const tree = buildColumn(cardsToRender, null)
+    return tree
+  }
 
   return (
     <Segment.Group>
