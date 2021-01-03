@@ -21,10 +21,6 @@ export const getColorType = (color) => {
   }
 }
 
-export const isKing = (value) => {
-  return Math.max(...Values) === value
-}
-
 export const Types = {
   STOCK: 'stock',
   TALON: 'talon',

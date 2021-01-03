@@ -3,7 +3,7 @@ import { Types } from '../lib/consts'
 export const isLastContainerCard = (state, card) => {
   const sourceType = card.container.type
   const container = [...state[sourceType]]
-  if (card.container.type === Types.COLUMNS || card.container.type === Types.FOUNDATION) {
+  if (card.container.type === Types.COLUMNS || card.container.type === Types.FOUNDATIONS) {
     return container[card.container.id].length - 1 === card.container.position
   }
   return container.length - 1 === card.container.position

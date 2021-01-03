@@ -6,11 +6,11 @@ import Card from './Card'
 import Empty from './Empty'
 import { moveCard } from '../redux/actions/actions'
 import { isSingleCardDrop } from '../redux/helpers'
+import { canPlayInFoundation } from '../redux/game'
 
-
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
   const { cards } = state
-  return { canDropInFoundation: (item) => isSingleCardDrop(cards, item) }
+  return { canDropInFoundation: (item) => isSingleCardDrop(cards, item) && canPlayInFoundation(cards, item, ownProps)}
 }
 
 

@@ -4,7 +4,7 @@ import {
   moveCard,
   revealLastColumnCard
 } from '../redux/actions/actions'
-import { canDropHere } from '../redux/game'
+import { canPlayInColumn } from '../redux/game'
 import Card from './Card'
 import Empty from './Empty'
 import { Types } from '../lib/consts'
@@ -13,7 +13,7 @@ import { useDrop } from 'react-dnd'
 
 const mapStateToProps = (state, ownProps) => {
   const { cards } = state
-  return { canDropInColumn: (item) => canDropHere(cards, item, {id: ownProps.id, type: Types.COLUMNS}) }
+  return { canDropInColumn: (item) => canPlayInColumn(cards, item, ownProps) }
 }
 
 const mapDispatchToProps = dispatch => {
