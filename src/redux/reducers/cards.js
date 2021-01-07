@@ -4,7 +4,7 @@ import {
   REFILL_STOCK,
   REVEAL_LAST_COLUMN_CARD
 } from '../actions/types'
-import { Types } from '../../lib/consts'
+import { Types } from '../../game/consts'
 import { getColumnChildCards } from '../helpers'
 
 const moveCard = (state, card, destination) => {
@@ -33,6 +33,7 @@ const moveCard = (state, card, destination) => {
   const targetCards = [...state[targetType]]
   const newTarget = [...targetCards[destination.id], ...cards]
   targetCards[destination.id] = newTarget
+
   return { ...state, [sourceType]: sourceCards, [targetType]: targetCards }
 }
 
@@ -58,6 +59,7 @@ const revealLastColumnCard = (state, columnId) => {
 }
 
 const cards = (state = {}, action) => {
+  console.log('cards reducer : ', state)
   //console.log('enter reducer card with action ', action.type)
   switch (action.type) {
     case MOVE_CARD:

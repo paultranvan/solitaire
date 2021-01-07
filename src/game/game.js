@@ -1,4 +1,4 @@
-import { getColorType, Types, Values } from '../lib/consts'
+import { getColorType, Types, Values } from './consts'
 
 const isSameColor = (sourceCard, targetCard) => {
   return sourceCard.color === targetCard.color
@@ -37,8 +37,16 @@ const canPlayOnFoundationCard = (sourceCard, targetCard) => {
   )
 }
 
-export const canPlayInColumn = (state, sourceCard, containerTarget) => {
-  const targetCards = [...state[Types.COLUMNS][containerTarget.id]]
+export const canPlayInColumn = (
+  cards,
+  game,
+  sourceCard,
+  containerTarget
+) => {
+  if (game.cheat) {
+    return true
+  }
+  const targetCards = [...cards[Types.COLUMNS][containerTarget.id]]
   if (targetCards.length < 1) {
     // Column empty, check if the source card is a king
     return isKing(sourceCard.value)
@@ -49,8 +57,16 @@ export const canPlayInColumn = (state, sourceCard, containerTarget) => {
   }
 }
 
-export const canPlayInFoundation = (state, sourceCard, containerTarget) => {
-  const targetCards = [...state[Types.FOUNDATIONS][containerTarget.id]]
+export const canPlayInFoundation = (
+  cards,
+  game,
+  sourceCard,
+  containerTarget
+) => {
+  if (game.cheat) {
+    return true
+  }
+  const targetCards = [...cards[Types.FOUNDATIONS][containerTarget.id]]
   if (targetCards.length < 1) {
     // Foundation empty, check if the source card is an ace
     return isAce(sourceCard.value)
@@ -62,19 +78,31 @@ export const canPlayInFoundation = (state, sourceCard, containerTarget) => {
 }
 
 // Auto-move first checks the foundations, then the columns
-export const findAutoMoveTarget = (state, sourceCard) => {
-  const foundations = [...state[Types.FOUNDATIONS]]
+export const findAutoMoveTarget = (cards, game, sourceCard) => {
+  const foundations = [...cards[Types.FOUNDATIONS]]
   for (let i = 0; i < foundations.length; i++) {
-    if (canPlayInFoundation(state, sourceCard, { id: i })) {
+    if (canPlayInFoundation(cards, game, sourceCard, { id: i })) {
       return { type: Types.FOUNDATIONS, id: i }
     }
   }
-  const columns = [...state[Types.COLUMNS]]
+  const columns = [...cards[Types.COLUMNS]]
   for (let i = 0; i < columns.length; i++) {
-    if (canPlayInColumn(state, sourceCard, { id: i })) {
+    if (canPlayInColumn(cards, game, sourceCard, { id: i })) {
       return { type: Types.COLUMNS, id: i }
     }
   }
   // No auto-move found
   return null
+}
+
+export const isGameWon = (columns) => {
+  for (const column of columns) {
+    const hasNotVisible = column.find((card) => !card.visible)
+    if (hasNotVisible) {
+      console.log('has not : ', hasNotVisible)
+      return false
+    }
+  }
+  console.log('WON')
+  return true
 }

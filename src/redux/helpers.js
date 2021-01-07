@@ -1,4 +1,4 @@
-import { Types } from '../lib/consts'
+import { Types } from '../game/consts'
 
 export const isLastContainerCard = (state, card) => {
   const sourceType = card.container.type

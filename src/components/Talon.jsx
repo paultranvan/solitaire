@@ -1,11 +1,11 @@
 import React from 'react'
-import { Types } from '../lib/consts'
+import { Types } from '../game/consts'
 import { connect } from 'react-redux'
 import Card from './Card'
 import Empty from './Empty'
 
-const Talon = ({ cards }) => {
-  const topCard = cards.length > 0 ? cards[cards.length - 1] : null
+const Talon = ({ talon }) => {
+  const topCard = talon.length > 0 ? talon[talon.length - 1] : null
 
   return topCard ? (
     <div>
@@ -13,7 +13,7 @@ const Talon = ({ cards }) => {
         id={topCard.id}
         value={topCard.value}
         color={topCard.color}
-        container={{ type: Types.TALON, position: cards.length - 1 }}
+        container={{ type: Types.TALON, position: talon.length - 1 }}
       />
     </div>
   ) : (
@@ -21,7 +21,4 @@ const Talon = ({ cards }) => {
   )
 }
 
-export default connect(
-  null,
-  null
-)(Talon)
+export default connect(null, null)(Talon)

@@ -1,54 +1,64 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
+import { useDrop } from 'react-dnd'
+import { Segment } from 'semantic-ui-react'
 import {
   moveCard,
-  revealLastColumnCard
+  revealLastColumnCard,
+  checkGameWon
 } from '../redux/actions/actions'
-import { canPlayInColumn } from '../redux/game'
+import { canPlayInColumn } from '../game/game'
 import Card from './Card'
 import Empty from './Empty'
-import { Types } from '../lib/consts'
-import { Segment } from 'semantic-ui-react'
-import { useDrop } from 'react-dnd'
+import { Types } from '../game/consts'
 
 const mapStateToProps = (state, ownProps) => {
-  const { cards } = state
-  return { 
-    canDropInColumn: (item) => canPlayInColumn(cards, item, ownProps)
+  const { cards, game } = state
+  return {
+    getAllColumnsCards: () => cards[Types.COLUMNS],
+    column: cards[Types.COLUMNS][ownProps.id],
+    canDropInColumn: (item) => canPlayInColumn(cards, game, item, ownProps)
   }
 }
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     dropCard: (id, card) => {
       dispatch(moveCard(card, { type: Types.COLUMNS, id }))
     },
-    makeLastCardVisible: id => {
+    makeLastCardVisible: (id) => {
       dispatch(revealLastColumnCard(id))
+    },
+    checkGameWon: (columns) => {
+      console.log('checkgame columns : ', columns)
+      dispatch(checkGameWon(columns))
     }
   }
 }
 
 const Column = ({
   id,
-  cards,
+  column,
+  getAllColumnsCards,
   dropCard,
   makeLastCardVisible,
   canDropInColumn,
+  checkGameWon
 }) => {
   const [{ canDrop }, drop] = useDrop({
     accept: [Types.CARD],
-    drop: item => dropCard(id, item),
-    collect: monitor => ({
+    drop: (item) => dropCard(id, item),
+    collect: (monitor) => ({
       canDrop: !!monitor.canDrop()
     }),
-    canDrop: item => canDropInColumn(item)
+    canDrop: (item) => canDropInColumn(item)
   })
 
   useEffect(() => {
-    // Make last column cards visible
-    if (cards.length > 0 && !cards[cards.length - 1].visible) {
+    // Make last column card visible
+    if (column.length > 0 && !column[column.length - 1].visible) {
       makeLastCardVisible(id)
+      checkGameWon(getAllColumnsCards())
     }
   })
 
@@ -65,41 +75,38 @@ const Column = ({
           container={{ type: Types.COLUMNS, id, position }}
           canDrop={canDrop}
         >
-        {children}
+          {children}
         </Card>
       </div>
     )
   }
 
-  const buildColumn = (cards, children) => {
-    if (cards.length < 1) {
+  const buildColumn = (column, children) => {
+    if (column.length < 1) {
       return children
     }
-    const lastCard = cards[cards.length -1]
-    const newCardsTree = renderCard(lastCard, cards.length - 1, children)
-    cards.splice(cards.length - 1)
-    return buildColumn(cards, newCardsTree)
+    const lastCard = column[column.length - 1]
+    const newCardsTree = renderCard(lastCard, column.length - 1, children)
+    column.splice(column.length - 1)
+    return buildColumn(column, newCardsTree)
   }
 
   const renderColumn = () => {
-    if (cards.length < 1) {
+    if (column.length < 1) {
       return <Empty canDrop={canDrop} />
     }
-    const cardsToRender = [...cards]
-    const tree = buildColumn(cardsToRender, null)
+    const columnToRender = [...column]
+    const tree = buildColumn(columnToRender, null)
     return tree
   }
 
   return (
     <Segment.Group>
       <div ref={drop}>
-        <div>{renderColumn(id, cards, canDrop)}</div>
+        <div>{renderColumn(id, column, canDrop)}</div>
       </div>
     </Segment.Group>
   )
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Column)
+export default connect(mapStateToProps, mapDispatchToProps)(Column)

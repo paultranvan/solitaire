@@ -1,20 +1,23 @@
 import React from 'react'
-import { Types } from '../lib/consts'
+import { Types } from '../game/consts'
 import { useDrop } from 'react-dnd'
 import { connect } from 'react-redux'
 import Card from './Card'
 import Empty from './Empty'
 import { moveCard } from '../redux/actions/actions'
 import { isSingleCardDrop } from '../redux/helpers'
-import { canPlayInFoundation } from '../redux/game'
+import { canPlayInFoundation } from '../game/game'
 
 const mapStateToProps = (state, ownProps) => {
-  const { cards } = state
-  return { canDropInFoundation: (item) => isSingleCardDrop(cards, item) && canPlayInFoundation(cards, item, ownProps)}
+  const { cards, game } = state
+  return {
+    canDropInFoundation: (item) =>
+      isSingleCardDrop(cards, item) &&
+      canPlayInFoundation(cards, game, item, ownProps)
+  }
 }
 
-
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     dropCard: (id, card) => {
       dispatch(moveCard(card, { type: Types.FOUNDATIONS, id }))
@@ -22,24 +25,23 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const Foundation = ({ id, cards, dropCard, canDropInFoundation }) => {
+const Foundation = ({ id, foundation, dropCard, canDropInFoundation }) => {
   const [{ canDrop }, drop] = useDrop({
     accept: Types.CARD,
-    drop: item => dropCard(id, item),
-    canDrop: item => {
+    drop: (item) => dropCard(id, item),
+    canDrop: (item) => {
       return canDropInFoundation(item)
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       canDrop: !!monitor.canDrop()
     })
   })
 
-  const topCard = cards.length > 0 ? cards[cards.length - 1] : null
+  const topCard =
+    foundation.length > 0 ? foundation[foundation.length - 1] : null
 
   return (
-    <div
-      ref={drop}
-    >
+    <div ref={drop}>
       {topCard ? (
         <Card
           id={topCard.id}
@@ -48,7 +50,7 @@ const Foundation = ({ id, cards, dropCard, canDropInFoundation }) => {
           container={{
             type: Types.FOUNDATIONS,
             id: id,
-            position: cards.length - 1
+            position: foundation.length - 1
           }}
           canDrop={canDrop}
         />
@@ -59,7 +61,4 @@ const Foundation = ({ id, cards, dropCard, canDropInFoundation }) => {
   )
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Foundation)
+export default connect(mapStateToProps, mapDispatchToProps)(Foundation)

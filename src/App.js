@@ -1,5 +1,6 @@
 import React from 'react'
 import './App.css'
+import ActionsButtons from './components/ActionButtons'
 import Header from './components/Header'
 import Stock from './components/Stock'
 import Talon from './components/Talon'
@@ -16,57 +17,58 @@ const isTouchDevice =
 const backend = isTouchDevice ? TouchBackend : HTML5Backend
 console.log('is touch device : ', isTouchDevice)
 
-const renderStock = (stock) => {
-  return (
-    <Grid.Column floated="left" width="2">
-      <Stock cards={stock} />
-    </Grid.Column>
-  )
-}
-
-const renderTalon = (talon) => {
-  return (
-    <Grid.Column floated="left" width="2">
-      <Talon cards={talon} />
-    </Grid.Column>
-  )
-}
-
-const renderFoundation = (foundations) => {
-  return foundations.map((f, i) => {
+const App = ({ cards, game }) => {
+  const renderStock = () => {
     return (
-      <Grid.Column key={i} floated="right" width="2">
-        <Foundation id={i} cards={foundations[i]} />
+      <Grid.Column floated="left" width="2">
+        <Stock stock={cards.stock} />
       </Grid.Column>
     )
-  })
-}
+  }
 
-const renderColumns = (columns) => {
-  return columns.map((c, i) => {
+  const renderTalon = () => {
     return (
-      <Grid.Column key={i} floated="left" width="2">
-        <Column id={i} cards={columns[i]} />
+      <Grid.Column floated="left" width="2">
+        <Talon talon={cards.talon} />
       </Grid.Column>
     )
-  })
-}
+  }
 
-const App = ({ cards }) => {
+  const renderFoundation = () => {
+    return cards.foundations.map((f, i) => {
+      return (
+        <Grid.Column key={i} floated="right" width="2">
+          <Foundation id={i} foundation={cards.foundations[i]} game={game} />
+        </Grid.Column>
+      )
+    })
+  }
+
+  const renderColumns = () => {
+    return cards.columns.map((c, i) => {
+      return (
+        <Grid.Column key={i} floated="left" width="2">
+          <Column id={i} column={cards.columns[i]} game={game} />
+        </Grid.Column>
+      )
+    })
+  }
+
   //console.log('cards : ', cards)
   return (
     <div className="App">
+      <Header />
+      <ActionsButtons game={game} />
       <DndProvider backend={backend}>
-        <Header />
         <Container>
           <Grid columns="equal">
             <Grid.Row>
-              {renderStock(cards.stock)}
-              {renderTalon(cards.talon)}
+              {renderStock()}
+              {renderTalon()}
               <Grid.Column width="4" />
-              {renderFoundation(cards.foundations)}
+              {renderFoundation()}
             </Grid.Row>
-            <Grid.Row>{renderColumns(cards.columns)}</Grid.Row>
+            <Grid.Row>{renderColumns()}</Grid.Row>
           </Grid>
         </Container>
       </DndProvider>
@@ -75,8 +77,9 @@ const App = ({ cards }) => {
 }
 
 const mapStateToProps = (state) => {
-  const cards = state
-  return cards
+  console.log('state : ', state)
+  const { cards, game } = state
+  return { cards, game }
 }
 
 export default connect(mapStateToProps)(App)

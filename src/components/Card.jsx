@@ -2,22 +2,22 @@ import React from 'react'
 import { Image, Segment } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import { useDrag } from 'react-dnd'
-import { Types } from '../lib/consts'
+import { Types } from '../game/consts'
 import { isLastContainerCard } from '../redux/helpers'
-import { findAutoMoveTarget } from '../redux/game'
-import {  moveCard } from '../redux/actions/actions'
+import { findAutoMoveTarget } from '../game/game'
+import { moveCard } from '../redux/actions/actions'
 
 const mapStateToProps = (state, ownProps) => {
-  const { cards } = state
-  return { 
+  const { cards, game } = state
+  return {
     isLastCard: isLastContainerCard(cards, ownProps),
     findTarget: () => {
-      return findAutoMoveTarget(cards, ownProps)
+      return findAutoMoveTarget(cards, game, ownProps)
     }
   }
 }
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     autoMoveCard: (card, target) => {
       dispatch(moveCard(card, target))
@@ -39,7 +39,7 @@ const Card = ({
 }) => {
   const [{ isDragging }, drag] = useDrag({
     item: { type: Types.CARD, value, color, container },
-    collect: monitor => ({
+    collect: (monitor) => ({
       isDragging: !!monitor.isDragging()
     }),
     canDrag: () => {
@@ -50,13 +50,13 @@ const Card = ({
   const style = {
     backgroundColor: 'green'
   }
-  
+
   const cardPath = visible
     ? './assets/cards/' + color + '_' + value + '.png'
     : './assets/cards/card_back.png'
 
   const autoMove = () => {
-    const card = {value, color, container}
+    const card = { value, color, container }
     const target = findTarget(card)
     if (target) {
       autoMoveCard(card, target)
@@ -85,13 +85,10 @@ const Card = ({
       <Segment style={canDrop && isLastCard ? style : null}>
         <Image src={cardPath} alt="" onClick={fireOnClick} size="tiny" />
       </Segment>
-  
-      {children} 
+
+      {children}
     </div>
   )
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Card)
+export default connect(mapStateToProps, mapDispatchToProps)(Card)
