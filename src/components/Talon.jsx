@@ -3,6 +3,7 @@ import { Types } from '../game/consts'
 import { connect } from 'react-redux'
 import Card from './Card'
 import Empty from './Empty'
+import { Container } from 'semantic-ui-react'
 
 const Talon = ({ talon }) => {
   const topCard = talon.length > 0 ? talon[talon.length - 1] : null

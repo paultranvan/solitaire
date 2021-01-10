@@ -6,7 +6,7 @@ import Stock from './components/Stock'
 import Talon from './components/Talon'
 import Foundation from './components/Foundation'
 import Column from './components/Column'
-import { Grid, Container } from 'semantic-ui-react'
+import { Grid, Container, Item, Segment } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { TouchBackend } from 'react-dnd-touch-backend'
@@ -36,6 +36,7 @@ const App = ({ cards, game }) => {
 
   const renderFoundation = () => {
     return cards.foundations.map((f, i) => {
+      //<Item.Group>
       return (
         <Grid.Column key={i} floated="right" width="2">
           <Foundation id={i} foundation={cards.foundations[i]} game={game} />
@@ -58,14 +59,15 @@ const App = ({ cards, game }) => {
   return (
     <div className="App">
       <Header />
-      <ActionsButtons game={game} />
       <DndProvider backend={backend}>
         <Container>
-          <Grid columns="equal">
-            <Grid.Row>
+          <Grid columns="equal"> {/* Permet aux columns de prendre la même largeur */ }
+            <Grid.Row centered>
+              <ActionsButtons game={game} />
+            </Grid.Row>
+            <Grid.Row stretched>
               {renderStock()}
               {renderTalon()}
-              <Grid.Column width="4" />
               {renderFoundation()}
             </Grid.Row>
             <Grid.Row>{renderColumns()}</Grid.Row>

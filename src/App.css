@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  /*background-color: rgba(12, 98, 35, 0.88);*/
 }
 
 .App-logo {
@@ -17,9 +18,24 @@
 
 .Column-card {
   position: relative;
-  margin-top: -100%;
+  margin-top: -85%;
 }
 
 .Column-card.first {
   margin-top: 0px;
+}
+
+.columns {
+  /*padding-left: 0.25rem;
+  padding-right: 0.25rem;*/
+}
+
+/* TODO : glow only on selected card and children (currently flow on whole column) */ 
+.card {
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  color: rgba(255, 255, 255, 1);
+  box-shadow: 0 5px 15px rgba(241, 13, 13, 0.4);
 }

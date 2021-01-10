@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useDrop } from 'react-dnd'
-import { Segment } from 'semantic-ui-react'
+import { Segment, Item, Container } from 'semantic-ui-react'
 import {
   moveCard,
   revealLastColumnCard,
@@ -30,7 +30,6 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(revealLastColumnCard(id))
     },
     checkGameWon: (columns) => {
-      console.log('checkgame columns : ', columns)
       dispatch(checkGameWon(columns))
     }
   }
@@ -51,7 +50,10 @@ const Column = ({
     collect: (monitor) => ({
       canDrop: !!monitor.canDrop()
     }),
-    canDrop: (item) => canDropInColumn(item)
+    canDrop: (item) => {
+      console.log('can drop ? ', canDropInColumn(item))
+      return canDropInColumn(item)
+    }
   })
 
   useEffect(() => {
@@ -64,7 +66,7 @@ const Column = ({
 
   const renderCard = (card, position, children) => {
     return (
-      <div
+      <Container
         key={card.id}
         className={position === 0 ? 'Column-card first' : 'Column-card'}
       >
@@ -77,7 +79,7 @@ const Column = ({
         >
           {children}
         </Card>
-      </div>
+      </Container>
     )
   }
 
@@ -100,12 +102,11 @@ const Column = ({
     return tree
   }
 
+  //return <Item.Group ref={drop}>{renderColumn(id, column, canDrop)}</Item.Group>
   return (
-    <Segment.Group>
-      <div ref={drop}>
-        <div>{renderColumn(id, column, canDrop)}</div>
-      </div>
-    </Segment.Group>
+    <div ref={drop}>
+      <div>{renderColumn(id, column, canDrop)}</div>
+    </div>
   )
 }
 

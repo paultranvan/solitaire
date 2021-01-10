@@ -7,6 +7,7 @@ import Empty from './Empty'
 import { moveCard } from '../redux/actions/actions'
 import { isSingleCardDrop } from '../redux/helpers'
 import { canPlayInFoundation } from '../game/game'
+import { Item, Segment } from 'semantic-ui-react'
 
 const mapStateToProps = (state, ownProps) => {
   const { cards, game } = state

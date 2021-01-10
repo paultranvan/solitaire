@@ -37,12 +37,7 @@ const canPlayOnFoundationCard = (sourceCard, targetCard) => {
   )
 }
 
-export const canPlayInColumn = (
-  cards,
-  game,
-  sourceCard,
-  containerTarget
-) => {
+export const canPlayInColumn = (cards, game, sourceCard, containerTarget) => {
   if (game.cheat) {
     return true
   }
