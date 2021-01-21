@@ -55,7 +55,7 @@ const Foundation = ({ id, foundation, dropCard, canDropInFoundation }) => {
           canDrop={canDrop}
         />
       ) : (
-        <Empty canDrop={canDrop} />
+        <Empty canDrop={canDrop} height="100%" />
       )}
     </div>
   )

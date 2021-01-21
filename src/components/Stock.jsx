@@ -27,7 +27,7 @@ const Stock = ({ stock, getFromStock, refillStock }) => {
       />
     </div>
   ) : (
-    <Empty onClick={refillStock} />
+    <Empty onClick={refillStock} height="100%" />
   )
 }
 
