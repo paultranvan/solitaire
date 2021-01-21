@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { Segment, Button, Icon } from 'semantic-ui-react'
 
 import { cheatMode } from '../redux/actions/actions'
 
@@ -13,25 +14,25 @@ const mapDispatchToProps = (dispatch) => {
 
 const ActionButtons = ({ game, cheatMode }) => {
   return (
-    <div>
-      <button className="ui red huge circular icon button">
-        <i className="home icon"></i>
-      </button>
-      <button className="ui red huge circular icon button">
-        <i className="reply icon"></i>
-      </button>
-      <button className="ui red huge circular icon button">
-        <i className="chart bar outline icon"></i>
-      </button>
-      <button className="ui red huge circular icon button" onClick={cheatMode}>
-        <i className="cog icon"></i>
-      </button>
+    <Segment>
+      <Button className="ui red huge circular icon Button">
+        <Icon name="home"></Icon>
+      </Button>
+      <Button className="ui red huge circular icon Button">
+        <Icon name="reply"></Icon>
+      </Button>
+      <Button className="ui red huge circular icon Button">
+        <Icon name="chart bar outline"></Icon>
+      </Button>
+      <Button className="ui red huge circular icon Button" onClick={cheatMode}>
+        <Icon name="cog"></Icon>
+      </Button>
       {/*
-      <i className="big circular reply icon"></i>
-      <i className="big circular chart bar outline icon"></i>
-      <i className="big circular cog icon"></i>
+      <Icon className="big circular reply icon"></Icon>
+      <Icon className="big circular chart bar outline icon"></Icon>
+      <Icon className="big circular cog icon"></Icon>
       */}
-    </div>
+    </Segment>
   )
 }
 

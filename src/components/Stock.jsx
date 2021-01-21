@@ -16,7 +16,7 @@ const Stock = ({ stock, getFromStock, refillStock }) => {
   const topCard = stock.length > 0 ? stock[stock.length - 1] : null
 
   return topCard ? (
-    <div>
+    <div id="stock">
       <Card
         id={topCard.id}
         value={topCard.value}

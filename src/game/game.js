@@ -37,12 +37,7 @@ const canPlayOnFoundationCard = (sourceCard, targetCard) => {
   )
 }
 
-export const canPlayInColumn = (
-  cards,
-  game,
-  sourceCard,
-  containerTarget
-) => {
+export const canPlayInColumn = (cards, game, sourceCard, containerTarget) => {
   if (game.cheat) {
     return true
   }
@@ -99,7 +94,7 @@ export const isGameWon = (columns) => {
   for (const column of columns) {
     const hasNotVisible = column.find((card) => !card.visible)
     if (hasNotVisible) {
-      console.log('has not : ', hasNotVisible)
+      //console.log('has not : ', hasNotVisible)
       return false
     }
   }

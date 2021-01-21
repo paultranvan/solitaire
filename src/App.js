@@ -13,7 +13,7 @@ import { TouchBackend } from 'react-dnd-touch-backend'
 import { DndProvider } from 'react-dnd'
 
 const isTouchDevice =
-  navigator.maxTouchPoints || 'ontouchstart' in document.documentElement
+  navigator.maxTouchPoints > 0 || 'ontouchstart' in document.documentElement
 const backend = isTouchDevice ? TouchBackend : HTML5Backend
 console.log('is touch device : ', isTouchDevice)
 
@@ -47,27 +47,31 @@ const App = ({ cards, game }) => {
   const renderColumns = () => {
     return cards.columns.map((c, i) => {
       return (
-        <Grid.Column key={i} floated="left" width="2">
+        <Grid.Column key={i} mobile={2} tablet={2} computer={2}>
           <Column id={i} column={cards.columns[i]} game={game} />
         </Grid.Column>
       )
     })
   }
 
-  //console.log('cards : ', cards)
   return (
     <div className="App">
       <Header />
-      <ActionsButtons game={game} />
       <DndProvider backend={backend}>
         <Container>
           <Grid columns="equal">
+            {/* columns=equal means columns have the same width */}
+            <Grid.Row centered>
+              <ActionsButtons game={game} />
+            </Grid.Row>
             <Grid.Row>
               {renderStock()}
               {renderTalon()}
+
               <Grid.Column width="4" />
               {renderFoundation()}
             </Grid.Row>
+
             <Grid.Row>{renderColumns()}</Grid.Row>
           </Grid>
         </Container>
@@ -77,7 +81,7 @@ const App = ({ cards, game }) => {
 }
 
 const mapStateToProps = (state) => {
-  console.log('state : ', state)
+  //console.log('state : ', state)
   const { cards, game } = state
   return { cards, game }
 }

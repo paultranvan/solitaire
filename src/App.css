@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  /*background-color: rgba(12, 98, 35, 0.88);*/
 }
 
 .App-logo {
@@ -15,11 +16,64 @@
   font-size: large;
 }
 
-.Column-card {
-  position: relative;
-  margin-top: -100%;
+
+@media (max-width: 1001px) {
+  .Column-card {
+    position: relative;
+    margin-top: -115%;
+  }
 }
+
+@media (min-width: 1001px) and (max-width: 1201px) {
+  .Column-card {
+    position: relative;
+    margin-top: -95%;
+  }
+}
+
+@media (min-width: 1201px) {
+  .Column-card {
+    position: relative;
+    margin-top: -90%;
+  }
+}
+
 
 .Column-card.first {
   margin-top: 0px;
+}
+
+@media (max-width: 641px) {
+  .column {
+    padding-left: 0.1rem !important;
+    padding-right: 0.1rem !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1001px) {
+  .column {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+@media (max-width: 1001px) {
+  .ui.segment {
+    padding: 0.2rem 0.2rem !important
+  }
+}
+
+.fullHeight {
+  height: 100%
+}
+
+
+/* TODO : glow only on selected card and children (currently flow on whole column) */ 
+.card {
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  color: rgba(255, 255, 255, 1);
+  box-shadow: 0 5px 15px rgba(241, 13, 13, 0.4);
 }

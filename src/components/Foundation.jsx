@@ -41,7 +41,7 @@ const Foundation = ({ id, foundation, dropCard, canDropInFoundation }) => {
     foundation.length > 0 ? foundation[foundation.length - 1] : null
 
   return (
-    <div ref={drop}>
+    <div ref={drop} className="fullHeight">
       {topCard ? (
         <Card
           id={topCard.id}

@@ -59,7 +59,7 @@ const revealLastColumnCard = (state, columnId) => {
 }
 
 const cards = (state = {}, action) => {
-  console.log('cards reducer : ', state)
+  //console.log('cards reducer : ', state)
   //console.log('enter reducer card with action ', action.type)
   switch (action.type) {
     case MOVE_CARD:

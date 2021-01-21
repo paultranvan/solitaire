@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useDrop } from 'react-dnd'
-import { Segment } from 'semantic-ui-react'
 import {
   moveCard,
   revealLastColumnCard,
@@ -30,7 +29,6 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(revealLastColumnCard(id))
     },
     checkGameWon: (columns) => {
-      console.log('checkgame columns : ', columns)
       dispatch(checkGameWon(columns))
     }
   }
@@ -51,7 +49,9 @@ const Column = ({
     collect: (monitor) => ({
       canDrop: !!monitor.canDrop()
     }),
-    canDrop: (item) => canDropInColumn(item)
+    canDrop: (item) => {
+      return canDropInColumn(item)
+    }
   })
 
   useEffect(() => {
@@ -101,11 +101,9 @@ const Column = ({
   }
 
   return (
-    <Segment.Group>
-      <div ref={drop}>
-        <div>{renderColumn(id, column, canDrop)}</div>
-      </div>
-    </Segment.Group>
+    <div ref={drop}>
+      <div>{renderColumn(id, column, canDrop)}</div>
+    </div>
   )
 }
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Image, Segment } from 'semantic-ui-react'
+import { Segment, Image } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import { useDrag } from 'react-dnd'
 import { Types } from '../game/consts'
@@ -73,6 +73,9 @@ const Card = ({
     return
   }
 
+  // TODO: use classname instead of segment style
+  // TODO: change card size depending on screen size
+  // TODO : segment renders better, but is not/less responsive than just item...
   return (
     <div
       ref={drag}
@@ -83,9 +86,14 @@ const Card = ({
       }}
     >
       <Segment style={canDrop && isLastCard ? style : null}>
-        <Image src={cardPath} alt="" onClick={fireOnClick} size="tiny" />
+        <Image
+          className="test"
+          src={cardPath}
+          rounded
+          onClick={fireOnClick}
+          size="tiny"
+        />
       </Segment>
-
       {children}
     </div>
   )
