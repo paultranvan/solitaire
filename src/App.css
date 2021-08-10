@@ -16,28 +16,26 @@
   font-size: large;
 }
 
-
 @media (max-width: 1001px) {
   .Column-card {
     position: relative;
-    margin-top: -115%;
+    margin-top: -110%;
   }
 }
 
 @media (min-width: 1001px) and (max-width: 1201px) {
   .Column-card {
     position: relative;
-    margin-top: -95%;
+    margin-top: -105%;
   }
 }
 
 @media (min-width: 1201px) {
   .Column-card {
     position: relative;
-    margin-top: -90%;
+    margin-top: -100%;
   }
 }
-
 
 .Column-card.first {
   margin-top: 0px;
@@ -59,16 +57,15 @@
 
 @media (max-width: 1001px) {
   .ui.segment {
-    padding: 0.2rem 0.2rem !important
+    padding: 0.2rem 0.2rem !important;
   }
 }
 
 .fullHeight {
-  height: 100%
+  height: 100%;
 }
 
-
-/* TODO : glow only on selected card and children (currently flow on whole column) */ 
+/* TODO : glow only on selected card and children (currently flow on whole column) */
 .card {
   transition: all 0.2s ease-in-out;
 }
