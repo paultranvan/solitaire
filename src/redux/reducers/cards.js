@@ -45,7 +45,7 @@ const getCardFromStock = (state) => {
 }
 
 const refillStock = (state) => {
-  const stock = [...state.talon]
+  const stock = [...state.talon].reverse()
   const talon = []
   return { ...state, stock, talon }
 }
