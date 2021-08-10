@@ -6,6 +6,7 @@ import Stock from './components/Stock'
 import Talon from './components/Talon'
 import Foundation from './components/Foundation'
 import Column from './components/Column'
+import Win from './components/Win'
 import { Grid, Container } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -56,6 +57,7 @@ const App = ({ cards, game }) => {
 
   return (
     <div className="App">
+      <Win gameWon={game.gameWon} />
       <Header />
       <DndProvider backend={backend}>
         <Container>
