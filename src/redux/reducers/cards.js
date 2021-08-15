@@ -1,3 +1,4 @@
+import produce from 'immer'
 import {
   GET_FROM_STOCK,
   MOVE_CARD,
@@ -6,6 +7,11 @@ import {
 } from '../actions/types'
 import { Types } from '../../game/consts'
 import { getColumnChildCards } from '../helpers'
+
+// XXX - We use immer to update state to ease state mutations
+// When doing a mutation on a nested level, all involved levels must be
+// shallow copied, as it keeps references.
+// See https://redux.js.org/usage/structuring-reducers/immutable-update-patterns
 
 const moveCard = (state, card, destination) => {
   const sourceType = card.container.type
@@ -16,51 +22,44 @@ const moveCard = (state, card, destination) => {
     cards = getColumnChildCards(state, card)
   }
 
-  // The source can be talon, column or foundation
-  let sourceCards = [...state[sourceType]]
-  if (
-    card.container.type === Types.COLUMNS ||
-    card.container.type === Types.FOUNDATION
-  ) {
-    sourceCards[card.container.id].splice(
-      sourceCards[card.container.id].length - cards.length
-    )
-  } else {
-    sourceCards.splice(sourceCards.length - 1)
-  }
-
-  // The target is either a column, or a foundation
-  const targetCards = [...state[targetType]]
-  const newTarget = [...targetCards[destination.id], ...cards]
-  targetCards[destination.id] = newTarget
-
-  return { ...state, [sourceType]: sourceCards, [targetType]: targetCards }
+  return produce(state, (draft) => {
+    if (
+      card.container.type === Types.COLUMNS ||
+      card.container.type === Types.FOUNDATION
+    ) {
+      draft[sourceType][card.container.id].splice(
+        draft[sourceType][card.container.id].length - cards.length
+      )
+    } else {
+      draft[sourceType].splice(draft[sourceType].length - 1)
+    }
+    draft[targetType][destination.id].push(...cards)
+  })
 }
 
 const getCardFromStock = (state) => {
-  const topStock = state.stock[state.stock.length - 1]
-  const stock = state.stock.splice(0, state.stock.length - 1)
-  const talon = [...state.talon, topStock]
-  return { ...state, stock, talon }
+  return produce(state, (draft) => {
+    const topStock = draft.stock[draft.stock.length - 1]
+    draft.talon.push(topStock)
+    draft.stock.pop()
+  })
 }
 
 const refillStock = (state) => {
-  const stock = [...state.talon].reverse()
-  const talon = []
-  return { ...state, stock, talon }
+  return produce(state, (draft) => {
+    draft.stock = draft.talon.reverse()
+    draft.talon = []
+  })
 }
 
 const revealLastColumnCard = (state, columnId) => {
-  const newColumns = [...state[Types.COLUMNS]]
-  const column = [...newColumns[columnId]]
-  column[column.length - 1].visible = true
-  newColumns[columnId] = column
-  return { ...state, columns: newColumns }
+  return produce(state, (draft) => {
+    const column = draft.columns[columnId]
+    draft.columns[columnId][column.length - 1].visible = true
+  })
 }
 
 const cards = (state = {}, action) => {
-  //console.log('cards reducer : ', state)
-  //console.log('enter reducer card with action ', action.type)
   switch (action.type) {
     case MOVE_CARD:
       return moveCard(state, action.card, action.destination)
