@@ -14,6 +14,10 @@ export const initDeck = () => {
     const columnCards = []
     for (let j = 0; j < i + 1; j++) {
       const card = pickRandomCard(shuffledDeck)
+      if (j === i) {
+        // Last column card
+        card.visible = true
+      }
       columnCards.push(card)
     }
     columns.push(columnCards)

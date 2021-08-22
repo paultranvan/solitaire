@@ -1,18 +1,15 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useDrop } from 'react-dnd'
-import {
-  moveCard,
-  revealLastColumnCard,
-  checkGameWon
-} from '../redux/actions/actions'
+import { moveCard, checkGameWon } from '../redux/actions/actions'
 import { canPlayInColumn } from '../game/game'
 import Card from './Card'
 import Empty from './Empty'
 import { Types } from '../game/consts'
 
 const mapStateToProps = (state, ownProps) => {
-  const { cards, game } = state
+  const game = state.game
+  const cards = state.cards.present
   return {
     getAllColumnsCards: () => cards[Types.COLUMNS],
     column: cards[Types.COLUMNS][ownProps.id],
@@ -25,9 +22,6 @@ const mapDispatchToProps = (dispatch) => {
     dropCard: (id, card) => {
       dispatch(moveCard(card, { type: Types.COLUMNS, id }))
     },
-    makeLastCardVisible: (id) => {
-      dispatch(revealLastColumnCard(id))
-    },
     checkGameWon: (columns) => {
       dispatch(checkGameWon(columns))
     }
@@ -39,7 +33,6 @@ const Column = ({
   column,
   getAllColumnsCards,
   dropCard,
-  makeLastCardVisible,
   canDropInColumn,
   checkGameWon
 }) => {
@@ -54,13 +47,10 @@ const Column = ({
     }
   })
 
+  const allCards = getAllColumnsCards()
   useEffect(() => {
-    // Make last column card visible
-    if (column.length > 0 && !column[column.length - 1].visible) {
-      makeLastCardVisible(id)
-      checkGameWon(getAllColumnsCards())
-    }
-  })
+    checkGameWon(allCards)
+  }, [checkGameWon, allCards])
 
   const renderCard = (card, position, children) => {
     return (
