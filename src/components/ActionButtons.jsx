@@ -1,24 +1,27 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { ActionCreators } from 'redux-undo'
 import { Segment, Button, Icon } from 'semantic-ui-react'
-
 import { cheatMode } from '../redux/actions/actions'
 
 const mapDispatchToProps = (dispatch) => {
   return {
     cheatMode: (id, card) => {
       dispatch(cheatMode(card))
+    },
+    undo: () => {
+      dispatch(ActionCreators.undo())
     }
   }
 }
 
-const ActionButtons = ({ game, cheatMode }) => {
+const ActionButtons = ({ game, cheatMode, undo }) => {
   return (
     <Segment>
       <Button className="ui red huge circular icon Button">
         <Icon name="home"></Icon>
       </Button>
-      <Button className="ui red huge circular icon Button">
+      <Button className="ui red huge circular icon Button" onClick={undo}>
         <Icon name="reply"></Icon>
       </Button>
       <Button className="ui red huge circular icon Button">

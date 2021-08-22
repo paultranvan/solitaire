@@ -8,6 +8,13 @@ import {
 import { Types } from '../../game/consts'
 import { getColumnChildCards } from '../helpers'
 
+const revealLastColumnCard = (state, columnId) => {
+  const columnCards = state[Types.COLUMNS][columnId]
+  if (columnCards.length > 0) {
+    columnCards[columnCards.length - 1].visible = true
+  }
+}
+
 // XXX - We use immer to update state to ease state mutations
 // When doing a mutation on a nested level, all involved levels must be
 // shallow copied, as it keeps references.
@@ -23,17 +30,23 @@ const moveCard = (state, card, destination) => {
   }
 
   return produce(state, (draft) => {
-    if (
-      card.container.type === Types.COLUMNS ||
-      card.container.type === Types.FOUNDATION
-    ) {
+    if (sourceType === Types.COLUMNS || sourceType === Types.FOUNDATION) {
+      // Remove card from column or foundation
       draft[sourceType][card.container.id].splice(
         draft[sourceType][card.container.id].length - cards.length
       )
     } else {
+      // Remove card from stock
       draft[sourceType].splice(draft[sourceType].length - 1)
     }
+
+    // Add card to destination
     draft[targetType][destination.id].push(...cards)
+
+    // Make last column card visible
+    if (sourceType === Types.COLUMNS) {
+      revealLastColumnCard(draft, card.container.id)
+    }
   })
 }
 
@@ -49,13 +62,6 @@ const refillStock = (state) => {
   return produce(state, (draft) => {
     draft.stock = draft.talon.reverse()
     draft.talon = []
-  })
-}
-
-const revealLastColumnCard = (state, columnId) => {
-  return produce(state, (draft) => {
-    const column = draft.columns[columnId]
-    draft.columns[columnId][column.length - 1].visible = true
   })
 }
 

@@ -8,7 +8,8 @@ import { findAutoMoveTarget } from '../game/game'
 import { moveCard } from '../redux/actions/actions'
 
 const mapStateToProps = (state, ownProps) => {
-  const { cards, game } = state
+  const game = state.game
+  const cards = state.cards.present
   return {
     isLastCard: isLastContainerCard(cards, ownProps),
     findTarget: () => {

@@ -85,7 +85,7 @@ const App = ({ cards, game }) => {
 const mapStateToProps = (state) => {
   //console.log('state : ', state)
   const { cards, game } = state
-  return { cards, game }
+  return { cards: cards.present, game }
 }
 
 export default connect(mapStateToProps)(App)

@@ -1,10 +1,13 @@
 import { combineReducers } from 'redux'
-import cards from './cards'
-import game from './game'
+import undoable from 'redux-undo'
+import cardsReducer from './cards'
+import gameReducer from './game'
 
 const rootReducer = combineReducers({
-  cards,
-  game
+  cards: undoable(cardsReducer, {
+    limit: false
+  }),
+  game: gameReducer
 })
 
 export default rootReducer
