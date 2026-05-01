@@ -4,6 +4,6 @@ import { Board } from '@/ui/Board';
 import './ui/theme.css';
 
 export default function App() {
-  const [state] = useState(() => createInitialState({ drawCount: 1, seed: 'dev-seed-001' }));
-  return <Board state={state} />;
+  const [initial] = useState(() => createInitialState({ drawCount: 1, seed: 'dev-seed-001' }));
+  return <Board initial={initial} />;
 }

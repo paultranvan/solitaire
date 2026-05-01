@@ -7,4 +7,15 @@
 .foundations__slot {
   width: var(--card-w);
   height: var(--card-h);
+  position: relative;
+}
+
+.foundations__slot--over::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: calc(var(--card-radius) + 4px);
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 0;
+  pointer-events: none;
 }

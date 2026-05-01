@@ -6,7 +6,7 @@ export function Tableau({ columns }: { columns: Card[][] }) {
   return (
     <div className="tableau">
       {columns.map((col, i) => (
-        <TableauColumn key={i} cards={col} />
+        <TableauColumn key={i} cards={col} column={i} />
       ))}
     </div>
   );

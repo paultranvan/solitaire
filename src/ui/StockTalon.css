@@ -7,4 +7,12 @@
 .stock-talon__slot {
   width: var(--card-w);
   height: var(--card-h);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.stock-talon__slot.stock {
+  cursor: pointer;
 }

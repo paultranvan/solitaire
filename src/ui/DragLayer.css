@@ -1,0 +1,11 @@
+.drag-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.45));
+}
+
+.drag-stack__slot {
+  position: relative;
+}
