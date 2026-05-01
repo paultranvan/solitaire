@@ -1,6 +1,30 @@
-.card {
+.card-flip {
   width: var(--card-w);
   height: var(--card-h);
+  perspective: 800px;
+  position: relative;
+}
+
+.card-flip__inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.card-flip__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.card-flip__back { transform: rotateY(0deg); }
+.card-flip__front { transform: rotateY(180deg); }
+
+.card {
+  width: 100%;
+  height: 100%;
   border-radius: var(--card-radius);
   position: relative;
   flex-shrink: 0;
