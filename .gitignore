@@ -11,6 +11,11 @@
 /dist
 *.tsbuildinfo
 
+# Capacitor native projects (generated; not yet committed)
+/ios
+/android
+.DS_Store
+
 # misc
 .DS_Store
 .env.local

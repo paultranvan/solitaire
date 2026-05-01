@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createInitialState, GameState } from '@/game/state';
+import { initNativeLifecycle } from '@/native/lifecycle';
 import { loadSavedGame } from '@/persistence/gameAutosave';
 import { hydrateSettingsFromStorage, useSettingsStore } from '@/store/settingsStore';
 import { hydrateStatsFromStorage } from '@/store/statsStore';
@@ -14,7 +15,11 @@ export default function App() {
     let cancelled = false;
     (async () => {
       // Hydrate settings + stats first (needed for default drawCount).
-      await Promise.all([hydrateSettingsFromStorage(), hydrateStatsFromStorage()]);
+      await Promise.all([
+        hydrateSettingsFromStorage(),
+        hydrateStatsFromStorage(),
+        initNativeLifecycle(),
+      ]);
       const saved = await loadSavedGame();
       if (cancelled) return;
       if (saved) {
