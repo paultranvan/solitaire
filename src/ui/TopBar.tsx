@@ -13,9 +13,10 @@ export type TopBarProps = {
   onUndo: () => void;
   onHint: () => void;
   onNewGame: () => void;
+  onMenu: () => void;
 };
 
-export function TopBar({ elapsedSec, moves, canUndo, onUndo, onHint, onNewGame }: TopBarProps) {
+export function TopBar({ elapsedSec, moves, canUndo, onUndo, onHint, onNewGame, onMenu }: TopBarProps) {
   return (
     <header className="topbar">
       <div className="topbar__group topbar__group--left">
@@ -54,6 +55,15 @@ export function TopBar({ elapsedSec, moves, canUndo, onUndo, onHint, onNewGame }
           onClick={onHint}
         >
           💡
+        </button>
+        <button
+          type="button"
+          className="topbar__btn"
+          title="menu"
+          aria-label="menu"
+          onClick={onMenu}
+        >
+          ☰
         </button>
       </div>
     </header>

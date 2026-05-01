@@ -1,0 +1,83 @@
+.win {
+  text-align: center;
+  padding: 12px 0 8px;
+}
+
+.win__hero {
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.win__title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.win__subtitle {
+  margin: 0 0 24px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.win__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.win__stat {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 14px;
+  border-radius: 10px;
+}
+
+.win__stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.win__stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
+}
+
+.win__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn--primary {
+  background: #4ade80;
+  color: #052e10;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 12px 18px;
+}
+
+.btn--primary:hover {
+  background: #3acb6d;
+}
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 70;
+  overflow: hidden;
+}
+
+.confetti__piece {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 14px;
+  border-radius: 1px;
+}

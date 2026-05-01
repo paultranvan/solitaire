@@ -30,8 +30,12 @@ import { HintState, moveToHint } from './hints';
 import { DragLayer } from './DragLayer';
 import { Foundations } from './Foundations';
 import { StockTalon } from './StockTalon';
+import { MenuSheet } from './MenuSheet';
 import { Tableau } from './Tableau';
 import { TopBar } from './TopBar';
+import { WinSheet } from './WinSheet';
+import { play, primeAudioOnFirstGesture } from '@/audio/sounds';
+import { haptic } from '@/haptics/haptics';
 import './Board.css';
 
 const HINT_DURATION_MS = 1600;
@@ -50,25 +54,41 @@ export function Board({ initial }: { initial: GameState }) {
   const [state, dispatch] = useReducer(gameReducer, initial);
   const [activeCards, setActiveCards] = useState<Card[] | null>(null);
   const [hint, setHint] = useState<HintState>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [winOpen, setWinOpen] = useState(false);
   const [, setTick] = useState(0);
   const wonReportedRef = useRef(false);
+  const winDurationRef = useRef(0);
+  const winMovesRef = useRef(0);
+
+  useEffect(() => {
+    primeAudioOnFirstGesture();
+  }, []);
 
   const recordGame = useStatsStore((s) => s.recordGame);
   const settingsDrawCount = useSettingsStore((s) => s.settings.drawCount);
 
   useGameAutosave(state);
 
-  // Record win exactly once per game.
+  // Record win exactly once per game and trigger celebration.
   useEffect(() => {
     if (!isWon(state)) return;
     if (wonReportedRef.current) return;
     wonReportedRef.current = true;
+    const durationSec = Math.max(0, Math.floor((Date.now() - state.startedAt) / 1000));
+    winDurationRef.current = durationSec;
+    winMovesRef.current = state.movesMade;
     recordGame({
       mode: state.drawCount,
       outcome: 'won',
-      durationSec: Math.max(0, Math.floor((Date.now() - state.startedAt) / 1000)),
+      durationSec,
       moves: state.movesMade,
     });
+    play('winCascade');
+    haptic('win');
+    // Slight delay so the last foundation animation finishes before the sheet covers it.
+    const id = setTimeout(() => setWinOpen(true), 600);
+    return () => clearTimeout(id);
   }, [state, recordGame]);
 
   useEffect(() => {
@@ -103,23 +123,41 @@ export function Board({ initial }: { initial: GameState }) {
   const handleStockClick = () => {
     const move: Move = state.stock.length > 0 ? { kind: 'draw' } : { kind: 'recycle' };
     dispatch({ type: 'move', move });
+    play('flip');
+    haptic('pickup');
   };
 
   const handleDragStart = (e: DragStartEvent) => {
     const data = e.active.data.current as DragData | undefined;
     setActiveCards(data?.cards ?? null);
     setHint(null);
+    play('pickup');
+    haptic('pickup');
   };
 
   const handleDragEnd = (e: DragEndEvent) => {
     setActiveCards(null);
-    if (!e.over) return;
+    if (!e.over) {
+      play('dropInvalid');
+      haptic('dropInvalid');
+      return;
+    }
     const data = e.active.data.current as DragData | undefined;
     if (!data) return;
     const move = resolveMove(data, String(e.over.id));
-    if (move === null) return;
-    if (!canApply(state, move)) return;
+    if (move === null || !canApply(state, move)) {
+      play('dropInvalid');
+      haptic('dropInvalid');
+      return;
+    }
     dispatch({ type: 'move', move });
+    if (move.kind === 'tableauToFoundation' || move.kind === 'talonToFoundation') {
+      play('foundation');
+      haptic('foundation');
+    } else {
+      play('dropValid');
+      haptic('dropValid');
+    }
   };
 
   const handleAutoMove = useCallback(
@@ -128,6 +166,13 @@ export function Board({ initial }: { initial: GameState }) {
       if (move === null) return;
       if (!canApply(state, move)) return;
       dispatch({ type: 'move', move });
+      if (move.kind === 'tableauToFoundation' || move.kind === 'talonToFoundation') {
+        play('foundation');
+        haptic('foundation');
+      } else {
+        play('dropValid');
+        haptic('dropValid');
+      }
     },
     [state],
   );
@@ -187,6 +232,7 @@ export function Board({ initial }: { initial: GameState }) {
           onUndo={handleUndo}
           onHint={handleHint}
           onNewGame={handleNewGame}
+          onMenu={() => setMenuOpen(true)}
         />
         <div className="board__top">
           <StockTalon
@@ -200,6 +246,18 @@ export function Board({ initial }: { initial: GameState }) {
         </div>
         <Tableau columns={state.tableau} hint={hint} onAutoMove={handleAutoMove} />
         <DragLayer cards={activeCards} />
+        <MenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
+        <WinSheet
+          open={winOpen}
+          onClose={() => setWinOpen(false)}
+          onPlayAgain={() => {
+            setWinOpen(false);
+            handleNewGame();
+          }}
+          durationSec={winDurationRef.current}
+          moves={winMovesRef.current}
+          drawCount={state.drawCount}
+        />
       </div>
     </DndContext>
   );
