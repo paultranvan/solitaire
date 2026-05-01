@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -23,6 +23,9 @@ import { dealKlondike } from '@/game/deck';
 import { DragData } from '@/dnd/types';
 import { resolveMove } from '@/dnd/resolveMove';
 import { gameReducer } from '@/store/gameReducer';
+import { useGameAutosave } from '@/persistence/gameAutosave';
+import { useStatsStore } from '@/store/statsStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { HintState, moveToHint } from './hints';
 import { DragLayer } from './DragLayer';
 import { Foundations } from './Foundations';
@@ -48,6 +51,25 @@ export function Board({ initial }: { initial: GameState }) {
   const [activeCards, setActiveCards] = useState<Card[] | null>(null);
   const [hint, setHint] = useState<HintState>(null);
   const [, setTick] = useState(0);
+  const wonReportedRef = useRef(false);
+
+  const recordGame = useStatsStore((s) => s.recordGame);
+  const settingsDrawCount = useSettingsStore((s) => s.settings.drawCount);
+
+  useGameAutosave(state);
+
+  // Record win exactly once per game.
+  useEffect(() => {
+    if (!isWon(state)) return;
+    if (wonReportedRef.current) return;
+    wonReportedRef.current = true;
+    recordGame({
+      mode: state.drawCount,
+      outcome: 'won',
+      durationSec: Math.max(0, Math.floor((Date.now() - state.startedAt) / 1000)),
+      moves: state.movesMade,
+    });
+  }, [state, recordGame]);
 
   useEffect(() => {
     if (isWon(state)) return;
@@ -119,6 +141,16 @@ export function Board({ initial }: { initial: GameState }) {
   };
 
   const handleNewGame = () => {
+    // Count abandoned game if there were moves but it wasn't won.
+    if (state.movesMade > 0 && !isWon(state) && !wonReportedRef.current) {
+      recordGame({
+        mode: state.drawCount,
+        outcome: 'abandoned',
+        durationSec: Math.max(0, Math.floor((Date.now() - state.startedAt) / 1000)),
+        moves: state.movesMade,
+      });
+    }
+    wonReportedRef.current = false;
     const seed = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const { tableau, stock } = dealKlondike(seed);
     dispatch({
@@ -129,7 +161,7 @@ export function Board({ initial }: { initial: GameState }) {
         stock,
         talon: [],
         foundations: [[], [], [], []],
-        drawCount: state.drawCount,
+        drawCount: settingsDrawCount,
         startedAt: Date.now(),
         movesMade: 0,
         redealCount: 0,
