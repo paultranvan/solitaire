@@ -31,8 +31,6 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-    // settings is intentionally not in deps; we only initialise once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!initial) {

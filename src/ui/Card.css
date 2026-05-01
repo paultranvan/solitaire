@@ -58,18 +58,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: calc(var(--card-w) * 0.28);
+  line-height: 0.95;
+  font-size: calc(var(--card-w) * 0.26);
 }
 
-.card__corner--tl { top: calc(var(--card-w) * 0.06); left: calc(var(--card-w) * 0.08); }
+.card__corner--tl { top: calc(var(--card-w) * 0.08); left: calc(var(--card-w) * 0.1); }
 .card__corner--br {
-  bottom: calc(var(--card-w) * 0.06);
-  right: calc(var(--card-w) * 0.08);
+  bottom: calc(var(--card-w) * 0.08);
+  right: calc(var(--card-w) * 0.1);
   transform: rotate(180deg);
 }
 
 .card__rank { letter-spacing: -0.02em; }
-.card__suit-small { font-size: calc(var(--card-w) * 0.24); margin-top: 1px; }
+.card__suit-small { font-size: calc(var(--card-w) * 0.22); margin-top: 2px; }
 
 .card__center {
   position: absolute;
@@ -77,9 +78,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(var(--card-w) * 0.6);
+  font-size: calc(var(--card-w) * 0.46);
   pointer-events: none;
-  opacity: 0.92;
+  opacity: 0.18;
 }
 
 /* Empty pile slot */
@@ -93,6 +94,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.25);
-  font-size: calc(var(--card-w) * 0.4);
+  color: rgba(255, 255, 255, 0.22);
+  font-size: calc(var(--card-w) * 0.38);
 }
