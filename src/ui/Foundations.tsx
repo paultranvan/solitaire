@@ -2,18 +2,22 @@ import { useDroppable } from '@dnd-kit/core';
 import { Card } from '@/game/card';
 import { foundationDropId } from '@/dnd/types';
 import { DraggableCard } from './DraggableCard';
+import { HintState, isHintSource, isHintTarget } from './hints';
 import './Foundations.css';
 
 const SUIT_GLYPH: Record<number, string> = { 0: '♥', 1: '♦', 2: '♠', 3: '♣' };
 
-function FoundationSlot({ pile, idx }: { pile: Card[]; idx: number }) {
+function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: HintState }) {
   const { setNodeRef, isOver } = useDroppable({ id: foundationDropId(idx) });
   const top = pile[pile.length - 1];
+  const hinted =
+    isHintSource(hint, { kind: 'foundation', idx }) ||
+    isHintTarget(hint, { kind: 'foundation', idx });
 
   return (
     <div
       ref={setNodeRef}
-      className={`foundations__slot${isOver ? ' foundations__slot--over' : ''}`}
+      className={`foundations__slot${isOver ? ' foundations__slot--over' : ''}${hinted ? ' is-hinted' : ''}`}
     >
       {top ? (
         <DraggableCard
@@ -33,11 +37,11 @@ function FoundationSlot({ pile, idx }: { pile: Card[]; idx: number }) {
   );
 }
 
-export function Foundations({ piles }: { piles: Card[][] }) {
+export function Foundations({ piles, hint }: { piles: Card[][]; hint: HintState }) {
   return (
     <div className="foundations">
       {piles.map((pile, i) => (
-        <FoundationSlot key={i} pile={pile} idx={i} />
+        <FoundationSlot key={i} pile={pile} idx={i} hint={hint} />
       ))}
     </div>
   );

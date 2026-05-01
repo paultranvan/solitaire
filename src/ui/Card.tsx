@@ -30,8 +30,14 @@ export function CardView({ card, ghost = false }: CardProps) {
         animate={{ rotateY: card.faceUp ? 180 : 0 }}
         transition={SPRING_FLIP}
       >
-        <div className="card-flip__face card-flip__back card card--back" />
-        <div className={`card-flip__face card-flip__front card card--face card--${c}`}>
+        <div
+          className="card-flip__face card-flip__back card card--back"
+          aria-hidden={card.faceUp}
+        />
+        <div
+          className={`card-flip__face card-flip__front card card--face card--${c}`}
+          aria-hidden={!card.faceUp}
+        >
           <div className="card__corner card__corner--tl">
             <span className="card__rank">{label}</span>
             <span className="card__suit-small">{glyph}</span>

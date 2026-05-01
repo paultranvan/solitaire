@@ -3,15 +3,28 @@ import { Card } from '@/game/card';
 import { tableauColumnDropId } from '@/dnd/types';
 import { CardView } from './Card';
 import { DraggableCard } from './DraggableCard';
+import { HintState, isHintSource, isHintTarget } from './hints';
 import './TableauColumn.css';
 
-export function TableauColumn({ cards, column }: { cards: Card[]; column: number }) {
+export function TableauColumn({
+  cards,
+  column,
+  hint,
+  onAutoMove,
+}: {
+  cards: Card[];
+  column: number;
+  hint: HintState;
+  onAutoMove: () => void;
+}) {
   const { setNodeRef, isOver } = useDroppable({ id: tableauColumnDropId(column) });
+  const columnHinted = isHintTarget(hint, { kind: 'tableauColumn', column });
 
   return (
     <div
       ref={setNodeRef}
-      className={`tableau-col${isOver ? ' tableau-col--over' : ''}`}
+      className={`tableau-col${isOver ? ' tableau-col--over' : ''}${columnHinted ? ' is-hinted' : ''}`}
+      onDoubleClick={onAutoMove}
     >
       {cards.length === 0 ? (
         <div className="pile-empty" />
@@ -24,10 +37,15 @@ export function TableauColumn({ cards, column }: { cards: Card[]; column: number
             : prev.faceUp
               ? `calc(var(--fan-faceup) - var(--card-h))`
               : `calc(var(--fan-facedown) - var(--card-h))`;
+
+          const isStackHinted =
+            isHintSource(hint, { kind: 'tableauStack', column, cardIndex: i }) ||
+            (i === cards.length - 1 && isHintSource(hint, { kind: 'tableauTop', column }));
+
           return (
             <div
               key={card.id}
-              className="tableau-col__slot"
+              className={`tableau-col__slot${isStackHinted ? ' is-hinted' : ''}`}
               style={{ marginTop: offset }}
             >
               {card.faceUp ? (

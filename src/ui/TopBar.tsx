@@ -6,13 +6,16 @@ const fmt = (s: number) => {
   return `${m.toString().padStart(2, '0')}:${r.toString().padStart(2, '0')}`;
 };
 
-export function TopBar({
-  elapsedSec,
-  moves,
-}: {
+export type TopBarProps = {
   elapsedSec: number;
   moves: number;
-}) {
+  canUndo: boolean;
+  onUndo: () => void;
+  onHint: () => void;
+  onNewGame: () => void;
+};
+
+export function TopBar({ elapsedSec, moves, canUndo, onUndo, onHint, onNewGame }: TopBarProps) {
   return (
     <header className="topbar">
       <div className="topbar__group topbar__group--left">
@@ -24,14 +27,33 @@ export function TopBar({
         </span>
       </div>
       <div className="topbar__group topbar__group--right">
-        <button className="topbar__btn" title="undo" aria-label="undo" disabled>
+        <button
+          type="button"
+          className="topbar__btn"
+          title="new game"
+          aria-label="new game"
+          onClick={onNewGame}
+        >
+          +
+        </button>
+        <button
+          type="button"
+          className="topbar__btn"
+          title="undo"
+          aria-label="undo"
+          onClick={onUndo}
+          disabled={!canUndo}
+        >
           ↺
         </button>
-        <button className="topbar__btn" title="hint" aria-label="hint" disabled>
+        <button
+          type="button"
+          className="topbar__btn"
+          title="hint"
+          aria-label="hint"
+          onClick={onHint}
+        >
           💡
-        </button>
-        <button className="topbar__btn" title="menu" aria-label="menu" disabled>
-          ☰
         </button>
       </div>
     </header>
