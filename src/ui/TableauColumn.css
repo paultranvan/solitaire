@@ -1,0 +1,11 @@
+.tableau-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: var(--card-h);
+}
+
+.tableau-col__slot {
+  position: relative;
+  display: block;
+}

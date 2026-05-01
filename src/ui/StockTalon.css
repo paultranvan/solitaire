@@ -1,0 +1,10 @@
+.stock-talon {
+  display: grid;
+  grid-template-columns: var(--card-w) var(--card-w);
+  gap: var(--gap-col);
+}
+
+.stock-talon__slot {
+  width: var(--card-w);
+  height: var(--card-h);
+}

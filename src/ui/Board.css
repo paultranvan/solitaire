@@ -1,0 +1,18 @@
+.board {
+  min-height: 100%;
+  background: radial-gradient(
+      ellipse at top,
+      var(--felt-light) 0%,
+      var(--felt-dark) 70%,
+      var(--felt-edge) 100%
+    );
+  padding-bottom: calc(24px + var(--safe-bottom));
+}
+
+.board__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px calc(12px + var(--safe-right)) 0 calc(12px + var(--safe-left));
+  gap: var(--gap-col);
+}

@@ -1,0 +1,10 @@
+.foundations {
+  display: grid;
+  grid-template-columns: repeat(4, var(--card-w));
+  gap: var(--gap-col);
+}
+
+.foundations__slot {
+  width: var(--card-w);
+  height: var(--card-h);
+}

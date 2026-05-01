@@ -1,3 +1,9 @@
+import { useState } from 'react';
+import { createInitialState } from '@/game/state';
+import { Board } from '@/ui/Board';
+import './ui/theme.css';
+
 export default function App() {
-  return <div style={{ padding: 24, fontFamily: 'system-ui' }}>Solitaire — Phase 1 (engine only)</div>;
+  const [state] = useState(() => createInitialState({ drawCount: 1, seed: 'dev-seed-001' }));
+  return <Board state={state} />;
 }

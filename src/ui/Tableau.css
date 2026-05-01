@@ -1,0 +1,7 @@
+.tableau {
+  display: grid;
+  grid-template-columns: repeat(7, var(--card-w));
+  gap: var(--gap-col);
+  justify-content: center;
+  margin-top: calc(var(--card-h) * 0.3);
+}
