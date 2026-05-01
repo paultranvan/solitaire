@@ -1,0 +1,131 @@
+import { describe, expect, it } from 'vitest';
+import { makeCard, Suit } from '../card';
+import {
+  canPlaceOnFoundation,
+  canPlaceOnTableau,
+  foundationIdxFor,
+  isAutoCompletable,
+  isValidStack,
+  isWon,
+} from '../rules';
+import { GameState } from '../state';
+
+const fu = (s: Suit, r: number) => makeCard(s, r as 1, true);
+
+const blank = (): GameState => ({
+  schemaVersion: 1,
+  tableau: [[], [], [], [], [], [], []],
+  foundations: [[], [], [], []],
+  stock: [],
+  talon: [],
+  drawCount: 1,
+  startedAt: 0,
+  movesMade: 0,
+  redealCount: 0,
+  seed: 't',
+  history: [],
+});
+
+describe('canPlaceOnTableau', () => {
+  it('allows K on an empty column', () => {
+    expect(canPlaceOnTableau(fu('s', 13), undefined)).toBe(true);
+    expect(canPlaceOnTableau(fu('h', 13), undefined)).toBe(true);
+  });
+  it('rejects non-K on an empty column', () => {
+    expect(canPlaceOnTableau(fu('s', 12), undefined)).toBe(false);
+  });
+  it('allows alternating-color, one-rank-lower placement', () => {
+    expect(canPlaceOnTableau(fu('h', 6), fu('s', 7))).toBe(true);
+    expect(canPlaceOnTableau(fu('s', 6), fu('d', 7))).toBe(true);
+  });
+  it('rejects same color', () => {
+    expect(canPlaceOnTableau(fu('h', 6), fu('d', 7))).toBe(false);
+    expect(canPlaceOnTableau(fu('s', 6), fu('c', 7))).toBe(false);
+  });
+  it('rejects wrong rank', () => {
+    expect(canPlaceOnTableau(fu('h', 5), fu('s', 7))).toBe(false);
+    expect(canPlaceOnTableau(fu('h', 7), fu('s', 7))).toBe(false);
+  });
+  it('rejects placing on a face-down card', () => {
+    expect(canPlaceOnTableau(fu('h', 6), makeCard('s', 7, false))).toBe(false);
+  });
+});
+
+describe('canPlaceOnFoundation', () => {
+  it('allows A on empty foundation', () => {
+    expect(canPlaceOnFoundation(fu('h', 1), undefined)).toBe(true);
+  });
+  it('rejects non-A on empty foundation', () => {
+    expect(canPlaceOnFoundation(fu('h', 2), undefined)).toBe(false);
+  });
+  it('allows next ascending same-suit', () => {
+    expect(canPlaceOnFoundation(fu('h', 5), fu('h', 4))).toBe(true);
+    expect(canPlaceOnFoundation(fu('s', 13), fu('s', 12))).toBe(true);
+  });
+  it('rejects different suit', () => {
+    expect(canPlaceOnFoundation(fu('h', 5), fu('d', 4))).toBe(false);
+  });
+  it('rejects wrong rank', () => {
+    expect(canPlaceOnFoundation(fu('h', 6), fu('h', 4))).toBe(false);
+  });
+});
+
+describe('isValidStack', () => {
+  it('accepts a single face-up card', () => {
+    expect(isValidStack([fu('h', 7)])).toBe(true);
+  });
+  it('accepts descending alternating-color sequence', () => {
+    expect(isValidStack([fu('s', 7), fu('h', 6), fu('c', 5)])).toBe(true);
+  });
+  it('rejects same-color adjacent', () => {
+    expect(isValidStack([fu('s', 7), fu('c', 6)])).toBe(false);
+  });
+  it('rejects wrong rank order', () => {
+    expect(isValidStack([fu('s', 7), fu('h', 5)])).toBe(false);
+  });
+  it('rejects any face-down card', () => {
+    expect(isValidStack([fu('s', 7), makeCard('h', 6, false)])).toBe(false);
+  });
+});
+
+describe('foundationIdxFor', () => {
+  it('maps suits to fixed slots h=0 d=1 s=2 c=3', () => {
+    expect(foundationIdxFor('h')).toBe(0);
+    expect(foundationIdxFor('d')).toBe(1);
+    expect(foundationIdxFor('s')).toBe(2);
+    expect(foundationIdxFor('c')).toBe(3);
+  });
+});
+
+describe('isWon / isAutoCompletable', () => {
+  it('isWon true when all 4 foundations are full', () => {
+    const s = blank();
+    s.foundations = [
+      Array.from({ length: 13 }, (_, i) => fu('h', i + 1)),
+      Array.from({ length: 13 }, (_, i) => fu('d', i + 1)),
+      Array.from({ length: 13 }, (_, i) => fu('s', i + 1)),
+      Array.from({ length: 13 }, (_, i) => fu('c', i + 1)),
+    ];
+    expect(isWon(s)).toBe(true);
+  });
+  it('isWon false otherwise', () => {
+    expect(isWon(blank())).toBe(false);
+  });
+  it('isAutoCompletable when stock and talon are empty and no face-down cards remain', () => {
+    const s = blank();
+    s.tableau[0] = [fu('h', 7)];
+    s.tableau[1] = [fu('s', 13), fu('h', 12)];
+    expect(isAutoCompletable(s)).toBe(true);
+  });
+  it('isAutoCompletable false when any tableau card is face-down', () => {
+    const s = blank();
+    s.tableau[0] = [makeCard('h', 7, false)];
+    expect(isAutoCompletable(s)).toBe(false);
+  });
+  it('isAutoCompletable false when stock or talon is non-empty', () => {
+    const s = blank();
+    s.tableau[0] = [fu('h', 7)];
+    s.stock = [makeCard('s', 1, false)];
+    expect(isAutoCompletable(s)).toBe(false);
+  });
+});
