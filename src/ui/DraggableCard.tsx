@@ -29,10 +29,17 @@ export function DraggableCard({
       ref={setNodeRef}
       {...attributes}
       {...listeners}
+      // Suppress browser focus ring + selection blink on mouse-down. dnd-kit
+      // listens to pointer events, so cancelling mousedown's default doesn't
+      // affect drag detection.
+      onMouseDown={(e) => e.preventDefault()}
       style={{
         position: 'relative',
         cursor: 'grab',
         touchAction: 'none',
+        outline: 'none',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
       }}
     >
       {hidden && !suppressGhost && (
