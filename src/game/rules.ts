@@ -43,7 +43,8 @@ export const isValidStack = (cards: readonly Card[]): boolean => {
 
 export const isWon = (s: GameState): boolean => s.foundations.every((p) => p.length === 13);
 
-export const isAutoCompletable = (s: GameState): boolean => {
-  if (s.stock.length > 0 || s.talon.length > 0) return false;
-  return s.tableau.every((col) => col.every((c) => c.faceUp));
-};
+// True once the tableau has no face-down cards left. Stock and talon may
+// still contain cards — the auto-complete loop will draw from stock and
+// dump talon tops to the foundation as part of the resolution.
+export const isAutoCompletable = (s: GameState): boolean =>
+  s.tableau.every((col) => col.every((c) => c.faceUp));

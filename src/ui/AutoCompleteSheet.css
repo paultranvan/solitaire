@@ -1,0 +1,28 @@
+.autocomplete {
+  text-align: center;
+  padding: 12px 0 8px;
+}
+
+.autocomplete__hero {
+  font-size: 48px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.autocomplete__title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.autocomplete__subtitle {
+  margin: 0 0 24px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+}
+
+.autocomplete__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

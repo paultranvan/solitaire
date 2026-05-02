@@ -111,7 +111,7 @@ describe('isWon / isAutoCompletable', () => {
   it('isWon false otherwise', () => {
     expect(isWon(blank())).toBe(false);
   });
-  it('isAutoCompletable when stock and talon are empty and no face-down cards remain', () => {
+  it('isAutoCompletable when no face-down cards remain in the tableau', () => {
     const s = blank();
     s.tableau[0] = [fu('h', 7)];
     s.tableau[1] = [fu('s', 13), fu('h', 12)];
@@ -122,10 +122,11 @@ describe('isWon / isAutoCompletable', () => {
     s.tableau[0] = [makeCard('h', 7, false)];
     expect(isAutoCompletable(s)).toBe(false);
   });
-  it('isAutoCompletable false when stock or talon is non-empty', () => {
+  it('isAutoCompletable still true when stock or talon have cards (tableau is the gate)', () => {
     const s = blank();
     s.tableau[0] = [fu('h', 7)];
     s.stock = [makeCard('s', 1, false)];
-    expect(isAutoCompletable(s)).toBe(false);
+    s.talon = [fu('d', 5)];
+    expect(isAutoCompletable(s)).toBe(true);
   });
 });

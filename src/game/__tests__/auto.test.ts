@@ -118,7 +118,7 @@ describe('findAutoMoveTarget — tableau stack source', () => {
 });
 
 describe('nextAutoCompleteMove', () => {
-  it('returns the next move during auto-complete', () => {
+  it('returns the next tableau-to-foundation move when available', () => {
     const s = blank({
       tableau: [[makeCard('h', 1, true)], [], [], [], [], [], []],
     });
@@ -129,7 +129,26 @@ describe('nextAutoCompleteMove', () => {
     });
   });
 
-  it('returns null when nothing can move to a foundation', () => {
+  it('falls back to talon-to-foundation when no tableau move is available', () => {
+    const s = blank({
+      tableau: [[makeCard('h', 7, true)], [], [], [], [], [], []],
+      talon: [makeCard('s', 1, true)],
+    });
+    expect(nextAutoCompleteMove(s)).toEqual({
+      kind: 'talonToFoundation',
+      foundationIdx: 2,
+    });
+  });
+
+  it('draws from stock when no foundation move is available', () => {
+    const s = blank({
+      tableau: [[makeCard('h', 7, true)], [], [], [], [], [], []],
+      stock: [makeCard('s', 5, false)],
+    });
+    expect(nextAutoCompleteMove(s)).toEqual({ kind: 'draw' });
+  });
+
+  it('returns null when nothing can move and stock is empty', () => {
     const s = blank({
       tableau: [[makeCard('h', 7, true)], [], [], [], [], [], []],
     });

@@ -36,6 +36,7 @@ import { MenuSheet } from './MenuSheet';
 import { Tableau } from './Tableau';
 import { TopBar } from './TopBar';
 import { WinSheet } from './WinSheet';
+import { AutoCompleteSheet } from './AutoCompleteSheet';
 import { play, primeAudioOnFirstGesture } from '@/audio/sounds';
 import { haptic } from '@/haptics/haptics';
 import './Board.css';
@@ -62,6 +63,12 @@ export function Board({ initial }: { initial: GameState }) {
   // the layoutId fly-from-source animation that looks wrong because the card
   // was visually at the cursor rather than in its source slot.
   const [skipLayoutAnim, setSkipLayoutAnim] = useState(false);
+  // Auto-complete state machine: 'idle' until the tableau has no face-down
+  // cards, 'prompt' shows the confirmation sheet, 'running' steps the loop,
+  // 'declined' suppresses the prompt for the rest of this game.
+  const [autoCompleteState, setAutoCompleteState] = useState<
+    'idle' | 'prompt' | 'running' | 'declined'
+  >('idle');
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -108,14 +115,24 @@ export function Board({ initial }: { initial: GameState }) {
     return () => clearInterval(id);
   }, [state]);
 
+  // Open the auto-complete prompt the first time the tableau has no
+  // face-downs left in this game. Stays declined until a new game.
   useEffect(() => {
+    if (autoCompleteState !== 'idle') return;
     if (isWon(state)) return;
     if (!isAutoCompletable(state)) return;
+    setAutoCompleteState('prompt');
+  }, [state, autoCompleteState]);
+
+  // Step the auto-complete loop while the player has accepted.
+  useEffect(() => {
+    if (autoCompleteState !== 'running') return;
+    if (isWon(state)) return;
     const move = nextAutoCompleteMove(state);
     if (move === null) return;
     const id = setTimeout(() => dispatch({ type: 'move', move }), AUTOCOMPLETE_STEP_MS);
     return () => clearTimeout(id);
-  }, [state]);
+  }, [state, autoCompleteState]);
 
   useEffect(() => {
     if (hint === null) return;
@@ -214,6 +231,7 @@ export function Board({ initial }: { initial: GameState }) {
       });
     }
     wonReportedRef.current = false;
+    setAutoCompleteState('idle');
     const seed = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const { tableau, stock } = dealKlondike(seed);
     dispatch({
@@ -272,6 +290,11 @@ export function Board({ initial }: { initial: GameState }) {
           </SkipLayoutAnimProvider>
         </LayoutGroup>
         <DragLayer cards={activeCards} />
+        <AutoCompleteSheet
+          open={autoCompleteState === 'prompt'}
+          onAccept={() => setAutoCompleteState('running')}
+          onDecline={() => setAutoCompleteState('declined')}
+        />
         <MenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
         <WinSheet
           open={winOpen}

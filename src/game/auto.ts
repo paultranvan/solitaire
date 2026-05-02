@@ -65,6 +65,9 @@ export const findAutoMoveTarget = (state: GameState, source: AutoMoveSource): Mo
   };
 };
 
+// Step the auto-complete loop: prefer foundation moves (tableau or talon),
+// otherwise draw from the stock so a future iteration may unblock a move.
+// Returns null when nothing more can be done automatically.
 export const nextAutoCompleteMove = (state: GameState): Move | null => {
   for (let from = 0; from < 7; from++) {
     const col = state.tableau[from];
@@ -74,5 +77,11 @@ export const nextAutoCompleteMove = (state: GameState): Move | null => {
     const idx = tryFoundationFor(top, state.foundations);
     if (idx !== null) return { kind: 'tableauToFoundation', from, foundationIdx: idx };
   }
+  if (state.talon.length > 0) {
+    const top = state.talon[state.talon.length - 1];
+    const idx = tryFoundationFor(top, state.foundations);
+    if (idx !== null) return { kind: 'talonToFoundation', foundationIdx: idx };
+  }
+  if (state.stock.length > 0) return { kind: 'draw' };
   return null;
 };
