@@ -5,7 +5,6 @@ import {
   DragStartEvent,
   PointerSensor,
   TouchSensor,
-  KeyboardSensor,
   useSensor,
   useSensors,
   pointerWithin,
@@ -116,7 +115,6 @@ export function Board({ initial }: { initial: GameState }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 6 } }),
-    useSensor(KeyboardSensor),
   );
 
   const elapsedSec = Math.max(0, Math.floor((Date.now() - state.startedAt) / 1000));
