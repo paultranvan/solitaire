@@ -56,7 +56,7 @@ export function TableauColumn({
               key={card.id}
               className={`tableau-col__slot${isStackHinted ? ' is-hinted' : ''}`}
               style={{ marginTop: offset }}
-              onDoubleClick={card.faceUp ? () => onAutoMove(i) : undefined}
+              onClick={card.faceUp ? () => onAutoMove(i) : undefined}
             >
               {card.faceUp ? (
                 <DraggableCard

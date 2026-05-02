@@ -85,6 +85,7 @@ export function Board({ initial }: { initial: GameState }) {
 
   const recordGame = useStatsStore((s) => s.recordGame);
   const settingsDrawCount = useSettingsStore((s) => s.settings.drawCount);
+  const autoMoveOnTap = useSettingsStore((s) => s.settings.autoMoveOnTap);
 
   useGameAutosave(state);
 
@@ -142,7 +143,10 @@ export function Board({ initial }: { initial: GameState }) {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 6 } }),
+    // 200 ms delay so a quick finger-tap fires onClick (single-tap auto-move)
+    // before dnd-kit grabs the touch as a drag. Below ~150 ms the click was
+    // intermittently swallowed on real devices.
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
   );
 
   const elapsedSec = Math.max(0, Math.floor((Date.now() - state.startedAt) / 1000));
@@ -190,6 +194,7 @@ export function Board({ initial }: { initial: GameState }) {
 
   const handleAutoMove = useCallback(
     (source: AutoMoveSource) => {
+      if (!autoMoveOnTap) return;
       const move = findAutoMoveTarget(state, source);
       if (move === null) return;
       if (!canApply(state, move)) return;
@@ -209,7 +214,7 @@ export function Board({ initial }: { initial: GameState }) {
         haptic('dropValid');
       }
     },
-    [state],
+    [state, autoMoveOnTap],
   );
 
   const handleUndo = () => dispatch({ type: 'undo' });

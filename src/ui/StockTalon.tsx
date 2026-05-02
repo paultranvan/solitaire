@@ -38,7 +38,7 @@ export function StockTalon({
       </button>
       <div
         className={`stock-talon__slot talon${talonHinted ? ' is-hinted' : ''}`}
-        onDoubleClick={onTalonAutoMove}
+        onClick={onTalonAutoMove}
       >
         {talonBehind && (
           <div className="card-behind" aria-hidden="true">

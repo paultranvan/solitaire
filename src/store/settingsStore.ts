@@ -8,7 +8,7 @@ export type Settings = {
   sound: boolean;
   haptics: boolean;
   animations: boolean;
-  autoMoveOnDoubleTap: boolean;
+  autoMoveOnTap: boolean;
   handedness: 'right' | 'left';
 };
 
@@ -18,7 +18,7 @@ export const defaultSettings = (): Settings => ({
   sound: true,
   haptics: true,
   animations: true,
-  autoMoveOnDoubleTap: true,
+  autoMoveOnTap: true,
   handedness: 'right',
 });
 
@@ -35,7 +35,11 @@ export const useSettingsStore = create<SettingsStore>()(
     settings: defaultSettings(),
     hydrate: (s) =>
       set((state) => {
-        state.settings = s;
+        // Spread defaults under loaded values so renamed/added fields fall back
+        // to their defaults instead of becoming undefined. Lets us evolve the
+        // shape (e.g. autoMoveOnDoubleTap → autoMoveOnTap) without bumping
+        // schemaVersion for every rename.
+        state.settings = { ...defaultSettings(), ...s };
       }),
     update: (patch) =>
       set((state) => {

@@ -242,9 +242,9 @@ function SettingsSection() {
         onChange={(v) => set({ animations: v })}
       />
       <Toggle
-        label="Auto-move on double-tap"
-        value={settings.autoMoveOnDoubleTap}
-        onChange={(v) => set({ autoMoveOnDoubleTap: v })}
+        label="Auto-move on tap"
+        value={settings.autoMoveOnTap}
+        onChange={(v) => set({ autoMoveOnTap: v })}
       />
     </section>
   );
