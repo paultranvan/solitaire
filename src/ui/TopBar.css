@@ -3,49 +3,120 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 calc(12px + var(--safe-right)) 0 calc(12px + var(--safe-left));
+  padding: 0 calc(16px + var(--safe-right)) 0 calc(16px + var(--safe-left));
   padding-top: var(--safe-top);
   background: var(--topbar-bg);
   color: var(--topbar-fg);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
+@media (min-width: 720px) {
+  .topbar {
+    padding: 0 calc(28px + var(--safe-right)) 0 calc(28px + var(--safe-left));
+    padding-top: var(--safe-top);
+  }
+}
+
 .topbar__group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
+@media (min-width: 720px) {
+  .topbar__group {
+    gap: 14px;
+  }
+}
+
+/* Status chips — timer / move count.
+   Serif numerals on a subtle pill, like inscribed tokens. */
 .topbar__chip {
-  font-variant-numeric: tabular-nums;
-  font-size: 14px;
-  letter-spacing: 0.02em;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 6px 10px;
+  font-family: var(--font-display);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'lnum', 'tnum';
+  font-size: clamp(14px, 1.3vw, 17px);
+  letter-spacing: 0.01em;
+  background: rgba(243, 236, 217, 0.06);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 7px 14px;
   border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
+@media (min-width: 720px) {
+  .topbar__chip {
+    padding: 9px 18px;
+  }
+}
+
+/* Round buttons. Scale up on wider viewports so they don't feel lost. */
 .topbar__btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: none;
-  color: var(--topbar-fg);
-  width: 36px;
-  height: 36px;
+  background: rgba(243, 236, 217, 0.06);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  width: clamp(40px, 4vw, 48px);
+  height: clamp(40px, 4vw, 48px);
   border-radius: 999px;
-  font-size: 16px;
   cursor: pointer;
-  transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    transform 0.18s;
 }
 
 .topbar__btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(243, 236, 217, 0.12);
+  border-color: var(--rule-strong);
+}
+
+.topbar__btn:active:not(:disabled) {
+  transform: scale(0.94);
 }
 
 .topbar__btn:disabled {
-  opacity: 0.45;
+  opacity: 0.35;
   cursor: not-allowed;
+}
+
+.topbar__btn--hint:hover:not(:disabled) {
+  background: var(--gold-soft);
+  border-color: rgba(216, 182, 111, 0.4);
+  color: var(--gold);
+}
+
+/* Glyphs — sized to the button. Use the display serif so the marks
+   feel hand-drawn rather than UI-generic. */
+.topbar__glyph {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 1.8vw, 22px);
+  line-height: 1;
+  display: inline-block;
+}
+
+.topbar__glyph--plus {
+  /* Heavier stroke for a clean + */
+  font-weight: 300;
+  font-size: clamp(22px, 2.2vw, 28px);
+  margin-top: -2px;
+}
+
+.topbar__glyph--hint {
+  /* Italic question mark — feels like a quill mark in the ledger */
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(18px, 1.9vw, 22px);
+  color: var(--gold);
 }

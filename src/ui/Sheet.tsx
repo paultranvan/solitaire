@@ -33,29 +33,31 @@ export function Sheet({
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
-          <motion.div
-            className="sheet"
-            role="dialog"
-            aria-label={title}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', stiffness: 360, damping: 36 }}
-          >
-            <div className="sheet__handle" />
-            <header className="sheet__header">
-              <h2 className="sheet__title">{title}</h2>
-              <button
-                type="button"
-                className="sheet__close"
-                onClick={onClose}
-                aria-label="close"
-              >
-                ✕
-              </button>
-            </header>
-            <div className="sheet__body">{children}</div>
-          </motion.div>
+          <div className="sheet-stage" aria-hidden={false}>
+            <motion.div
+              className="sheet"
+              role="dialog"
+              aria-label={title}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 18 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 38 }}
+            >
+              <div className="sheet__handle" />
+              <header className="sheet__header">
+                <h2 className="sheet__title">{title}</h2>
+                <button
+                  type="button"
+                  className="sheet__close"
+                  onClick={onClose}
+                  aria-label="close"
+                >
+                  ✕
+                </button>
+              </header>
+              <div className="sheet__body">{children}</div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

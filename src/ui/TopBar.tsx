@@ -41,7 +41,7 @@ export function TopBar({ elapsedSec, moves, canUndo, onUndo, onHint, onNewGame, 
           onMouseDown={swallowFocus}
           onClick={onNewGame}
         >
-          +
+          <span className="topbar__glyph topbar__glyph--plus">+</span>
         </button>
         <button
           type="button"
@@ -52,17 +52,17 @@ export function TopBar({ elapsedSec, moves, canUndo, onUndo, onHint, onNewGame, 
           onClick={onUndo}
           disabled={!canUndo}
         >
-          ↺
+          <span className="topbar__glyph">↺</span>
         </button>
         <button
           type="button"
-          className="topbar__btn"
+          className="topbar__btn topbar__btn--hint"
           title="hint"
           aria-label="hint"
           onMouseDown={swallowFocus}
           onClick={onHint}
         >
-          💡
+          <span className="topbar__glyph topbar__glyph--hint">?</span>
         </button>
         <button
           type="button"
@@ -72,7 +72,7 @@ export function TopBar({ elapsedSec, moves, canUndo, onUndo, onHint, onNewGame, 
           onMouseDown={swallowFocus}
           onClick={onMenu}
         >
-          ☰
+          <span className="topbar__glyph">☰</span>
         </button>
       </div>
     </header>

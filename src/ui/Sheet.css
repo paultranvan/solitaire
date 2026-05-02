@@ -1,67 +1,155 @@
 .sheet-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(2, 8, 4, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 50;
 }
 
-.sheet {
+/* Stage centers the sheet at the bottom on mobile, middle on desktop.
+   Pointer-events pass through empty areas so backdrop clicks still close. */
+.sheet-stage {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   z-index: 51;
-  background: #1a1a1a;
-  color: rgba(255, 255, 255, 0.95);
-  border-radius: 18px 18px 0 0;
-  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.45);
-  max-height: 85vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+@media (min-width: 720px) {
+  .sheet-stage {
+    align-items: center;
+    padding: max(var(--safe-top), 24px) 16px max(var(--safe-bottom), 24px);
+  }
+}
+
+.sheet {
+  pointer-events: auto;
+  background: var(--menu-surface);
+  color: var(--ink);
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--safe-bottom);
+  width: 100%;
+
+  /* Mobile bottom sheet */
+  border-radius: 22px 22px 0 0;
+  max-height: 88vh;
+  box-shadow:
+    0 -10px 40px rgba(0, 0, 0, 0.55),
+    0 -1px 0 rgba(243, 236, 217, 0.05) inset;
+}
+
+@media (min-width: 720px) {
+  .sheet {
+    width: min(680px, 92vw);
+    max-height: 86vh;
+    border-radius: 14px;
+    border: 1px solid var(--rule-strong);
+    box-shadow:
+      0 30px 100px rgba(0, 0, 0, 0.65),
+      0 0 0 1px rgba(243, 236, 217, 0.04),
+      0 1px 0 rgba(243, 236, 217, 0.06) inset;
+  }
 }
 
 .sheet__handle {
   width: 40px;
   height: 4px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.25);
-  margin: 8px auto 4px;
+  background: rgba(243, 236, 217, 0.22);
+  margin: 8px auto 0;
   flex-shrink: 0;
+}
+
+@media (min-width: 720px) {
+  .sheet__handle {
+    display: none;
+  }
 }
 
 .sheet__header {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  padding: 8px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 16px;
+  padding: 20px 24px 16px;
   flex-shrink: 0;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+
+@media (min-width: 720px) {
+  .sheet__header {
+    padding: 28px 32px 20px;
+  }
+  /* Double-rule under the header — engraved feel */
+  .sheet__header::after {
+    content: '';
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    bottom: -3px;
+    height: 1px;
+    background: var(--rule);
+  }
 }
 
 .sheet__title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(22px, 3vw, 30px);
   letter-spacing: 0.01em;
+  color: var(--ink);
+  font-feature-settings: 'lnum';
 }
 
 .sheet__close {
   background: none;
-  border: none;
-  color: inherit;
-  font-size: 18px;
+  border: 1px solid transparent;
+  color: var(--ink-quiet);
+  font-size: 16px;
+  line-height: 1;
   cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: background 0.15s;
+  padding: 8px 12px;
+  border-radius: 999px;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+  font-family: var(--font-sans);
+  min-width: 36px;
+  min-height: 36px;
 }
 
 .sheet__close:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(243, 236, 217, 0.08);
+  color: var(--ink);
+  border-color: var(--rule);
 }
 
 .sheet__body {
   overflow-y: auto;
-  padding: 16px 18px 24px;
+  padding: 22px 24px 28px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(243, 236, 217, 0.18) transparent;
+}
+
+@media (min-width: 720px) {
+  .sheet__body {
+    padding: 28px 32px 32px;
+  }
+}
+
+.sheet__body::-webkit-scrollbar {
+  width: 8px;
+}
+.sheet__body::-webkit-scrollbar-thumb {
+  background: rgba(243, 236, 217, 0.14);
+  border-radius: 999px;
 }

@@ -28,9 +28,27 @@
   --gap-col: calc(var(--card-w) * 0.18);
 
   /* Top bar */
-  --topbar-h: 52px;
+  --topbar-h: clamp(52px, 4.5vh, 64px);
   --topbar-bg: rgba(0, 0, 0, 0.25);
   --topbar-fg: rgba(255, 255, 255, 0.95);
+
+  /* Menu surface — parchment & aged gold on dark felt */
+  --ink: #f3ecd9;
+  --ink-soft: rgba(243, 236, 217, 0.78);
+  --ink-quiet: rgba(243, 236, 217, 0.52);
+  --ink-faint: rgba(243, 236, 217, 0.28);
+  --gold: #d8b66f;
+  --gold-soft: rgba(216, 182, 111, 0.18);
+  --rule: rgba(243, 236, 217, 0.08);
+  --rule-strong: rgba(243, 236, 217, 0.16);
+  --menu-surface: linear-gradient(180deg, #1d2521 0%, #11181c 100%);
+
+  /* Type — system serifs that look like ledger ink */
+  --font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --font-display: 'Cochin', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', Roboto,
+    sans-serif;
 
   /* Safe-area insets fall back to 0 */
   --safe-top: env(safe-area-inset-top, 0px);

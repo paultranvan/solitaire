@@ -8,7 +8,7 @@ const fmtTime = (sec: number | null): string => {
   if (sec === null) return '—';
   const m = Math.floor(sec / 60);
   const s = sec % 60;
-  return `${m}m ${s.toString().padStart(2, '0')}s`;
+  return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
 const fmtDuration = (sec: number): string => {
@@ -22,6 +22,56 @@ const fmtDuration = (sec: number): string => {
 const winPct = (won: number, played: number): string =>
   played === 0 ? '—' : `${Math.round((won / played) * 100)}%`;
 
+function StatHero({ value, label }: { value: string | number; label: string }) {
+  return (
+    <div className="stat-hero">
+      <div className="stat-hero__value">{value}</div>
+      <div className="stat-hero__label">{label}</div>
+    </div>
+  );
+}
+
+function ModeBlock({
+  mode,
+  played,
+  won,
+  bestTimeSec,
+  fewestMovesWin,
+}: {
+  mode: '1' | '3';
+  played: number;
+  won: number;
+  bestTimeSec: number | null;
+  fewestMovesWin: number | null;
+}) {
+  return (
+    <div className="mode-block">
+      <div className="mode-block__head">
+        <span className="mode-block__name">Draw {mode}</span>
+        <span className="mode-block__rate">{winPct(won, played)}</span>
+      </div>
+      <dl className="mode-block__list">
+        <div className="mode-block__item">
+          <dt>Played</dt>
+          <dd>{played}</dd>
+        </div>
+        <div className="mode-block__item">
+          <dt>Won</dt>
+          <dd>{won}</dd>
+        </div>
+        <div className="mode-block__item">
+          <dt>Best time</dt>
+          <dd>{fmtTime(bestTimeSec)}</dd>
+        </div>
+        <div className="mode-block__item">
+          <dt>Min moves</dt>
+          <dd>{fewestMovesWin ?? '—'}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
 function StatsSection() {
   const stats = useStatsStore((s) => s.stats);
   const reset = useStatsStore((s) => s.reset);
@@ -31,83 +81,66 @@ function StatsSection() {
   const totalPlayed = stats.byMode['1'].played + stats.byMode['3'].played;
 
   return (
-    <section className="menu-section">
-      <h3 className="menu-section__title">Statistics</h3>
+    <section className="m-section">
+      <h3 className="m-eyebrow">
+        <span className="m-eyebrow__line" />
+        Statistics
+        <span className="m-eyebrow__line" />
+      </h3>
 
-      <div className="stats-grid">
-        <div className="stat-tile">
-          <div className="stat-tile__value">{totalWon}</div>
-          <div className="stat-tile__label">Wins</div>
-        </div>
-        <div className="stat-tile">
-          <div className="stat-tile__value">{winPct(totalWon, totalPlayed)}</div>
-          <div className="stat-tile__label">Win %</div>
-        </div>
-        <div className="stat-tile">
-          <div className="stat-tile__value">{stats.currentStreak}</div>
-          <div className="stat-tile__label">Streak</div>
-        </div>
-        <div className="stat-tile">
-          <div className="stat-tile__value">{stats.longestStreak}</div>
-          <div className="stat-tile__label">Best streak</div>
-        </div>
+      <div className="stat-hero-grid">
+        <StatHero value={totalWon} label="Wins" />
+        <StatHero value={winPct(totalWon, totalPlayed)} label="Win rate" />
+        <StatHero value={stats.currentStreak} label="Streak" />
+        <StatHero value={stats.longestStreak} label="Best" />
       </div>
 
-      <div className="mode-table">
-        <div className="mode-row mode-row--head">
-          <div></div>
-          <div>Played</div>
-          <div>Won</div>
-          <div>Win %</div>
-          <div>Best</div>
-          <div>Min moves</div>
-        </div>
-        {(['1', '3'] as const).map((m) => {
-          const ms = stats.byMode[m];
-          return (
-            <div key={m} className="mode-row">
-              <div className="mode-row__label">Draw {m}</div>
-              <div>{ms.played}</div>
-              <div>{ms.won}</div>
-              <div>{winPct(ms.won, ms.played)}</div>
-              <div>{fmtTime(ms.bestTimeSec)}</div>
-              <div>{ms.fewestMovesWin ?? '—'}</div>
-            </div>
-          );
-        })}
+      <div className="mode-pair">
+        {(['1', '3'] as const).map((m) => (
+          <ModeBlock
+            key={m}
+            mode={m}
+            played={stats.byMode[m].played}
+            won={stats.byMode[m].won}
+            bestTimeSec={stats.byMode[m].bestTimeSec}
+            fewestMovesWin={stats.byMode[m].fewestMovesWin}
+          />
+        ))}
       </div>
 
-      <div className="menu-row menu-row--quiet">
-        <span>Total time played</span>
-        <span>{fmtDuration(stats.totalSecondsPlayed)}</span>
+      <div className="m-row m-row--quiet">
+        <span>Total time at table</span>
+        <span className="num">{fmtDuration(stats.totalSecondsPlayed)}</span>
       </div>
 
-      {confirming ? (
-        <div className="confirm-row">
-          <span>Reset all stats?</span>
+      <div className="m-section__action">
+        {confirming ? (
+          <div className="confirm-row">
+            <span>Reset all statistics?</span>
+            <button
+              type="button"
+              className="btn btn--danger"
+              onClick={() => {
+                reset();
+                setConfirming(false);
+              }}
+            >
+              Yes, reset
+            </button>
+            <button type="button" className="btn" onClick={() => setConfirming(false)}>
+              Cancel
+            </button>
+          </div>
+        ) : (
           <button
             type="button"
-            className="btn btn--danger"
-            onClick={() => {
-              reset();
-              setConfirming(false);
-            }}
+            className="btn btn--ghost"
+            onClick={() => setConfirming(true)}
           >
-            Yes, reset
+            Reset stats…
           </button>
-          <button type="button" className="btn" onClick={() => setConfirming(false)}>
-            Cancel
-          </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          className="btn btn--ghost menu-section__action"
-          onClick={() => setConfirming(true)}
-        >
-          Reset stats…
-        </button>
-      )}
+        )}
+      </div>
     </section>
   );
 }
@@ -144,11 +177,15 @@ function SettingsSection() {
   const set = (patch: Partial<Settings>) => update(patch);
 
   return (
-    <section className="menu-section">
-      <h3 className="menu-section__title">Settings</h3>
+    <section className="m-section">
+      <h3 className="m-eyebrow">
+        <span className="m-eyebrow__line" />
+        Settings
+        <span className="m-eyebrow__line" />
+      </h3>
 
-      <div className="menu-row">
-        <span>Draw count (next game)</span>
+      <div className="m-row">
+        <span>Draw count<span className="m-row__hint">next game</span></span>
         <div className="seg">
           <button
             type="button"
@@ -167,7 +204,7 @@ function SettingsSection() {
         </div>
       </div>
 
-      <div className="menu-row">
+      <div className="m-row">
         <span>Layout</span>
         <div className="seg">
           <button
