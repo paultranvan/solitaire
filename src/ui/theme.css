@@ -23,7 +23,7 @@
   /* Layout */
   --card-w: clamp(38px, calc((100vw - 32px) / 7.5), 120px);
   --card-h: calc(var(--card-w) * 1.4);
-  --fan-faceup: calc(var(--card-h) * 0.34);
+  --fan-faceup: calc(var(--card-h) * 0.28);
   --fan-facedown: calc(var(--card-h) * 0.13);
   --gap-col: calc(var(--card-w) * 0.08);
 
