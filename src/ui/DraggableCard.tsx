@@ -13,6 +13,7 @@ export type DraggableCardProps = {
 
 export function DraggableCard({ card, dragId, data, hiddenByStackDrag = false }: DraggableCardProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: dragId, data });
+  const hidden = isDragging || hiddenByStackDrag;
 
   return (
     <div
@@ -20,12 +21,15 @@ export function DraggableCard({ card, dragId, data, hiddenByStackDrag = false }:
       {...attributes}
       {...listeners}
       style={{
-        opacity: isDragging || hiddenByStackDrag ? 0 : 1,
+        position: 'relative',
         cursor: 'grab',
         touchAction: 'none',
       }}
     >
-      <CardView card={card} />
+      {hidden && <div className="pile-empty pile-empty--ghost" aria-hidden="true" />}
+      <div style={{ opacity: hidden ? 0 : 1 }}>
+        <CardView card={card} />
+      </div>
     </div>
   );
 }
