@@ -47,6 +47,20 @@ describe('findAutoMoveTarget — talon source', () => {
     const s = blank({ talon: [makeCard('h', 7, true)] });
     expect(findAutoMoveTarget(s, { kind: 'talon' })).toBeNull();
   });
+
+  it('finds an empty foundation when the suit-indexed slot holds another suit', () => {
+    // Player drag-dropped A♦ onto the leftmost (suit-indicator-says-hearts)
+    // foundation slot. Now A♥ in the talon should still auto-move — to the
+    // empty diamonds slot, since foundations have no fixed suit assignment.
+    const s = blank({
+      talon: [makeCard('h', 1, true)],
+      foundations: [[makeCard('d', 1, true)], [], [makeCard('s', 1, true)], []],
+    });
+    expect(findAutoMoveTarget(s, { kind: 'talon' })).toEqual({
+      kind: 'talonToFoundation',
+      foundationIdx: 1,
+    });
+  });
 });
 
 describe('findAutoMoveTarget — tableau stack source', () => {
@@ -134,9 +148,11 @@ describe('nextAutoCompleteMove', () => {
       tableau: [[makeCard('h', 7, true)], [], [], [], [], [], []],
       talon: [makeCard('s', 1, true)],
     });
+    // All foundations are empty; the Ace lands in the first one that accepts
+    // it, since foundations have no pre-assigned suit.
     expect(nextAutoCompleteMove(s)).toEqual({
       kind: 'talonToFoundation',
-      foundationIdx: 2,
+      foundationIdx: 0,
     });
   });
 

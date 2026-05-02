@@ -1,16 +1,22 @@
 import { Card } from './card';
 import { Move } from './moves';
-import { canPlaceOnFoundation, canPlaceOnTableau, foundationIdxFor } from './rules';
+import { canPlaceOnFoundation, canPlaceOnTableau } from './rules';
 import { GameState } from './state';
 
 export type AutoMoveSource =
   | { kind: 'talon' }
   | { kind: 'tableauStack'; column: number; cardIndex: number };
 
+// Foundations have no fixed suit assignment in classic Klondike — any Ace can
+// start any pile, and the player decides where each suit lands. Scan all four
+// piles in order and return the first one that accepts the card. The empty
+// pile suit indicators in the UI are decorative, not constraints.
 const tryFoundationFor = (card: Card, foundations: readonly Card[][]): number | null => {
-  const idx = foundationIdxFor(card.suit);
-  const top = foundations[idx][foundations[idx].length - 1];
-  return canPlaceOnFoundation(card, top) ? idx : null;
+  for (let idx = 0; idx < foundations.length; idx++) {
+    const top = foundations[idx][foundations[idx].length - 1];
+    if (canPlaceOnFoundation(card, top)) return idx;
+  }
+  return null;
 };
 
 const countFaceDownInColumn = (col: readonly Card[]): number =>

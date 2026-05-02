@@ -1,17 +1,16 @@
 import { Card } from './card';
 import { Move } from './moves';
-import {
-  canPlaceOnFoundation,
-  canPlaceOnTableau,
-  foundationIdxFor,
-  isValidStack,
-} from './rules';
+import { canPlaceOnFoundation, canPlaceOnTableau, isValidStack } from './rules';
 import { GameState } from './state';
 
+// See note in auto.ts — foundations are not pre-assigned to suits, so scan all
+// piles to find one that accepts the card.
 const tryFoundationFor = (card: Card, foundations: readonly Card[][]): number | null => {
-  const idx = foundationIdxFor(card.suit);
-  const top = foundations[idx][foundations[idx].length - 1];
-  return canPlaceOnFoundation(card, top) ? idx : null;
+  for (let idx = 0; idx < foundations.length; idx++) {
+    const top = foundations[idx][foundations[idx].length - 1];
+    if (canPlaceOnFoundation(card, top)) return idx;
+  }
+  return null;
 };
 
 export const bestNextMove = (state: GameState): Move | null => {
