@@ -5,7 +5,10 @@ The web build is the source of truth. To produce native shells:
 ## Prerequisites
 
 - **iOS**: macOS with Xcode 15+, CocoaPods.
-- **Android**: Android Studio (Hedgehog or newer) with Android SDK 34, Java 17.
+- **Android**: Android Studio (Hedgehog or newer) with Android SDK 34, JDK 17
+  or JDK 21 (the default `JAVA_HOME` on some Linux setups is JDK 20, which
+  Android Gradle 8.7 rejects — point `JAVA_HOME` at a 17/21 install before
+  running gradle).
 
 ## One-time scaffolding
 
@@ -20,10 +23,36 @@ npx cap add ios
 npx cap add android
 ```
 
+`@capacitor/android` is already in `package.json`; `@capacitor/ios` will need
+`npm install @capacitor/ios` before `cap add ios`.
+
 `ios/` and `android/` are git-ignored by default. If you want to commit them
 later (recommended once you have signing certificates and final icons),
 remove the matching lines from `.gitignore` and commit the generated
 projects.
+
+## Android post-scaffold patch — Kotlin stdlib dedup
+
+Out of the box, the generated `android/` project fails to build with a
+`Duplicate class kotlin.collections.jdk8.CollectionsJDK8Kt …` error.
+`cordova-android` 10.x pulls Kotlin 1.6.21 versions of the now-deprecated
+`kotlin-stdlib-jdk7` / `kotlin-stdlib-jdk8` modules, whose classes overlap
+with the merged Kotlin 1.8 stdlib used by AndroidX. Add this exclusion to
+`android/build.gradle` inside the existing `allprojects { … }` block:
+
+```gradle
+allprojects {
+    repositories { google(); mavenCentral() }
+    configurations.all {
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    }
+}
+```
+
+Re-apply this patch any time `android/` is regenerated (`cap add android`
+after deleting it) — the file is gitignored so the fix doesn't survive a
+re-scaffold.
 
 ## Per-build sync
 
