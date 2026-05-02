@@ -11,9 +11,11 @@ export type TopBarProps = {
   elapsedSec: number;
   moves: number;
   canUndo: boolean;
+  canRestart: boolean;
   onUndo: () => void;
   onHint: () => void;
   onNewGame: () => void;
+  onRestart: () => void;
   onMenu: () => void;
 };
 
@@ -21,7 +23,17 @@ export type TopBarProps = {
 // don't accidentally re-trigger it later. Tab navigation still focuses normally.
 const swallowFocus = (e: MouseEvent) => e.preventDefault();
 
-export function TopBar({ elapsedSec, moves, canUndo, onUndo, onHint, onNewGame, onMenu }: TopBarProps) {
+export function TopBar({
+  elapsedSec,
+  moves,
+  canUndo,
+  canRestart,
+  onUndo,
+  onHint,
+  onNewGame,
+  onRestart,
+  onMenu,
+}: TopBarProps) {
   return (
     <header className="topbar">
       <div className="topbar__group topbar__group--left">
@@ -43,6 +55,33 @@ export function TopBar({ elapsedSec, moves, canUndo, onUndo, onHint, onNewGame, 
         >
           <span className="topbar__glyph topbar__glyph--plus">+</span>
           <span className="topbar__btn-label">New Game</span>
+        </button>
+        <button
+          type="button"
+          className="topbar__btn topbar__btn--labeled"
+          title="restart this deal"
+          aria-label="restart this deal"
+          onMouseDown={swallowFocus}
+          onClick={onRestart}
+          disabled={!canRestart}
+        >
+          <svg
+            className="topbar__icon"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            {/* Clockwise circular arrow — "play this deal again" */}
+            <path d="M3 12a9 9 0 1 0 3-6.7" />
+            <path d="M3 4v5h5" />
+          </svg>
+          <span className="topbar__btn-label">Restart</span>
         </button>
         <button
           type="button"

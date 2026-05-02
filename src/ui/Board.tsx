@@ -252,6 +252,31 @@ export function Board({ initial }: { initial: GameState }) {
     });
   };
 
+  // Re-deal the current seed from scratch — same hand, fresh attempt. Doesn't
+  // touch stats: a restart is a continuation of the same deal, not a new game,
+  // so it shouldn't inflate the abandoned counter.
+  const handleRestart = () => {
+    wonReportedRef.current = false;
+    setAutoCompleteState('idle');
+    const { tableau, stock } = dealKlondike(state.seed);
+    dispatch({
+      type: 'reset',
+      state: {
+        schemaVersion: 1,
+        tableau,
+        stock,
+        talon: [],
+        foundations: [[], [], [], []],
+        drawCount: state.drawCount,
+        startedAt: Date.now(),
+        movesMade: 0,
+        redealCount: 0,
+        seed: state.seed,
+        history: [],
+      },
+    });
+  };
+
   return (
     <DndContext
       sensors={sensors}
@@ -265,9 +290,11 @@ export function Board({ initial }: { initial: GameState }) {
           elapsedSec={elapsedSec}
           moves={state.movesMade}
           canUndo={state.history.length > 0}
+          canRestart={state.movesMade > 0}
           onUndo={handleUndo}
           onHint={handleHint}
           onNewGame={handleNewGame}
+          onRestart={handleRestart}
           onMenu={() => setMenuOpen(true)}
         />
         {/* LayoutGroup is keyed by seed so layoutId shared-element animations
