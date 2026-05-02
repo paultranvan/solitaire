@@ -8,10 +8,3 @@ export const SPRING_DEFAULT: Transition = {
   damping: 40,
   mass: 0.7,
 };
-
-export const SPRING_FLIP: Transition = {
-  type: 'spring',
-  stiffness: 280,
-  damping: 24,
-  mass: 0.7,
-};

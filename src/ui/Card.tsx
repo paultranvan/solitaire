@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import { motion } from 'motion/react';
 import { Card as CardModel, color } from '@/game/card';
-import { SPRING_DEFAULT, SPRING_FLIP } from '@/motion/presets';
+import { SPRING_DEFAULT } from '@/motion/presets';
 import './Card.css';
 
 const SUIT_GLYPH: Record<string, string> = { h: '♥', d: '♦', s: '♠', c: '♣' };
@@ -34,17 +34,12 @@ export function CardView({ card, ghost = false }: CardProps) {
       transition={layoutTransition}
       aria-label={card.faceUp ? `${label} of ${card.suit}` : 'face-down card'}
     >
-      <motion.div
-        className="card-flip__inner"
-        // Skip the entry flip animation on every mount. Cards mount fresh in
-        // a few cases (DragOverlay ghost on pickup, destination pile after a
-        // drop) and motion would otherwise animate rotateY 0→180 each time.
-        // Genuine flips (face-down → face-up auto-reveal) still animate
-        // because they go through an `animate` prop change, not a mount.
-        initial={false}
-        animate={{ rotateY: card.faceUp ? 180 : 0 }}
-        transition={SPRING_FLIP}
-      >
+      {/* The flip is a plain CSS transition — keeping rotateY out of motion's
+          value tracking. motion's resetSkewAndRotation step (run on every
+          layout update) would otherwise strip rotateY from all face-up cards
+          for 1–2ms while measuring boxes, and the browser can paint that gap,
+          flashing the card backs across the whole board. */}
+      <div className={`card-flip__inner${card.faceUp ? ' is-faceup' : ''}`}>
         <div
           className="card-flip__face card-flip__back card card--back"
           aria-hidden={card.faceUp}
@@ -59,7 +54,7 @@ export function CardView({ card, ghost = false }: CardProps) {
           </div>
           <div className="card__center">{glyph}</div>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
