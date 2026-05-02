@@ -70,6 +70,10 @@
   font-size: calc(var(--card-w) * 0.32);
   font-weight: 700;
   letter-spacing: -0.03em;
+  /* Georgia ships old-style figures by default; force lining figures so digits
+     share the cap-height baseline with letter ranks (A/J/Q/K), and tabular
+     widths so "10" aligns predictably with single-digit ranks. */
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .card__suit {
