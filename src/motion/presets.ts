@@ -7,13 +7,6 @@ export const SPRING_DEFAULT: Transition = {
   mass: 0.7,
 };
 
-export const SPRING_LIFT: Transition = {
-  type: 'spring',
-  stiffness: 350,
-  damping: 22,
-  mass: 0.6,
-};
-
 export const SPRING_FLIP: Transition = {
   type: 'spring',
   stiffness: 280,
