@@ -33,28 +33,24 @@
   }
 }
 
-/* Status chips — timer / move count.
-   Serif numerals on a subtle pill, like inscribed tokens. */
+/* Status readouts — timer / move count.
+   Plain serif numerals, no chrome. They're stats, not buttons, so they
+   shouldn't compete visually with the action pills on the right. */
 .topbar__chip {
   font-family: var(--font-display);
   font-variant-numeric: lining-nums tabular-nums;
   font-feature-settings: 'lnum', 'tnum';
   font-size: clamp(14px, 1.3vw, 17px);
-  letter-spacing: 0.01em;
-  background: rgba(243, 236, 217, 0.06);
-  border: 1px solid var(--rule);
-  color: var(--ink);
-  padding: 7px 14px;
-  border-radius: 999px;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
   display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  align-items: baseline;
+  gap: 5px;
 }
 
-@media (min-width: 720px) {
-  .topbar__chip {
-    padding: 9px 18px;
-  }
+.topbar__chip-glyph {
+  color: var(--ink-quiet);
+  font-size: 0.85em;
 }
 
 /* Round buttons. Scale up on wider viewports so they don't feel lost. */

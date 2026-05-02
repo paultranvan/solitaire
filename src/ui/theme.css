@@ -20,8 +20,16 @@
   --pile-empty: rgba(0, 0, 0, 0.18);
   --pile-empty-border: rgba(255, 255, 255, 0.18);
 
-  /* Layout */
-  --card-w: clamp(38px, calc((100vw - 32px) / 7.5), 120px);
+  /* Layout
+     Tableau row = 7·card-w + 6·gap-col, where gap-col = 0.18·card-w → 8.08·card-w.
+     The 28 px reserve covers the board__main 12 px gutter on each side plus
+     a 4 px sub-pixel rounding budget. Safe-area insets stay accounted for so
+     notched/curved screens don't push the rightmost column off-canvas. */
+  --card-w: clamp(
+    38px,
+    calc((100vw - 28px - var(--safe-left) - var(--safe-right)) / 8.08),
+    120px
+  );
   --card-h: calc(var(--card-w) * 1.4);
   --fan-faceup: calc(var(--card-h) * 0.29);
   --fan-facedown: calc(var(--card-h) * 0.13);

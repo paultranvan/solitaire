@@ -38,10 +38,12 @@ export function TopBar({
     <header className="topbar">
       <div className="topbar__group topbar__group--left">
         <span className="topbar__chip" title="time">
-          ⏱ {fmt(elapsedSec)}
+          <span className="topbar__chip-glyph" aria-hidden="true">⏱</span>
+          {fmt(elapsedSec)}
         </span>
         <span className="topbar__chip" title="moves">
-          ♠ {moves}
+          <span className="topbar__chip-glyph" aria-hidden="true">♠</span>
+          {moves}
         </span>
       </div>
       <div className="topbar__group topbar__group--right">
