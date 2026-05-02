@@ -36,10 +36,12 @@ export function CardView({ card, ghost = false }: CardProps) {
     >
       <motion.div
         className="card-flip__inner"
-        // Ghost cards in the DragOverlay mount fresh each pickup; without
-        // initial=false motion would animate rotateY 0→180 every time, looking
-        // like a flip. Real board cards keep the flip animation on faceUp toggle.
-        initial={ghost ? false : undefined}
+        // Skip the entry flip animation on every mount. Cards mount fresh in
+        // a few cases (DragOverlay ghost on pickup, destination pile after a
+        // drop) and motion would otherwise animate rotateY 0→180 each time.
+        // Genuine flips (face-down → face-up auto-reveal) still animate
+        // because they go through an `animate` prop change, not a mount.
+        initial={false}
         animate={{ rotateY: card.faceUp ? 180 : 0 }}
         transition={SPRING_FLIP}
       >
