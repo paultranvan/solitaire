@@ -21,8 +21,8 @@
 }
 
 @keyframes hint-pulse-fnd {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 220, 100, 0); }
-  50%      { box-shadow: 0 0 0 6px rgba(255, 220, 100, 0.55); }
+  0%, 100% { box-shadow: 0 0 0 4px rgba(255, 220, 100, 0.55); }
+  50%      { box-shadow: 0 0 0 10px rgba(255, 220, 100, 0.95); }
 }
 
 .foundations__slot.is-hinted {
