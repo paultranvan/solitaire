@@ -9,9 +9,18 @@ export type DraggableCardProps = {
   data: DragData;
   /** True when another draggable in the same stack is dragging this card along. */
   hiddenByStackDrag?: boolean;
+  /** Suppress the dashed placeholder when hidden — the slot already renders
+      a card-behind underneath that should show through instead. */
+  suppressGhost?: boolean;
 };
 
-export function DraggableCard({ card, dragId, data, hiddenByStackDrag = false }: DraggableCardProps) {
+export function DraggableCard({
+  card,
+  dragId,
+  data,
+  hiddenByStackDrag = false,
+  suppressGhost = false,
+}: DraggableCardProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: dragId, data });
   const hidden = isDragging || hiddenByStackDrag;
 
@@ -26,7 +35,9 @@ export function DraggableCard({ card, dragId, data, hiddenByStackDrag = false }:
         touchAction: 'none',
       }}
     >
-      {hidden && <div className="pile-empty pile-empty--ghost" aria-hidden="true" />}
+      {hidden && !suppressGhost && (
+        <div className="pile-empty pile-empty--ghost" aria-hidden="true" />
+      )}
       <div style={{ opacity: hidden ? 0 : 1 }}>
         <CardView card={card} />
       </div>

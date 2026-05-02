@@ -18,6 +18,7 @@ export function StockTalon({
   hint: HintState;
 }) {
   const talonTop = talon[talon.length - 1];
+  const talonBehind = talon[talon.length - 2];
   const talonHinted =
     isHintSource(hint, { kind: 'talon' }) || isHintTarget(hint, { kind: 'talon' });
 
@@ -39,14 +40,20 @@ export function StockTalon({
         className={`stock-talon__slot talon${talonHinted ? ' is-hinted' : ''}`}
         onDoubleClick={onTalonAutoMove}
       >
+        {talonBehind && (
+          <div className="card-behind" aria-hidden="true">
+            <CardView card={talonBehind} />
+          </div>
+        )}
         {talonTop ? (
           <DraggableCard
             card={talonTop}
             dragId="talon-top"
             data={{ source: { kind: 'talonTop' }, cards: [talonTop] }}
+            suppressGhost={!!talonBehind}
           />
         ) : (
-          <div className="pile-empty" />
+          !talonBehind && <div className="pile-empty" />
         )}
       </div>
     </div>

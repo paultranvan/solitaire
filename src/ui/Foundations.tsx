@@ -1,6 +1,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { Card } from '@/game/card';
 import { foundationDropId } from '@/dnd/types';
+import { CardView } from './Card';
 import { DraggableCard } from './DraggableCard';
 import { HintState, isHintSource, isHintTarget } from './hints';
 import './Foundations.css';
@@ -10,6 +11,7 @@ const SUIT_GLYPH: Record<number, string> = { 0: '♥', 1: '♦', 2: '♠', 3: '�
 function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: HintState }) {
   const { setNodeRef, isOver } = useDroppable({ id: foundationDropId(idx) });
   const top = pile[pile.length - 1];
+  const behind = pile[pile.length - 2];
   const hinted =
     isHintSource(hint, { kind: 'foundation', idx }) ||
     isHintTarget(hint, { kind: 'foundation', idx });
@@ -19,6 +21,11 @@ function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: 
       ref={setNodeRef}
       className={`foundations__slot${isOver ? ' foundations__slot--over' : ''}${hinted ? ' is-hinted' : ''}`}
     >
+      {behind && (
+        <div className="card-behind" aria-hidden="true">
+          <CardView card={behind} />
+        </div>
+      )}
       {top ? (
         <DraggableCard
           card={top}
@@ -27,6 +34,7 @@ function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: 
             source: { kind: 'foundationTop', foundationIdx: idx },
             cards: [top],
           }}
+          suppressGhost={!!behind}
         />
       ) : (
         <div className="pile-empty" aria-label={`foundation ${idx}`}>
