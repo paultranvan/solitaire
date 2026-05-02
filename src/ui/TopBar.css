@@ -82,6 +82,32 @@
   border-color: var(--rule-strong);
 }
 
+/* Labeled variant: pill with icon + text instead of a circle. */
+.topbar__btn--labeled {
+  width: auto;
+  padding: 0 16px 0 12px;
+  gap: 6px;
+}
+
+.topbar__btn-label {
+  font-family: var(--font-display);
+  font-size: clamp(13px, 1.2vw, 15px);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+/* Collapse to icon-only on very narrow viewports so the row still fits. */
+@media (max-width: 480px) {
+  .topbar__btn--labeled {
+    width: clamp(40px, 4vw, 48px);
+    padding: 0;
+    gap: 0;
+  }
+  .topbar__btn-label {
+    display: none;
+  }
+}
+
 .topbar__btn:active:not(:disabled) {
   transform: scale(0.94);
 }
@@ -119,4 +145,10 @@
   font-weight: 600;
   font-size: clamp(18px, 1.9vw, 22px);
   color: var(--gold);
+}
+
+.topbar__icon {
+  width: clamp(20px, 2vw, 24px);
+  height: clamp(20px, 2vw, 24px);
+  display: block;
 }

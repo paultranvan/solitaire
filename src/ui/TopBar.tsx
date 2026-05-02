@@ -35,13 +35,14 @@ export function TopBar({ elapsedSec, moves, canUndo, onUndo, onHint, onNewGame, 
       <div className="topbar__group topbar__group--right">
         <button
           type="button"
-          className="topbar__btn"
+          className="topbar__btn topbar__btn--labeled"
           title="new game"
           aria-label="new game"
           onMouseDown={swallowFocus}
           onClick={onNewGame}
         >
           <span className="topbar__glyph topbar__glyph--plus">+</span>
+          <span className="topbar__btn-label">New Game</span>
         </button>
         <button
           type="button"
@@ -52,7 +53,21 @@ export function TopBar({ elapsedSec, moves, canUndo, onUndo, onHint, onNewGame, 
           onClick={onUndo}
           disabled={!canUndo}
         >
-          <span className="topbar__glyph">↺</span>
+          <svg
+            className="topbar__icon"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M9 14 4 9l5-5" />
+            <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10" />
+          </svg>
         </button>
         <button
           type="button"
