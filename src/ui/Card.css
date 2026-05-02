@@ -67,13 +67,14 @@
 }
 
 .card__rank {
-  font-size: calc(var(--card-w) * 0.32);
+  /* Times New Roman ships lining figures by default — its digits all sit
+     cleanly between cap-height and baseline, unlike Georgia where 6/9/5
+     drift above or below. */
+  font-family: 'Times New Roman', Times, serif;
+  font-size: calc(var(--card-w) * 0.34);
   font-weight: 700;
   letter-spacing: -0.03em;
-  /* Georgia ships old-style figures by default; force lining figures so digits
-     share the cap-height baseline with letter ranks (A/J/Q/K), and tabular
-     widths so "10" aligns predictably with single-digit ranks. */
-  font-variant-numeric: lining-nums tabular-nums;
+  font-variant-numeric: tabular-nums;
 }
 
 .card__suit {
