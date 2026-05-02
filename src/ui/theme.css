@@ -9,9 +9,9 @@
   /* Card */
   --card-radius: 6px;
   --card-bg: #fdfcf7;
-  --card-border: rgba(0, 0, 0, 0.12);
-  --card-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 1px 3px rgba(0, 0, 0, 0.35),
-    0 0 0 0.5px rgba(0, 0, 0, 0.18);
+  --card-border: rgba(0, 0, 0, 0.28);
+  --card-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 2px 5px rgba(0, 0, 0, 0.45),
+    0 0 0 0.5px rgba(0, 0, 0, 0.28);
   --card-red: #c0392b;
   --card-black: #1a1a1a;
   --card-back: #1f3a85;
@@ -25,7 +25,7 @@
   --card-h: calc(var(--card-w) * 1.4);
   --fan-faceup: calc(var(--card-h) * 0.29);
   --fan-facedown: calc(var(--card-h) * 0.13);
-  --gap-col: calc(var(--card-w) * 0.08);
+  --gap-col: calc(var(--card-w) * 0.18);
 
   /* Top bar */
   --topbar-h: 52px;
