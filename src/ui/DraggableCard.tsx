@@ -7,9 +7,11 @@ export type DraggableCardProps = {
   card: CardModel;
   dragId: string;
   data: DragData;
+  /** True when another draggable in the same stack is dragging this card along. */
+  hiddenByStackDrag?: boolean;
 };
 
-export function DraggableCard({ card, dragId, data }: DraggableCardProps) {
+export function DraggableCard({ card, dragId, data, hiddenByStackDrag = false }: DraggableCardProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: dragId, data });
 
   return (
@@ -18,7 +20,7 @@ export function DraggableCard({ card, dragId, data }: DraggableCardProps) {
       {...attributes}
       {...listeners}
       style={{
-        opacity: isDragging ? 0 : 1,
+        opacity: isDragging || hiddenByStackDrag ? 0 : 1,
         cursor: 'grab',
         touchAction: 'none',
       }}

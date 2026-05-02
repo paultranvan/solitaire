@@ -1,6 +1,6 @@
-import { useDroppable } from '@dnd-kit/core';
+import { useDndContext, useDroppable } from '@dnd-kit/core';
 import { Card } from '@/game/card';
-import { tableauColumnDropId } from '@/dnd/types';
+import { DragData, tableauColumnDropId } from '@/dnd/types';
 import { CardView } from './Card';
 import { DraggableCard } from './DraggableCard';
 import { HintState, isHintSource, isHintTarget } from './hints';
@@ -19,6 +19,16 @@ export function TableauColumn({
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: tableauColumnDropId(column) });
   const columnHinted = isHintTarget(hint, { kind: 'tableauColumn', column });
+
+  // When a tableau-stack drag picks up cards [fromIndex..end], the cards below
+  // the grabbed one need to be hidden too — only the grabbed card's own
+  // DraggableCard sees `isDragging`, so the rest stay visible without this.
+  const { active } = useDndContext();
+  const activeData = active?.data.current as DragData | undefined;
+  const dragFromIndex =
+    activeData?.source.kind === 'tableauStack' && activeData.source.column === column
+      ? activeData.source.fromIndex
+      : null;
 
   return (
     <div
@@ -56,6 +66,7 @@ export function TableauColumn({
                     source: { kind: 'tableauStack', column, fromIndex: i },
                     cards: cards.slice(i),
                   }}
+                  hiddenByStackDrag={dragFromIndex !== null && i > dragFromIndex}
                 />
               ) : (
                 <CardView card={card} />

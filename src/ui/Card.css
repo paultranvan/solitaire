@@ -26,7 +26,6 @@
   width: 100%;
   height: 100%;
   border-radius: var(--card-radius);
-  position: relative;
   flex-shrink: 0;
   background: var(--card-bg);
   box-shadow: var(--card-shadow);
