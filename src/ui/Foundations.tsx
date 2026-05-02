@@ -1,4 +1,4 @@
-import { useDndContext, useDroppable } from '@dnd-kit/core';
+import { useDroppable } from '@dnd-kit/core';
 import { Card } from '@/game/card';
 import { foundationDropId } from '@/dnd/types';
 import { CardView } from './Card';
@@ -10,13 +10,8 @@ const SUIT_GLYPH: Record<number, string> = { 0: '♥', 1: '♦', 2: '♠', 3: '�
 
 function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: HintState }) {
   const { setNodeRef, isOver } = useDroppable({ id: foundationDropId(idx) });
-  const { active } = useDndContext();
   const top = pile[pile.length - 1];
   const behind = pile[pile.length - 2];
-  // Only reveal the card-behind while the top is actually being dragged.
-  // Otherwise an auto-move's layoutId flight would expose it mid-animation
-  // and read as a flicker.
-  const showBehind = !!behind && active?.id === `f:${idx}`;
   const hinted =
     isHintSource(hint, { kind: 'foundation', idx }) ||
     isHintTarget(hint, { kind: 'foundation', idx });
@@ -26,7 +21,7 @@ function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: 
       ref={setNodeRef}
       className={`foundations__slot${isOver ? ' foundations__slot--over' : ''}${hinted ? ' is-hinted' : ''}`}
     >
-      {showBehind && (
+      {behind && (
         <div className="card-behind" aria-hidden="true">
           <CardView card={behind} />
         </div>
@@ -39,7 +34,7 @@ function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: 
             source: { kind: 'foundationTop', foundationIdx: idx },
             cards: [top],
           }}
-          suppressGhost={showBehind}
+          suppressGhost={!!behind}
         />
       ) : (
         <div className="pile-empty" aria-label={`foundation ${idx}`}>

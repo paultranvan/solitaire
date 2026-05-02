@@ -1,4 +1,3 @@
-import { useDndContext } from '@dnd-kit/core';
 import { Card } from '@/game/card';
 import { CardView } from './Card';
 import { DraggableCard } from './DraggableCard';
@@ -18,12 +17,8 @@ export function StockTalon({
   onTalonAutoMove: () => void;
   hint: HintState;
 }) {
-  const { active } = useDndContext();
   const talonTop = talon[talon.length - 1];
   const talonBehind = talon[talon.length - 2];
-  // Only reveal the card-behind while the talon top is actually being
-  // dragged; an auto-move's layoutId flight would otherwise expose it.
-  const showBehind = !!talonBehind && active?.id === 'talon-top';
   const talonHinted =
     isHintSource(hint, { kind: 'talon' }) || isHintTarget(hint, { kind: 'talon' });
 
@@ -45,7 +40,7 @@ export function StockTalon({
         className={`stock-talon__slot talon${talonHinted ? ' is-hinted' : ''}`}
         onDoubleClick={onTalonAutoMove}
       >
-        {showBehind && (
+        {talonBehind && (
           <div className="card-behind" aria-hidden="true">
             <CardView card={talonBehind} />
           </div>
@@ -55,10 +50,10 @@ export function StockTalon({
             card={talonTop}
             dragId="talon-top"
             data={{ source: { kind: 'talonTop' }, cards: [talonTop] }}
-            suppressGhost={showBehind}
+            suppressGhost={!!talonBehind}
           />
         ) : (
-          <div className="pile-empty" />
+          !talonBehind && <div className="pile-empty" />
         )}
       </div>
     </div>
