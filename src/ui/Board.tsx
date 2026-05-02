@@ -27,6 +27,7 @@ import { useGameAutosave } from '@/persistence/gameAutosave';
 import { useStatsStore } from '@/store/statsStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { HintState, moveToHint } from './hints';
+import { SkipLayoutAnimProvider } from './Card';
 import { DragLayer } from './DragLayer';
 import { Foundations } from './Foundations';
 import { StockTalon } from './StockTalon';
@@ -56,7 +57,16 @@ export function Board({ initial }: { initial: GameState }) {
   const [hint, setHint] = useState<HintState>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [winOpen, setWinOpen] = useState(false);
+  // Becomes true for a single render after a drag-drop dispatch, suppressing
+  // the layoutId fly-from-source animation that looks wrong because the card
+  // was visually at the cursor rather than in its source slot.
+  const [skipLayoutAnim, setSkipLayoutAnim] = useState(false);
   const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!skipLayoutAnim) return;
+    setSkipLayoutAnim(false);
+  }, [skipLayoutAnim]);
   const wonReportedRef = useRef(false);
   const winDurationRef = useRef(0);
   const winMovesRef = useRef(0);
@@ -149,6 +159,7 @@ export function Board({ initial }: { initial: GameState }) {
       haptic('dropInvalid');
       return;
     }
+    setSkipLayoutAnim(true);
     dispatch({ type: 'move', move });
     if (move.kind === 'tableauToFoundation' || move.kind === 'talonToFoundation') {
       play('foundation');
@@ -236,19 +247,21 @@ export function Board({ initial }: { initial: GameState }) {
         {/* LayoutGroup is keyed by seed so layoutId shared-element animations
             never bridge between games (a new deal contains all 52 ids again). */}
         <LayoutGroup id={state.seed}>
-          <div className="board__main">
-            <div className="board__top">
-              <StockTalon
-                stock={state.stock}
-                talon={state.talon}
-                onStockClick={handleStockClick}
-                onTalonAutoMove={() => handleAutoMove({ kind: 'talon' })}
-                hint={hint}
-              />
-              <Foundations piles={state.foundations} hint={hint} />
+          <SkipLayoutAnimProvider value={skipLayoutAnim}>
+            <div className="board__main">
+              <div className="board__top">
+                <StockTalon
+                  stock={state.stock}
+                  talon={state.talon}
+                  onStockClick={handleStockClick}
+                  onTalonAutoMove={() => handleAutoMove({ kind: 'talon' })}
+                  hint={hint}
+                />
+                <Foundations piles={state.foundations} hint={hint} />
+              </div>
+              <Tableau columns={state.tableau} hint={hint} onAutoMove={handleAutoMove} />
             </div>
-            <Tableau columns={state.tableau} hint={hint} onAutoMove={handleAutoMove} />
-          </div>
+          </SkipLayoutAnimProvider>
         </LayoutGroup>
         <DragLayer cards={activeCards} />
         <MenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} />

@@ -1,3 +1,4 @@
+import { createContext, useContext } from 'react';
 import { motion } from 'motion/react';
 import { Card as CardModel, color } from '@/game/card';
 import { SPRING_DEFAULT, SPRING_FLIP } from '@/motion/presets';
@@ -6,6 +7,12 @@ import './Card.css';
 const SUIT_GLYPH: Record<string, string> = { h: '♥', d: '♦', s: '♠', c: '♣' };
 const RANK_LABEL: Record<number, string> = { 1: 'A', 11: 'J', 12: 'Q', 13: 'K' };
 const labelFor = (rank: number) => RANK_LABEL[rank] ?? String(rank);
+
+/* True for a single render after a drag-drop, so motion/react skips the
+   layoutId fly-from-source animation (the card was visually at the cursor,
+   not the source slot). Auto-moves keep the animation. */
+const SkipLayoutAnimContext = createContext(false);
+export const SkipLayoutAnimProvider = SkipLayoutAnimContext.Provider;
 
 export type CardProps = {
   card: CardModel;
@@ -17,12 +24,14 @@ export function CardView({ card, ghost = false }: CardProps) {
   const c = color(card.suit);
   const glyph = SUIT_GLYPH[card.suit];
   const label = labelFor(card.rank);
+  const skipLayoutAnim = useContext(SkipLayoutAnimContext);
+  const layoutTransition = skipLayoutAnim ? { duration: 0 } : SPRING_DEFAULT;
 
   return (
     <motion.div
       className="card-flip"
       layoutId={ghost ? undefined : card.id}
-      transition={SPRING_DEFAULT}
+      transition={layoutTransition}
       aria-label={card.faceUp ? `${label} of ${card.suit}` : 'face-down card'}
     >
       <motion.div
