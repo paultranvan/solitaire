@@ -9,10 +9,17 @@
   padding-bottom: calc(24px + var(--safe-bottom));
 }
 
+/* The card area caps at a sane width so wide screens don't sprawl. */
+.board__main {
+  max-width: calc(7 * var(--card-w) + 6 * var(--gap-col) + 24px);
+  margin: 0 auto;
+  padding: 0 calc(12px + var(--safe-right)) 0 calc(12px + var(--safe-left));
+}
+
 .board__top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 16px calc(12px + var(--safe-right)) 0 calc(12px + var(--safe-left));
+  padding-top: 16px;
   gap: var(--gap-col);
 }

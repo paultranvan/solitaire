@@ -12,6 +12,7 @@ import {
   closestCenter,
   CollisionDetection,
 } from '@dnd-kit/core';
+import { LayoutGroup } from 'motion/react';
 import { Card } from '@/game/card';
 import { canApply } from '@/game/canApply';
 import { Move } from '@/game/moves';
@@ -234,17 +235,23 @@ export function Board({ initial }: { initial: GameState }) {
           onNewGame={handleNewGame}
           onMenu={() => setMenuOpen(true)}
         />
-        <div className="board__top">
-          <StockTalon
-            stock={state.stock}
-            talon={state.talon}
-            onStockClick={handleStockClick}
-            onTalonAutoMove={() => handleAutoMove({ kind: 'talon' })}
-            hint={hint}
-          />
-          <Foundations piles={state.foundations} hint={hint} />
-        </div>
-        <Tableau columns={state.tableau} hint={hint} onAutoMove={handleAutoMove} />
+        {/* LayoutGroup is keyed by seed so layoutId shared-element animations
+            never bridge between games (a new deal contains all 52 ids again). */}
+        <LayoutGroup id={state.seed}>
+          <div className="board__main">
+            <div className="board__top">
+              <StockTalon
+                stock={state.stock}
+                talon={state.talon}
+                onStockClick={handleStockClick}
+                onTalonAutoMove={() => handleAutoMove({ kind: 'talon' })}
+                hint={hint}
+              />
+              <Foundations piles={state.foundations} hint={hint} />
+            </div>
+            <Tableau columns={state.tableau} hint={hint} onAutoMove={handleAutoMove} />
+          </div>
+        </LayoutGroup>
         <DragLayer cards={activeCards} />
         <MenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
         <WinSheet
