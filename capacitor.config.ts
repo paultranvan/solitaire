@@ -21,11 +21,12 @@ const config: CapacitorConfig = {
     StatusBar: {
       style: 'LIGHT',
       backgroundColor: '#0f3818',
-      // Android 15's forced edge-to-edge is opted out via the activity theme
-      // (see android/app/src/main/res/values/styles.xml — windowOptOutEdge
-      // ToEdgeEnforcement=true), so this flag is honored: the system bar
-      // sits above the WebView, painted with backgroundColor.
-      overlaysWebView: false,
+      // Let the WebView paint behind the system bar so the felt color
+      // shows through. The topbar's padding-top uses --safe-top (which is
+      // forced to a 44px floor on Android in lifecycle.ts because
+      // Chromium's env(safe-area-inset-top) is unreliable on edge-to-edge
+      // Android 15).
+      overlaysWebView: true,
     },
   },
 };

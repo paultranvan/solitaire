@@ -3,21 +3,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 calc(16px + var(--safe-right)) 0 calc(16px + var(--safe-left));
-  padding-top: var(--safe-top);
+  /* Generous padding-bottom so there's a visible band of dark below the
+     buttons before the felt gradient takes over — keeps the buttons
+     squarely on the dark zone. */
+  padding: var(--safe-top) calc(16px + var(--safe-right)) 22px calc(16px + var(--safe-left));
   background: var(--topbar-bg);
   color: var(--topbar-fg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   position: sticky;
   top: 0;
   z-index: 10;
+  /* Crisp shadow + 1px hairline give a defined edge between the dark
+     band and the lighter playing felt below. */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
 }
 
 @media (min-width: 720px) {
   .topbar {
-    padding: 0 calc(28px + var(--safe-right)) 0 calc(28px + var(--safe-left));
-    padding-top: var(--safe-top);
+    padding: var(--safe-top) calc(28px + var(--safe-right)) 22px calc(28px + var(--safe-left));
   }
 }
 

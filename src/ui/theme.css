@@ -35,9 +35,13 @@
   --fan-facedown: calc(var(--card-h) * 0.16);
   --gap-col: calc(var(--card-w) * 0.18);
 
-  /* Top bar */
+  /* Top bar
+     Strong, mostly-opaque dark felt — needs to read as a defined band so
+     the buttons clearly sit on a darker ground than the playing felt
+     below. A translucent overlay over the bright top of the radial felt
+     gradient is too subtle. */
   --topbar-h: clamp(52px, 4.5vh, 64px);
-  --topbar-bg: rgba(0, 0, 0, 0.25);
+  --topbar-bg: rgba(6, 26, 12, 0.92);
   --topbar-fg: rgba(255, 255, 255, 0.95);
 
   /* Menu surface — parchment & aged gold on dark felt */
