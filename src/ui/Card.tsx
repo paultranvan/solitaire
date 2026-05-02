@@ -29,6 +29,12 @@ export function CardView({ card, ghost = false }: CardProps) {
 
   return (
     <motion.div
+      // key forces a fresh motion node when the card identity changes. Without
+      // it, React reuses the same motion.div when a parent slot's `card` prop
+      // swaps (e.g. the talon top after a draw), and motion's shared-layout
+      // crossfade then fades the SAME element out — making the new card briefly
+      // disappear into the previous card sitting behind it.
+      key={card.id}
       className="card-flip"
       layoutId={ghost ? undefined : card.id}
       transition={layoutTransition}
