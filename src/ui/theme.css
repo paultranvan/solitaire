@@ -31,8 +31,8 @@
     120px
   );
   --card-h: calc(var(--card-w) * 1.4);
-  --fan-faceup: calc(var(--card-h) * 0.29);
-  --fan-facedown: calc(var(--card-h) * 0.13);
+  --fan-faceup: calc(var(--card-h) * 0.32);
+  --fan-facedown: calc(var(--card-h) * 0.16);
   --gap-col: calc(var(--card-w) * 0.18);
 
   /* Top bar */
