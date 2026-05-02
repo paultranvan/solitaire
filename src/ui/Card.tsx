@@ -38,15 +38,11 @@ export function CardView({ card, ghost = false }: CardProps) {
           className={`card-flip__face card-flip__front card card--face card--${c}`}
           aria-hidden={!card.faceUp}
         >
-          <div className="card__corner card__corner--tl">
+          <div className="card__corner">
             <span className="card__rank">{label}</span>
-            <span className="card__suit-small">{glyph}</span>
+            <span className="card__suit">{glyph}</span>
           </div>
           <div className="card__center">{glyph}</div>
-          <div className="card__corner card__corner--br">
-            <span className="card__rank">{label}</span>
-            <span className="card__suit-small">{glyph}</span>
-          </div>
         </div>
       </motion.div>
     </motion.div>

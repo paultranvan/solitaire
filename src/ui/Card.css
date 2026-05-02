@@ -52,34 +52,44 @@
 .card--face.card--red { color: var(--card-red); }
 .card--face.card--black { color: var(--card-black); }
 
+/* Single-row header: rank top-left, suit top-right. Sits high inside the
+   ~26%-of-card-h fan strip so both indices read clearly on stacked cards. */
 .card__corner {
   position: absolute;
+  top: calc(var(--card-w) * 0.04);
+  left: calc(var(--card-w) * 0.09);
+  right: calc(var(--card-w) * 0.09);
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 0.95;
-  font-size: calc(var(--card-w) * 0.26);
+  align-items: baseline;
+  justify-content: space-between;
+  line-height: 1;
+  pointer-events: none;
 }
 
-.card__corner--tl { top: calc(var(--card-w) * 0.08); left: calc(var(--card-w) * 0.1); }
-.card__corner--br {
-  bottom: calc(var(--card-w) * 0.08);
-  right: calc(var(--card-w) * 0.1);
-  transform: rotate(180deg);
+.card__rank {
+  font-size: calc(var(--card-w) * 0.32);
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
-.card__rank { letter-spacing: -0.02em; }
-.card__suit-small { font-size: calc(var(--card-w) * 0.22); margin-top: 2px; }
+.card__suit {
+  font-size: calc(var(--card-w) * 0.30);
+  line-height: 1;
+}
 
+/* Solid center pip — sits below the header in the lower 70% of the card so
+   it never bleeds into the corner row. */
 .card__center {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: calc(var(--card-w) * 0.45);
+  bottom: calc(var(--card-w) * 0.10);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(var(--card-w) * 0.46);
+  font-size: calc(var(--card-w) * 0.62);
   pointer-events: none;
-  opacity: 0.18;
 }
 
 /* Empty pile slot */
