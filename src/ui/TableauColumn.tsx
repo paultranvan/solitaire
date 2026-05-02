@@ -15,7 +15,7 @@ export function TableauColumn({
   cards: Card[];
   column: number;
   hint: HintState;
-  onAutoMove: () => void;
+  onAutoMove: (cardIndex: number) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: tableauColumnDropId(column) });
   const columnHinted = isHintTarget(hint, { kind: 'tableauColumn', column });
@@ -34,7 +34,6 @@ export function TableauColumn({
     <div
       ref={setNodeRef}
       className={`tableau-col${isOver ? ' tableau-col--over' : ''}${columnHinted ? ' is-hinted' : ''}`}
-      onDoubleClick={onAutoMove}
     >
       {cards.length === 0 ? (
         <div className="pile-empty" />
@@ -57,6 +56,7 @@ export function TableauColumn({
               key={card.id}
               className={`tableau-col__slot${isStackHinted ? ' is-hinted' : ''}`}
               style={{ marginTop: offset }}
+              onDoubleClick={card.faceUp ? () => onAutoMove(i) : undefined}
             >
               {card.faceUp ? (
                 <DraggableCard

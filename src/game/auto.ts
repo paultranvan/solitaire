@@ -5,7 +5,7 @@ import { GameState } from './state';
 
 export type AutoMoveSource =
   | { kind: 'talon' }
-  | { kind: 'tableauTop'; column: number };
+  | { kind: 'tableauStack'; column: number; cardIndex: number };
 
 const tryFoundationFor = (card: Card, foundations: readonly Card[][]): number | null => {
   const idx = foundationIdxFor(card.suit);
@@ -31,13 +31,17 @@ export const findAutoMoveTarget = (state: GameState, source: AutoMoveSource): Mo
   }
 
   const col = state.tableau[source.column];
-  if (col.length === 0) return null;
-  const top = col[col.length - 1];
-  if (!top.faceUp) return null;
+  if (source.cardIndex < 0 || source.cardIndex >= col.length) return null;
+  const head = col[source.cardIndex];
+  if (!head.faceUp) return null;
+  const isSingleCard = source.cardIndex === col.length - 1;
 
-  const fnd = tryFoundationFor(top, state.foundations);
-  if (fnd !== null) {
-    return { kind: 'tableauToFoundation', from: source.column, foundationIdx: fnd };
+  // Foundation accepts a single card only — try it for top-of-column clicks.
+  if (isSingleCard) {
+    const fnd = tryFoundationFor(head, state.foundations);
+    if (fnd !== null) {
+      return { kind: 'tableauToFoundation', from: source.column, foundationIdx: fnd };
+    }
   }
 
   let best: { to: number; score: number } | null = null;
@@ -45,7 +49,7 @@ export const findAutoMoveTarget = (state: GameState, source: AutoMoveSource): Mo
     if (to === source.column) continue;
     const dst = state.tableau[to];
     const dstTop = dst[dst.length - 1];
-    if (canPlaceOnTableau(top, dstTop)) {
+    if (canPlaceOnTableau(head, dstTop)) {
       const score = countFaceDownInColumn(dst);
       if (best === null || score > best.score) {
         best = { to, score };
@@ -56,7 +60,7 @@ export const findAutoMoveTarget = (state: GameState, source: AutoMoveSource): Mo
   return {
     kind: 'tableauToTableau',
     from: source.column,
-    cardIndex: col.length - 1,
+    cardIndex: source.cardIndex,
     to: best.to,
   };
 };

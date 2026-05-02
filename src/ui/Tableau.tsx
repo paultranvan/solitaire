@@ -21,7 +21,9 @@ export function Tableau({
           cards={col}
           column={i}
           hint={hint}
-          onAutoMove={() => onAutoMove({ kind: 'tableauTop', column: i })}
+          onAutoMove={(cardIndex) =>
+            onAutoMove({ kind: 'tableauStack', column: i, cardIndex })
+          }
         />
       ))}
     </div>
