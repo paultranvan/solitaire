@@ -21,7 +21,11 @@ const config: CapacitorConfig = {
     StatusBar: {
       style: 'LIGHT',
       backgroundColor: '#0f3818',
-      overlaysWebView: true,
+      // Android 15's forced edge-to-edge is opted out via the activity theme
+      // (see android/app/src/main/res/values/styles.xml — windowOptOutEdge
+      // ToEdgeEnforcement=true), so this flag is honored: the system bar
+      // sits above the WebView, painted with backgroundColor.
+      overlaysWebView: false,
     },
   },
 };

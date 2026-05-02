@@ -9,6 +9,7 @@ export const initNativeLifecycle = async (): Promise<void> => {
 
   try {
     const { StatusBar, Style } = await import('@capacitor/status-bar');
+    await StatusBar.setOverlaysWebView({ overlay: false });
     await StatusBar.setStyle({ style: Style.Light });
     await StatusBar.setBackgroundColor({ color: '#0f3818' });
   } catch {

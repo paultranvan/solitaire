@@ -54,6 +54,29 @@ Re-apply this patch any time `android/` is regenerated (`cap add android`
 after deleting it) — the file is gitignored so the fix doesn't survive a
 re-scaffold.
 
+## Android post-scaffold patch — Android 15 edge-to-edge opt-out
+
+On Android 15 (`targetSdk 35`) the system forces every activity to draw
+edge-to-edge regardless of the `StatusBar.overlaysWebView` Capacitor flag.
+The result: the system status bar stays at its default light grey color and
+the WebView paints behind it, ignoring our `setBackgroundColor('#0f3818')`
+calls. To restore Android-14 behavior on this single activity, add the
+opt-out attribute to `android/app/src/main/res/values/styles.xml` inside
+the `AppTheme.NoActionBar` style:
+
+```xml
+<style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <item name="windowActionBar">false</item>
+    <item name="windowNoTitle">true</item>
+    <item name="android:background">@null</item>
+    <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+</style>
+```
+
+After this, `overlaysWebView: false` and `StatusBar.setBackgroundColor` work
+again — the system bar paints felt-dark and the WebView starts below it.
+This file is also gitignored, so reapply on any `android/` re-scaffold.
+
 ## Per-build sync
 
 After every `npm run build`:
