@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import {
   DndContext,
   DragEndEvent,
@@ -175,7 +176,14 @@ export function Board({ initial }: { initial: GameState }) {
       const move = findAutoMoveTarget(state, source);
       if (move === null) return;
       if (!canApply(state, move)) return;
-      dispatch({ type: 'move', move });
+      // flushSync commits the state change synchronously so motion/react can
+      // run its layout-effects and apply layoutId transforms before the
+      // browser paints. Without it, multi-card moves intermittently flicker
+      // because some cards paint at their destination one frame before the
+      // transform pulls them back to the source for the animation.
+      flushSync(() => {
+        dispatch({ type: 'move', move });
+      });
       if (move.kind === 'tableauToFoundation' || move.kind === 'talonToFoundation') {
         play('foundation');
         haptic('foundation');
