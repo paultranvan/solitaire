@@ -41,11 +41,16 @@ export const useSettingsStore = create<SettingsStore>()(
         // schemaVersion for every rename.
         state.settings = { ...defaultSettings(), ...s };
       }),
-    update: (patch) =>
+    // persist() must run AFTER set() returns, not inside the producer: idb-keyval's
+    // write opens the DB asynchronously and only structured-clones the value once
+    // dbp resolves, by which point immer has revoked the draft proxy and the put
+    // throws (silently — saveKey swallows it).
+    update: (patch) => {
       set((state) => {
         Object.assign(state.settings, patch);
-        persist(state.settings);
-      }),
+      });
+      persist(useSettingsStore.getState().settings);
+    },
   })),
 );
 

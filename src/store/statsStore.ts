@@ -55,7 +55,11 @@ export const useStatsStore = create<StatsStore>()(
       set((state) => {
         state.stats = s;
       }),
-    recordGame: ({ mode, outcome, durationSec, moves }) =>
+    // persist() must run AFTER set() returns, not inside the producer: idb-keyval's
+    // write opens the DB asynchronously and only structured-clones the value once
+    // dbp resolves, by which point immer has revoked the draft proxy and the put
+    // throws (silently — saveKey swallows it).
+    recordGame: ({ mode, outcome, durationSec, moves }) => {
       set((state) => {
         const m = state.stats.byMode[String(mode) as '1' | '3'];
         m.played += 1;
@@ -71,13 +75,15 @@ export const useStatsStore = create<StatsStore>()(
         } else {
           state.stats.currentStreak = 0;
         }
-        persist(state.stats);
-      }),
-    reset: () =>
+      });
+      persist(useStatsStore.getState().stats);
+    },
+    reset: () => {
       set((state) => {
         state.stats = defaultStats();
-        persist(state.stats);
-      }),
+      });
+      persist(useStatsStore.getState().stats);
+    },
   })),
 );
 
