@@ -13,13 +13,14 @@ import {
   CollisionDetection,
 } from '@dnd-kit/core';
 import { LayoutGroup } from 'motion/react';
-import { Card } from '@/game/card';
+import { Card, makeCard, RANKS, SUITS } from '@/game/card';
 import { canApply } from '@/game/canApply';
 import { Move } from '@/game/moves';
 import { GameState } from '@/game/state';
 import { bestNextMove } from '@/game/hints';
 import { findAutoMoveTarget, AutoMoveSource, nextAutoCompleteMove } from '@/game/auto';
 import { isAutoCompletable, isWon } from '@/game/rules';
+import { computeScore } from '@/game/score';
 import { createInitialState } from '@/game/state';
 import { DragData } from '@/dnd/types';
 import { resolveMove } from '@/dnd/resolveMove';
@@ -74,6 +75,14 @@ export function Board({ initial }: { initial: GameState }) {
   const wonReportedRef = useRef(false);
   const winDurationRef = useRef(0);
   const winMovesRef = useRef(0);
+  const winScoreRef = useRef(0);
+  const winIsNewBestRef = useRef(false);
+  // True when the current win came from the "win" cheat key sequence — skip
+  // stats recording and the new-best badge so the preview leaves no trace.
+  const cheatWinRef = useRef(false);
+  // Holds the pending WinSheet open timer so handleNewGame/handleRestart can
+  // cancel it. Survives effect re-runs (cleanup intentionally omitted).
+  const winSheetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Active-play timer. activeSinceRef holds the ms-epoch when the current
   // "running" segment began (null = paused). flushActiveTime commits the
@@ -156,19 +165,43 @@ export function Board({ initial }: { initial: GameState }) {
     const since = activeSinceRef.current;
     const liveMs = state.activeMs + (since !== null ? Date.now() - since : 0);
     const durationSec = Math.max(0, Math.floor(liveMs / 1000));
-    winDurationRef.current = durationSec;
-    winMovesRef.current = state.movesMade;
-    recordGame({
-      mode: state.drawCount,
-      outcome: 'won',
+    const score = computeScore({
       durationSec,
       moves: state.movesMade,
+      drawCount: state.drawCount,
     });
+    const isCheat = cheatWinRef.current;
+    // Read the prior best for this mode *before* recordGame mutates it so the
+    // "New best!" badge reflects the comparison the player just made. Suppress
+    // the badge entirely on a cheat win since the score isn't saved.
+    const priorBest =
+      useStatsStore.getState().stats.byMode[String(state.drawCount) as '1' | '3'].bestScore;
+    winDurationRef.current = durationSec;
+    winMovesRef.current = state.movesMade;
+    winScoreRef.current = score;
+    winIsNewBestRef.current = !isCheat && (priorBest === null || score > priorBest);
+    if (!isCheat) {
+      recordGame({
+        mode: state.drawCount,
+        outcome: 'won',
+        durationSec,
+        moves: state.movesMade,
+        score,
+      });
+    }
     play('winCascade');
     haptic('win');
-    // Slight delay so the last foundation animation finishes before the sheet covers it.
-    const id = setTimeout(() => setWinOpen(true), 600);
-    return () => clearTimeout(id);
+    // Slight delay so the last foundation animation finishes before the sheet
+    // covers it. Don't return a cleanup: this effect re-runs whenever `state`
+    // changes (e.g. the activeMs tick that the won-transition effect dispatches
+    // immediately after the winning move), and the early-return path above
+    // means the cleanup would orphan the timer without scheduling a new one.
+    // Pending timers are cancelled explicitly in handleNewGame / handleRestart.
+    if (winSheetTimerRef.current !== null) clearTimeout(winSheetTimerRef.current);
+    winSheetTimerRef.current = setTimeout(() => {
+      winSheetTimerRef.current = null;
+      setWinOpen(true);
+    }, 600);
   }, [state, recordGame]);
 
   // Open the auto-complete prompt the first time the tableau has no
@@ -279,9 +312,43 @@ export function Board({ initial }: { initial: GameState }) {
     activeSinceRef.current = null;
     setRunningSince(null);
     wonReportedRef.current = false;
+    cheatWinRef.current = false;
+    if (winSheetTimerRef.current !== null) {
+      clearTimeout(winSheetTimerRef.current);
+      winSheetTimerRef.current = null;
+    }
     setAutoCompleteState('idle');
     dispatch({ type: 'reset', state: createInitialState({ drawCount: settingsDrawCount }) });
   };
+
+  // Hidden cheat: typing "win" anywhere installs a winning state that preserves
+  // the current seed, draw count, move count, and active play time. The normal
+  // win-detection effect then takes over (records stats, plays cascade, opens
+  // the WinSheet) so the resulting score and UI feel real.
+  useEffect(() => {
+    let buffer = '';
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.isContentEditable) return;
+      const tag = target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (e.key.length !== 1) return;
+      buffer = (buffer + e.key.toLowerCase()).slice(-3);
+      if (buffer !== 'win') return;
+      buffer = '';
+      cheatWinRef.current = true;
+      const winningState: GameState = {
+        ...state,
+        stock: [],
+        talon: [],
+        tableau: [[], [], [], [], [], [], []],
+        foundations: SUITS.map((suit) => RANKS.map((rank) => makeCard(suit, rank, true))),
+      };
+      dispatch({ type: 'reset', state: winningState });
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [state]);
 
   // Re-deal the current seed from scratch — same hand, fresh attempt. Doesn't
   // touch stats: a restart is a continuation of the same deal, not a new game,
@@ -290,6 +357,11 @@ export function Board({ initial }: { initial: GameState }) {
     activeSinceRef.current = null;
     setRunningSince(null);
     wonReportedRef.current = false;
+    cheatWinRef.current = false;
+    if (winSheetTimerRef.current !== null) {
+      clearTimeout(winSheetTimerRef.current);
+      winSheetTimerRef.current = null;
+    }
     setAutoCompleteState('idle');
     dispatch({
       type: 'reset',
@@ -357,6 +429,8 @@ export function Board({ initial }: { initial: GameState }) {
           durationSec={winDurationRef.current}
           moves={winMovesRef.current}
           drawCount={state.drawCount}
+          score={winScoreRef.current}
+          isNewBest={winIsNewBestRef.current}
           showConfetti={animationsOn}
         />
       </div>

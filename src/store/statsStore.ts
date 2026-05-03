@@ -7,6 +7,7 @@ export type ModeStats = {
   won: number;
   bestTimeSec: number | null;
   fewestMovesWin: number | null;
+  bestScore: number | null;
 };
 
 export type Stats = {
@@ -22,6 +23,14 @@ const emptyMode = (): ModeStats => ({
   won: 0,
   bestTimeSec: null,
   fewestMovesWin: null,
+  bestScore: null,
+});
+
+// Older saves predate `bestScore`; merge in a default so reads stay safe.
+const normalizeMode = (m: ModeStats): ModeStats => ({ ...emptyMode(), ...m });
+const normalizeStats = (s: Stats): Stats => ({
+  ...s,
+  byMode: { '1': normalizeMode(s.byMode['1']), '3': normalizeMode(s.byMode['3']) },
 });
 
 export const defaultStats = (): Stats => ({
@@ -37,6 +46,8 @@ export type RecordGameInput = {
   outcome: 'won' | 'abandoned';
   durationSec: number;
   moves: number;
+  // Only meaningful for wins; ignored for abandoned games.
+  score?: number;
 };
 
 type StatsStore = {
@@ -59,7 +70,7 @@ export const useStatsStore = create<StatsStore>()(
     // write opens the DB asynchronously and only structured-clones the value once
     // dbp resolves, by which point immer has revoked the draft proxy and the put
     // throws (silently — saveKey swallows it).
-    recordGame: ({ mode, outcome, durationSec, moves }) => {
+    recordGame: ({ mode, outcome, durationSec, moves, score }) => {
       set((state) => {
         const m = state.stats.byMode[String(mode) as '1' | '3'];
         m.played += 1;
@@ -68,6 +79,9 @@ export const useStatsStore = create<StatsStore>()(
           m.won += 1;
           if (m.bestTimeSec === null || durationSec < m.bestTimeSec) m.bestTimeSec = durationSec;
           if (m.fewestMovesWin === null || moves < m.fewestMovesWin) m.fewestMovesWin = moves;
+          if (score !== undefined && (m.bestScore === null || score > m.bestScore)) {
+            m.bestScore = score;
+          }
           state.stats.currentStreak += 1;
           if (state.stats.currentStreak > state.stats.longestStreak) {
             state.stats.longestStreak = state.stats.currentStreak;
@@ -90,6 +104,6 @@ export const useStatsStore = create<StatsStore>()(
 export const hydrateStatsFromStorage = async (): Promise<void> => {
   const loaded = await loadKey<Stats>(KEY_STATS);
   if (loaded && loaded.schemaVersion === 1) {
-    useStatsStore.getState().hydrate(loaded);
+    useStatsStore.getState().hydrate(normalizeStats(loaded));
   }
 };

@@ -51,4 +51,22 @@ describe('statsStore.recordGame', () => {
     rec({ mode: 3, outcome: 'abandoned', durationSec: 30, moves: 4 });
     expect(useStatsStore.getState().stats.totalSecondsPlayed).toBe(90);
   });
+
+  it('best score only grows on wins and never regresses', () => {
+    const rec = useStatsStore.getState().recordGame;
+    rec({ mode: 1, outcome: 'won', durationSec: 120, moves: 80, score: 5000 });
+    expect(useStatsStore.getState().stats.byMode['1'].bestScore).toBe(5000);
+    rec({ mode: 1, outcome: 'won', durationSec: 200, moves: 200, score: 2000 });
+    expect(useStatsStore.getState().stats.byMode['1'].bestScore).toBe(5000);
+    rec({ mode: 1, outcome: 'won', durationSec: 60, moves: 70, score: 9000 });
+    expect(useStatsStore.getState().stats.byMode['1'].bestScore).toBe(9000);
+    rec({ mode: 1, outcome: 'abandoned', durationSec: 10, moves: 3, score: 99999 });
+    expect(useStatsStore.getState().stats.byMode['1'].bestScore).toBe(9000);
+  });
+
+  it('omitting score on a win leaves bestScore untouched', () => {
+    const rec = useStatsStore.getState().recordGame;
+    rec({ mode: 3, outcome: 'won', durationSec: 90, moves: 70 });
+    expect(useStatsStore.getState().stats.byMode['3'].bestScore).toBeNull();
+  });
 });

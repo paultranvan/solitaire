@@ -23,12 +23,14 @@ function ModeBlock({
   won,
   bestTimeSec,
   fewestMovesWin,
+  bestScore,
 }: {
   mode: '1' | '3';
   played: number;
   won: number;
   bestTimeSec: number | null;
   fewestMovesWin: number | null;
+  bestScore: number | null;
 }) {
   return (
     <div className="mode-block">
@@ -44,6 +46,10 @@ function ModeBlock({
         <div className="mode-block__item">
           <dt>Won</dt>
           <dd>{won}</dd>
+        </div>
+        <div className="mode-block__item">
+          <dt>Best score</dt>
+          <dd>{bestScore === null ? '—' : bestScore.toLocaleString()}</dd>
         </div>
         <div className="mode-block__item">
           <dt>Best time</dt>
@@ -90,6 +96,7 @@ function StatsSection() {
             won={stats.byMode[m].won}
             bestTimeSec={stats.byMode[m].bestTimeSec}
             fewestMovesWin={stats.byMode[m].fewestMovesWin}
+            bestScore={stats.byMode[m].bestScore}
           />
         ))}
       </div>

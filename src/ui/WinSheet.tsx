@@ -38,6 +38,8 @@ export function WinSheet({
   durationSec,
   moves,
   drawCount,
+  score,
+  isNewBest,
   showConfetti = true,
 }: {
   open: boolean;
@@ -46,6 +48,8 @@ export function WinSheet({
   durationSec: number;
   moves: number;
   drawCount: 1 | 3;
+  score: number;
+  isNewBest: boolean;
   showConfetti?: boolean;
 }) {
   return (
@@ -56,6 +60,12 @@ export function WinSheet({
           <div className="win__hero">🎉</div>
           <h2 className="win__title">Congratulations</h2>
           <p className="win__subtitle">You cleared the board.</p>
+
+          <div className="win__score">
+            <div className="win__score-value">{score.toLocaleString()}</div>
+            <div className="win__score-label">Score</div>
+            {isNewBest && <div className="win__score-badge">New best!</div>}
+          </div>
 
           <div className="win__stats">
             <div className="win__stat">
