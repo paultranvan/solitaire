@@ -9,6 +9,10 @@ export type GameState = {
   talon: Card[];
   drawCount: 1 | 3;
   startedAt: number;
+  // Accumulated active play time. Ticked from the UI layer when the tab is
+  // visible and the game isn't won; drives stats and the on-screen timer.
+  // Wall-clock since startedAt is unreliable (tab hidden, app killed).
+  activeMs: number;
   movesMade: number;
   redealCount: number;
   seed: string;
@@ -29,6 +33,7 @@ export const createInitialState = (opts: { drawCount: 1 | 3; seed?: string }): G
     talon: [],
     drawCount: opts.drawCount,
     startedAt: Date.now(),
+    activeMs: 0,
     movesMade: 0,
     redealCount: 0,
     seed,

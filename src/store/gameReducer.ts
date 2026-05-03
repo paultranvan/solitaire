@@ -4,7 +4,8 @@ import { GameState } from '@/game/state';
 export type GameAction =
   | { type: 'move'; move: Move }
   | { type: 'undo' }
-  | { type: 'reset'; state: GameState };
+  | { type: 'reset'; state: GameState }
+  | { type: 'tick'; deltaMs: number };
 
 export const gameReducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
@@ -22,5 +23,11 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       // game; createInitialState already sets history: [], but keep this so
       // any future caller can't drift.
       return { ...action.state, history: [] };
+    case 'tick': {
+      // Tick doesn't push history — it isn't a player move, just an
+      // accumulator update for the active-play timer.
+      if (action.deltaMs <= 0) return state;
+      return { ...state, activeMs: state.activeMs + action.deltaMs };
+    }
   }
 };

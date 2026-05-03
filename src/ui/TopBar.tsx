@@ -3,8 +3,10 @@ import { formatMMSS } from './format';
 import './TopBar.css';
 
 export type TopBarProps = {
-  startedAt: number;
-  paused: boolean;
+  activeMs: number;
+  // ms-epoch when the active-play clock started its current segment, or null
+  // if paused (won, hidden, etc.). Displayed elapsed = activeMs + (now - runningSince).
+  runningSince: number | null;
   moves: number;
   canUndo: boolean;
   canRestart: boolean;
@@ -15,20 +17,28 @@ export type TopBarProps = {
   onMenu: () => void;
 };
 
-const elapsedFrom = (startedAt: number): number =>
-  Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+const elapsedSeconds = (activeMs: number, runningSince: number | null): number => {
+  const live = runningSince !== null ? Date.now() - runningSince : 0;
+  return Math.max(0, Math.floor((activeMs + live) / 1000));
+};
 
 // Self-contained 1Hz tick. Lives inside TopBar so the rest of the board
 // doesn't re-render once a second just to update the time chip.
-function ElapsedChip({ startedAt, paused }: { startedAt: number; paused: boolean }) {
-  const [elapsed, setElapsed] = useState(() => elapsedFrom(startedAt));
+function ElapsedChip({
+  activeMs,
+  runningSince,
+}: {
+  activeMs: number;
+  runningSince: number | null;
+}) {
+  const [elapsed, setElapsed] = useState(() => elapsedSeconds(activeMs, runningSince));
 
   useEffect(() => {
-    setElapsed(elapsedFrom(startedAt));
-    if (paused) return;
-    const id = setInterval(() => setElapsed(elapsedFrom(startedAt)), 1000);
+    setElapsed(elapsedSeconds(activeMs, runningSince));
+    if (runningSince === null) return;
+    const id = setInterval(() => setElapsed(elapsedSeconds(activeMs, runningSince)), 1000);
     return () => clearInterval(id);
-  }, [startedAt, paused]);
+  }, [activeMs, runningSince]);
 
   return (
     <span className="topbar__chip" title="time">
@@ -45,8 +55,8 @@ function ElapsedChip({ startedAt, paused }: { startedAt: number; paused: boolean
 const swallowFocus = (e: MouseEvent) => e.preventDefault();
 
 export function TopBar({
-  startedAt,
-  paused,
+  activeMs,
+  runningSince,
   moves,
   canUndo,
   canRestart,
@@ -59,7 +69,7 @@ export function TopBar({
   return (
     <header className="topbar">
       <div className="topbar__group topbar__group--left">
-        <ElapsedChip startedAt={startedAt} paused={paused} />
+        <ElapsedChip activeMs={activeMs} runningSince={runningSince} />
         <span className="topbar__chip" title="moves">
           <span className="topbar__chip-glyph" aria-hidden="true">
             ♠

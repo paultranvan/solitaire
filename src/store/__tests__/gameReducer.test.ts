@@ -41,4 +41,18 @@ describe('gameReducer', () => {
     const b = blank({ seed: 'b' });
     expect(gameReducer(a, { type: 'reset', state: b }).seed).toBe('b');
   });
+
+  it('tick adds positive deltaMs to activeMs and ignores non-positive deltas', () => {
+    const s = blank({ activeMs: 1000 });
+    expect(gameReducer(s, { type: 'tick', deltaMs: 250 }).activeMs).toBe(1250);
+    expect(gameReducer(s, { type: 'tick', deltaMs: 0 })).toBe(s);
+    expect(gameReducer(s, { type: 'tick', deltaMs: -5 })).toBe(s);
+  });
+
+  it('tick does not push history (it is not a player move)', () => {
+    const s = blank({ activeMs: 0 });
+    const next = gameReducer(s, { type: 'tick', deltaMs: 100 });
+    expect(next.history).toHaveLength(0);
+    expect(next.movesMade).toBe(s.movesMade);
+  });
 });

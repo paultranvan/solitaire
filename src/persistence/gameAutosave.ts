@@ -39,7 +39,14 @@ export const useGameAutosave = (state: GameState): void => {
 export const loadSavedGame = async (): Promise<GameState | null> => {
   const loaded = await loadKey<SavedGame>(KEY_GAME);
   if (!loaded || loaded.schemaVersion !== 1) return null;
-  const restored: GameState = { ...loaded, history: [] };
+  // activeMs was added after launch; pre-migration saves have no field. Default
+  // to 0 (player loses already-elapsed time on a resumed deal — acceptable
+  // tradeoff vs. inheriting an inflated wall-clock duration).
+  const restored: GameState = {
+    ...loaded,
+    activeMs: typeof loaded.activeMs === 'number' ? loaded.activeMs : 0,
+    history: [],
+  };
   // Belt-and-braces: the autosave clears on win, but defend in case a stale
   // won state survives (downgrade, manual IDB write, etc.).
   if (isWon(restored)) return null;

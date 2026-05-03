@@ -9,6 +9,7 @@ export const blankGameState = (over: Partial<GameState> = {}): GameState => ({
   talon: [],
   drawCount: 1,
   startedAt: 0,
+  activeMs: 0,
   movesMade: 0,
   redealCount: 0,
   seed: 't',

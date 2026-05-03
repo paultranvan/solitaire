@@ -75,9 +75,68 @@ export function Board({ initial }: { initial: GameState }) {
   const winDurationRef = useRef(0);
   const winMovesRef = useRef(0);
 
+  // Active-play timer. activeSinceRef holds the ms-epoch when the current
+  // "running" segment began (null = paused). flushActiveTime commits the
+  // running segment into state.activeMs via the tick reducer; liveActiveMs
+  // returns the up-to-the-moment total without committing (used when recording
+  // stats). runningSince mirrors the ref into state so TopBar can re-render.
+  const activeSinceRef = useRef<number | null>(null);
+  const wonRef = useRef(false);
+  const [runningSince, setRunningSince] = useState<number | null>(null);
+  const flushActiveTime = useCallback(() => {
+    const since = activeSinceRef.current;
+    if (since === null) return;
+    activeSinceRef.current = null;
+    setRunningSince(null);
+    const delta = Date.now() - since;
+    if (delta > 0) dispatch({ type: 'tick', deltaMs: delta });
+  }, []);
+  const startActiveTime = useCallback(() => {
+    if (activeSinceRef.current !== null) return;
+    if (wonRef.current) return;
+    if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+    const now = Date.now();
+    activeSinceRef.current = now;
+    setRunningSince(now);
+  }, []);
+  const liveActiveMs = (): number => {
+    const since = activeSinceRef.current;
+    return state.activeMs + (since !== null ? Date.now() - since : 0);
+  };
+
   useEffect(() => {
     primeAudioOnFirstGesture();
   }, []);
+
+  // Mount-only: register visibility listeners and start the timer if eligible.
+  // Reads wonRef so the listeners stay valid across won transitions without
+  // having to re-register. flushActiveTime / startActiveTime are stable.
+  useEffect(() => {
+    const onVisibility = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible')
+        startActiveTime();
+      else flushActiveTime();
+    };
+    const onPageHide = () => flushActiveTime();
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', onPageHide);
+    startActiveTime();
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', onPageHide);
+      flushActiveTime();
+    };
+  }, [flushActiveTime, startActiveTime]);
+
+  // React to won transitions: flush on win, start on new-deal-after-win/undo.
+  // Cheap & idempotent on every state change (start/flush early-return when
+  // already in target state), so depending on `state` is safe.
+  useEffect(() => {
+    const won = isWon(state);
+    wonRef.current = won;
+    if (won) flushActiveTime();
+    else startActiveTime();
+  }, [state, flushActiveTime, startActiveTime]);
 
   const recordGame = useStatsStore((s) => s.recordGame);
   const settingsDrawCount = useSettingsStore((s) => s.settings.drawCount);
@@ -92,7 +151,11 @@ export function Board({ initial }: { initial: GameState }) {
     if (!isWon(state)) return;
     if (wonReportedRef.current) return;
     wonReportedRef.current = true;
-    const durationSec = Math.max(0, Math.floor((Date.now() - state.startedAt) / 1000));
+    // Inline live-active-ms read so this effect doesn't depend on the
+    // freshly-rebuilt liveActiveMs closure each render.
+    const since = activeSinceRef.current;
+    const liveMs = state.activeMs + (since !== null ? Date.now() - since : 0);
+    const durationSec = Math.max(0, Math.floor(liveMs / 1000));
     winDurationRef.current = durationSec;
     winMovesRef.current = state.movesMade;
     recordGame({
@@ -206,10 +269,15 @@ export function Board({ initial }: { initial: GameState }) {
       recordGame({
         mode: state.drawCount,
         outcome: 'abandoned',
-        durationSec: Math.max(0, Math.floor((Date.now() - state.startedAt) / 1000)),
+        durationSec: Math.max(0, Math.floor(liveActiveMs() / 1000)),
         moves: state.movesMade,
       });
     }
+    // Drop the running segment without dispatching a tick — we already used
+    // it for the abandoned record (if any), and the reset below installs a
+    // fresh activeMs=0. The won-state effect will restart the timer.
+    activeSinceRef.current = null;
+    setRunningSince(null);
     wonReportedRef.current = false;
     setAutoCompleteState('idle');
     dispatch({ type: 'reset', state: createInitialState({ drawCount: settingsDrawCount }) });
@@ -219,6 +287,8 @@ export function Board({ initial }: { initial: GameState }) {
   // touch stats: a restart is a continuation of the same deal, not a new game,
   // so it shouldn't inflate the abandoned counter.
   const handleRestart = () => {
+    activeSinceRef.current = null;
+    setRunningSince(null);
     wonReportedRef.current = false;
     setAutoCompleteState('idle');
     dispatch({
@@ -237,8 +307,8 @@ export function Board({ initial }: { initial: GameState }) {
     >
       <div className="board" data-animations={animationsOn ? 'on' : 'off'}>
         <TopBar
-          startedAt={state.startedAt}
-          paused={isWon(state)}
+          activeMs={state.activeMs}
+          runningSince={runningSince}
           moves={state.movesMade}
           canUndo={state.history.length > 0}
           canRestart={state.movesMade > 0}
