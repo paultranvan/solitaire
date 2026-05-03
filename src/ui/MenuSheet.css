@@ -11,6 +11,80 @@
   margin-bottom: 8px;
 }
 
+/* ---- Game actions row (top of sheet: New Game / Restart) ---- */
+
+.m-game-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.m-game-action {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 18px 12px;
+  background: rgba(243, 236, 217, 0.04);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    transform 0.18s;
+}
+
+.m-game-action:hover:not(:disabled) {
+  background: rgba(243, 236, 217, 0.09);
+  border-color: var(--rule-strong);
+}
+
+.m-game-action:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.m-game-action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.m-game-action--accent {
+  background: var(--gold-soft);
+  border-color: rgba(216, 182, 111, 0.35);
+  color: var(--gold);
+}
+
+.m-game-action--accent:hover:not(:disabled) {
+  background: rgba(216, 182, 111, 0.16);
+  border-color: rgba(216, 182, 111, 0.55);
+}
+
+.m-game-action__glyph {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.m-game-action__icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+  color: var(--ink-soft);
+}
+
+.m-game-action__label {
+  line-height: 1;
+}
+
 /* "STATISTICS" eyebrow with hairline rules flanking the title.
    Engraved-plaque feel, like a chapter heading in a card-club ledger. */
 .m-eyebrow {

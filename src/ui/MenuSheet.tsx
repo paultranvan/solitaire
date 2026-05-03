@@ -230,9 +230,81 @@ function SettingsSection() {
   );
 }
 
-export function MenuSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+function GameActions({
+  onNewGame,
+  onRestart,
+  canRestart,
+}: {
+  onNewGame: () => void;
+  onRestart: () => void;
+  canRestart: boolean;
+}) {
+  return (
+    <div className="m-game-actions">
+      <button
+        type="button"
+        className="m-game-action m-game-action--accent"
+        onClick={onNewGame}
+      >
+        <span className="m-game-action__glyph" aria-hidden="true">
+          +
+        </span>
+        <span className="m-game-action__label">New Game</span>
+      </button>
+      <button
+        type="button"
+        className="m-game-action"
+        onClick={onRestart}
+        disabled={!canRestart}
+      >
+        <svg
+          className="m-game-action__icon"
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3 12a9 9 0 1 0 3-6.7" />
+          <path d="M3 4v5h5" />
+        </svg>
+        <span className="m-game-action__label">Restart</span>
+      </button>
+    </div>
+  );
+}
+
+export function MenuSheet({
+  open,
+  onClose,
+  onNewGame,
+  onRestart,
+  canRestart,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onNewGame: () => void;
+  onRestart: () => void;
+  canRestart: boolean;
+}) {
+  // Close the sheet after a game-changing action so the player sees the new
+  // board immediately. Defer one tick so the click finishes before the sheet
+  // begins its exit animation.
+  const fire = (handler: () => void) => () => {
+    handler();
+    onClose();
+  };
   return (
     <Sheet open={open} onClose={onClose} title="Menu">
+      <GameActions
+        onNewGame={fire(onNewGame)}
+        onRestart={fire(onRestart)}
+        canRestart={canRestart}
+      />
       <StatsSection />
       <SettingsSection />
     </Sheet>

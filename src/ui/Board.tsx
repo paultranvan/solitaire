@@ -311,11 +311,8 @@ export function Board({ initial }: { initial: GameState }) {
           runningSince={runningSince}
           moves={state.movesMade}
           canUndo={state.history.length > 0}
-          canRestart={state.movesMade > 0}
           onUndo={handleUndo}
           onHint={handleHint}
-          onNewGame={handleNewGame}
-          onRestart={handleRestart}
           onMenu={() => setMenuOpen(true)}
         />
         {/* LayoutGroup is keyed by seed so layoutId shared-element animations
@@ -343,7 +340,13 @@ export function Board({ initial }: { initial: GameState }) {
           onAccept={() => setAutoCompleteState('running')}
           onDecline={() => setAutoCompleteState('declined')}
         />
-        <MenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
+        <MenuSheet
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          onNewGame={handleNewGame}
+          onRestart={handleRestart}
+          canRestart={state.movesMade > 0}
+        />
         <WinSheet
           open={winOpen}
           onClose={() => setWinOpen(false)}
