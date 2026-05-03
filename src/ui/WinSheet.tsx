@@ -1,12 +1,7 @@
 import { motion } from 'motion/react';
 import { Sheet } from './Sheet';
+import { formatMMSS } from './format';
 import './WinSheet.css';
-
-const fmt = (sec: number) => {
-  const m = Math.floor(sec / 60);
-  const r = sec % 60;
-  return `${m.toString().padStart(2, '0')}:${r.toString().padStart(2, '0')}`;
-};
 
 const COLORS = ['#f97316', '#facc15', '#4ade80', '#22d3ee', '#a78bfa', '#f472b6', '#ef4444'];
 const PIECES = 60;
@@ -43,6 +38,7 @@ export function WinSheet({
   durationSec,
   moves,
   drawCount,
+  showConfetti = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -50,10 +46,11 @@ export function WinSheet({
   durationSec: number;
   moves: number;
   drawCount: 1 | 3;
+  showConfetti?: boolean;
 }) {
   return (
     <>
-      {open && <Confetti />}
+      {open && showConfetti && <Confetti />}
       <Sheet open={open} onClose={onClose} title="You won!">
         <div className="win">
           <div className="win__hero">🎉</div>
@@ -62,7 +59,7 @@ export function WinSheet({
 
           <div className="win__stats">
             <div className="win__stat">
-              <div className="win__stat-value">{fmt(durationSec)}</div>
+              <div className="win__stat-value">{formatMMSS(durationSec)}</div>
               <div className="win__stat-label">Time</div>
             </div>
             <div className="win__stat">

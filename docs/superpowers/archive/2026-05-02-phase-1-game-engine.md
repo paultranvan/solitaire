@@ -1,5 +1,9 @@
 # Phase 1: Game Engine — Implementation Plan
 
+> **Historical document — no longer maintained.**
+> This plan was used to drive the original engine build. The codebase has
+> evolved since; see [CLAUDE.md](../../../CLAUDE.md) for current architecture.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the pure game-logic library for Klondike solitaire. No UI, no React, no DOM — a fully unit-tested TypeScript module that exposes types, a deal function, a move reducer, hints, and auto-move logic. Phase 2 will wrap a UI around it.
@@ -13,6 +17,7 @@
 ## File map
 
 **Wiped from old project (preserve `docs/`, `.git/`, `.gitignore`, `.superpowers/`, `README.md` (kept for reference)):**
+
 - `src/` (all old files)
 - `public/` (old)
 - `package.json`, `package-lock.json`, `yarn.lock`
@@ -20,31 +25,32 @@
 
 **Created in this plan:**
 
-| Path | Responsibility |
-| --- | --- |
-| `package.json` | New deps: react, vite, typescript, vitest, dnd-kit, motion, zustand, idb-keyval, howler, seedrandom, capacitor + plugins |
-| `tsconfig.json` | Strict TS config, ESNext target |
-| `vite.config.ts` | Vite + Vitest + path alias `@/*` |
-| `eslint.config.js` | Flat config |
-| `.prettierrc.json` | Formatter |
-| `index.html` | Vite entry (placeholder for Phase 2) |
-| `src/main.tsx` | React entry (placeholder) |
-| `src/App.tsx` | Placeholder app |
-| `src/game/card.ts` | `Suit`, `Rank`, `Card`, `cardId`, `parseCardId`, color helpers |
-| `src/game/deck.ts` | `createDeck`, seedable `shuffleDeck`, `dealKlondike` |
-| `src/game/state.ts` | `GameState` type + `createInitialState({ drawCount, seed })` |
-| `src/game/rules.ts` | `canPlaceOnTableau`, `canPlaceOnFoundation`, `isValidStack`, `isWon`, `isAutoCompletable`, `foundationIdxFor` |
-| `src/game/moves.ts` | `Move` union + `applyMove(state, move)` + `undo(state)` + `InvalidMoveError` |
-| `src/game/hints.ts` | `bestNextMove(state): Move \| null` |
-| `src/game/auto.ts` | `findAutoMoveTarget`, `nextAutoCompleteMove` |
-| `src/game/index.ts` | Barrel export |
-| `src/game/__tests__/*.test.ts` | Vitest tests for each module |
+| Path                           | Responsibility                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `package.json`                 | New deps: react, vite, typescript, vitest, dnd-kit, motion, zustand, idb-keyval, howler, seedrandom, capacitor + plugins |
+| `tsconfig.json`                | Strict TS config, ESNext target                                                                                          |
+| `vite.config.ts`               | Vite + Vitest + path alias `@/*`                                                                                         |
+| `eslint.config.js`             | Flat config                                                                                                              |
+| `.prettierrc.json`             | Formatter                                                                                                                |
+| `index.html`                   | Vite entry (placeholder for Phase 2)                                                                                     |
+| `src/main.tsx`                 | React entry (placeholder)                                                                                                |
+| `src/App.tsx`                  | Placeholder app                                                                                                          |
+| `src/game/card.ts`             | `Suit`, `Rank`, `Card`, `cardId`, `parseCardId`, color helpers                                                           |
+| `src/game/deck.ts`             | `createDeck`, seedable `shuffleDeck`, `dealKlondike`                                                                     |
+| `src/game/state.ts`            | `GameState` type + `createInitialState({ drawCount, seed })`                                                             |
+| `src/game/rules.ts`            | `canPlaceOnTableau`, `canPlaceOnFoundation`, `isValidStack`, `isWon`, `isAutoCompletable`, `foundationIdxFor`            |
+| `src/game/moves.ts`            | `Move` union + `applyMove(state, move)` + `undo(state)` + `InvalidMoveError`                                             |
+| `src/game/hints.ts`            | `bestNextMove(state): Move \| null`                                                                                      |
+| `src/game/auto.ts`             | `findAutoMoveTarget`, `nextAutoCompleteMove`                                                                             |
+| `src/game/index.ts`            | Barrel export                                                                                                            |
+| `src/game/__tests__/*.test.ts` | Vitest tests for each module                                                                                             |
 
 ---
 
 ## Task 1: Wipe old project, scaffold new
 
 **Files:**
+
 - Delete: `src/` (old), `public/` (old), `package.json`, `package-lock.json`, `yarn.lock`, `.eslintrc.json`, `.prettierrc`, `.editorconfig`
 - Create: `package.json`, `tsconfig.json`, `vite.config.ts`, `eslint.config.js`, `.prettierrc.json`, `index.html`, `src/main.tsx`, `src/App.tsx`, `src/index.css`
 
@@ -176,7 +182,10 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
     },
   },
 );
@@ -231,17 +240,30 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 ```tsx
 export default function App() {
-  return <div style={{ padding: 24, fontFamily: 'system-ui' }}>Solitaire — Phase 1 (engine only)</div>;
+  return (
+    <div style={{ padding: 24, fontFamily: 'system-ui' }}>Solitaire — Phase 1 (engine only)</div>
+  );
 }
 ```
 
 - [ ] **Step 10: Write `src/index.css`**
 
 ```css
-:root { color-scheme: light dark; }
-* { box-sizing: border-box; }
-html, body, #root { height: 100%; margin: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+:root {
+  color-scheme: light dark;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 ```
 
 - [ ] **Step 11: Write `src/test-setup.ts`**
@@ -285,6 +307,7 @@ git commit -m "chore: Scaffold Vite + React + TypeScript project"
 ## Task 2: Card types + helpers (TDD)
 
 **Files:**
+
 - Create: `src/game/card.ts`
 - Create: `src/game/__tests__/card.test.ts`
 
@@ -392,6 +415,7 @@ git commit -m "feat(game): Add Card type and helpers"
 ## Task 3: Deck creation, seedable shuffle, Klondike deal (TDD)
 
 **Files:**
+
 - Create: `src/game/deck.ts`
 - Create: `src/game/__tests__/deck.test.ts`
 
@@ -533,6 +557,7 @@ git commit -m "feat(game): Add deck creation, seeded shuffle, Klondike deal"
 ## Task 4: GameState + initial state (TDD)
 
 **Files:**
+
 - Create: `src/game/state.ts`
 - Create: `src/game/__tests__/state.test.ts`
 
@@ -610,8 +635,7 @@ export type GameState = {
   history: GameState[];
 };
 
-const randomSeed = (): string =>
-  Math.random().toString(36).slice(2) + Date.now().toString(36);
+const randomSeed = (): string => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 export const createInitialState = (opts: { drawCount: 1 | 3; seed?: string }): GameState => {
   const seed = opts.seed ?? randomSeed();
@@ -653,6 +677,7 @@ git commit -m "feat(game): Add GameState type and initial state factory"
 ## Task 5: Placement rules — `canPlaceOnTableau`, `canPlaceOnFoundation`, `isValidStack` (TDD)
 
 **Files:**
+
 - Create: `src/game/rules.ts`
 - Create: `src/game/__tests__/rules.test.ts`
 
@@ -697,8 +722,8 @@ describe('canPlaceOnTableau', () => {
     expect(canPlaceOnTableau(fu('s', 12), undefined)).toBe(false);
   });
   it('allows alternating-color, one-rank-lower placement', () => {
-    expect(canPlaceOnTableau(fu('h', 6), fu('s', 7))).toBe(true);  // red on black
-    expect(canPlaceOnTableau(fu('s', 6), fu('d', 7))).toBe(true);  // black on red
+    expect(canPlaceOnTableau(fu('h', 6), fu('s', 7))).toBe(true); // red on black
+    expect(canPlaceOnTableau(fu('s', 6), fu('d', 7))).toBe(true); // black on red
   });
   it('rejects same color', () => {
     expect(canPlaceOnTableau(fu('h', 6), fu('d', 7))).toBe(false);
@@ -809,10 +834,14 @@ import { GameState } from './state';
 
 export const foundationIdxFor = (suit: Suit): 0 | 1 | 2 | 3 => {
   switch (suit) {
-    case 'h': return 0;
-    case 'd': return 1;
-    case 's': return 2;
-    case 'c': return 3;
+    case 'h':
+      return 0;
+    case 'd':
+      return 1;
+    case 's':
+      return 2;
+    case 'c':
+      return 3;
   }
 };
 
@@ -843,8 +872,7 @@ export const isValidStack = (cards: readonly Card[]): boolean => {
   return true;
 };
 
-export const isWon = (s: GameState): boolean =>
-  s.foundations.every((p) => p.length === 13);
+export const isWon = (s: GameState): boolean => s.foundations.every((p) => p.length === 13);
 
 export const isAutoCompletable = (s: GameState): boolean => {
   if (s.stock.length > 0 || s.talon.length > 0) return false;
@@ -873,6 +901,7 @@ git commit -m "feat(game): Add placement rules and game-state predicates"
 ## Task 6: Move types + applyMove for `draw` and `recycle` (TDD)
 
 **Files:**
+
 - Create: `src/game/moves.ts`
 - Create: `src/game/__tests__/moves.test.ts`
 
@@ -1064,6 +1093,7 @@ git commit -m "feat(game): Add Move union and applyMove for draw/recycle"
 ## Task 7: applyMove — `tableauToTableau` (with stack drag) + `tableauToFoundation` + auto-flip (TDD)
 
 **Files:**
+
 - Modify: `src/game/moves.ts`
 - Modify: `src/game/__tests__/moves.test.ts`
 
@@ -1079,9 +1109,13 @@ describe('applyMove: tableauToTableau (single card)', () => {
   it('moves a face-up tableau top to a legal target column', () => {
     const s = blank({
       tableau: [
-        [makeCard('s', 7, true)],     // col 0
-        [makeCard('h', 6, true)],     // col 1
-        [], [], [], [], [],
+        [makeCard('s', 7, true)], // col 0
+        [makeCard('h', 6, true)], // col 1
+        [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
     const next = applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 });
@@ -1094,20 +1128,28 @@ describe('applyMove: tableauToTableau (single card)', () => {
       tableau: [
         [makeCard('s', 7, true)],
         [makeCard('h', 7, true)], // wrong rank
-        [], [], [], [], [],
+        [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
-    expect(() =>
-      applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 }),
-    ).toThrow(InvalidMoveError);
+    expect(() => applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 })).toThrow(
+      InvalidMoveError,
+    );
   });
 
   it('auto-flips the new top of the source column if it is face-down', () => {
     const s = blank({
       tableau: [
-        [makeCard('h', 5, true)],         // dest
+        [makeCard('h', 5, true)], // dest
         [makeCard('s', 9, false), makeCard('c', 4, true)], // source: hidden K, top 4 - moving 4 to col?
-        [], [], [], [], [],
+        [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
     // place a target so the move is legal: 4 onto 5 of red? we need black on red — c4 black on h5 red is OK.
@@ -1124,7 +1166,11 @@ describe('applyMove: tableauToTableau (stack)', () => {
       tableau: [
         [makeCard('s', 8, true)],
         [makeCard('h', 7, true), makeCard('c', 6, true), makeCard('d', 5, true)],
-        [], [], [], [], [],
+        [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
     const next = applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 });
@@ -1137,34 +1183,34 @@ describe('applyMove: tableauToTableau (stack)', () => {
       tableau: [
         [makeCard('s', 8, true)],
         [makeCard('h', 7, true), makeCard('s', 6, true)], // same color — not a valid stack
-        [], [], [], [], [],
+        [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
-    expect(() =>
-      applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 }),
-    ).toThrow(InvalidMoveError);
+    expect(() => applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 })).toThrow(
+      InvalidMoveError,
+    );
   });
 
   it('rejects moving a face-down card', () => {
     const s = blank({
-      tableau: [
-        [makeCard('s', 8, true)],
-        [makeCard('h', 7, false)],
-        [], [], [], [], [],
-      ],
+      tableau: [[makeCard('s', 8, true)], [makeCard('h', 7, false)], [], [], [], [], []],
     });
-    expect(() =>
-      applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 }),
-    ).toThrow(InvalidMoveError);
+    expect(() => applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 })).toThrow(
+      InvalidMoveError,
+    );
   });
 
   it('rejects from === to', () => {
     const s = blank({
       tableau: [[makeCard('s', 8, true)], [], [], [], [], [], []],
     });
-    expect(() =>
-      applyMove(s, { kind: 'tableauToTableau', from: 0, cardIndex: 0, to: 0 }),
-    ).toThrow(InvalidMoveError);
+    expect(() => applyMove(s, { kind: 'tableauToTableau', from: 0, cardIndex: 0, to: 0 })).toThrow(
+      InvalidMoveError,
+    );
   });
 });
 
@@ -1181,10 +1227,7 @@ describe('applyMove: tableauToFoundation', () => {
 
   it('auto-flips the source column top after move', () => {
     const s = blank({
-      tableau: [
-        [makeCard('s', 9, false), makeCard('h', 1, true)],
-        [], [], [], [], [], [],
-      ],
+      tableau: [[makeCard('s', 9, false), makeCard('h', 1, true)], [], [], [], [], [], []],
       foundations: [[], [], [], []],
     });
     const next = applyMove(s, { kind: 'tableauToFoundation', from: 0, foundationIdx: 0 });
@@ -1197,9 +1240,9 @@ describe('applyMove: tableauToFoundation', () => {
       tableau: [[makeCard('h', 5, true)], [], [], [], [], [], []],
       foundations: [[], [], [], []],
     });
-    expect(() =>
-      applyMove(s, { kind: 'tableauToFoundation', from: 0, foundationIdx: 0 }),
-    ).toThrow(InvalidMoveError);
+    expect(() => applyMove(s, { kind: 'tableauToFoundation', from: 0, foundationIdx: 0 })).toThrow(
+      InvalidMoveError,
+    );
   });
 });
 
@@ -1411,6 +1454,7 @@ git commit -m "feat(game): Implement all Move kinds with auto-flip and undo"
 ## Task 8: Tests for talon/foundation moves and `undo()` (TDD)
 
 **Files:**
+
 - Modify: `src/game/__tests__/moves.test.ts`
 
 - [ ] **Step 1: Append tests for the remaining move kinds and undo**
@@ -1450,9 +1494,9 @@ describe('applyMove: talonToTableau / talonToFoundation', () => {
   });
 
   it('talonToFoundation: rejects when talon empty', () => {
-    expect(() =>
-      applyMove(blank(), { kind: 'talonToFoundation', foundationIdx: 0 }),
-    ).toThrow(InvalidMoveError);
+    expect(() => applyMove(blank(), { kind: 'talonToFoundation', foundationIdx: 0 })).toThrow(
+      InvalidMoveError,
+    );
   });
 });
 
@@ -1536,6 +1580,7 @@ git commit -m "test(game): Cover talon/foundation moves and undo"
 ## Task 9: Hints — `bestNextMove` (TDD)
 
 **Files:**
+
 - Create: `src/game/hints.ts`
 - Create: `src/game/__tests__/hints.test.ts`
 
@@ -1585,7 +1630,11 @@ describe('bestNextMove', () => {
       tableau: [
         [makeCard('s', 8, true)],
         [makeCard('h', 1, false), makeCard('h', 7, true)], // moving h7 onto s8 exposes h1
-        [], [], [], [], [],
+        [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
     expect(bestNextMove(s)).toEqual({
@@ -1619,18 +1668,10 @@ Expected: FAIL — module missing.
 ```ts
 import { Card } from './card';
 import { Move } from './moves';
-import {
-  canPlaceOnFoundation,
-  canPlaceOnTableau,
-  foundationIdxFor,
-  isValidStack,
-} from './rules';
+import { canPlaceOnFoundation, canPlaceOnTableau, foundationIdxFor, isValidStack } from './rules';
 import { GameState } from './state';
 
-const tryFoundationFor = (
-  card: Card,
-  foundations: readonly Card[][],
-): number | null => {
+const tryFoundationFor = (card: Card, foundations: readonly Card[][]): number | null => {
   const idx = foundationIdxFor(card.suit);
   const top = foundations[idx][foundations[idx].length - 1];
   return canPlaceOnFoundation(card, top) ? idx : null;
@@ -1709,6 +1750,7 @@ git commit -m "feat(game): Add bestNextMove hint heuristic"
 ## Task 10: Auto-move target + auto-complete sequence (TDD)
 
 **Files:**
+
 - Create: `src/game/auto.ts`
 - Create: `src/game/__tests__/auto.test.ts`
 
@@ -1752,7 +1794,10 @@ describe('findAutoMoveTarget — talon source', () => {
         [makeCard('s', 9, true)], // h7 cannot go (need s8 top)
         [makeCard('s', 8, true)], // legal
         [makeCard('c', 8, true)], // also legal — leftmost wins
-        [], [], [], [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
     expect(findAutoMoveTarget(s, { kind: 'talon' })).toEqual({
@@ -1783,11 +1828,13 @@ describe('findAutoMoveTarget — tableau top source', () => {
   it('picks tableau column that exposes the most face-down cards', () => {
     const s = blank({
       tableau: [
-        [makeCard('s', 13, true)],                                // empty target unsuitable for h7
-        [makeCard('s', 8, true)],                                  // legal target #1, exposes 0
-        [makeCard('s', 8, false), makeCard('h', 6, true)],         // not a place we'd move h7 to
+        [makeCard('s', 13, true)], // empty target unsuitable for h7
+        [makeCard('s', 8, true)], // legal target #1, exposes 0
+        [makeCard('s', 8, false), makeCard('h', 6, true)], // not a place we'd move h7 to
         [makeCard('h', 9, false), makeCard('h', 9, false), makeCard('s', 8, true)], // legal target, exposes 2
-        [], [], [makeCard('h', 7, true)],                          // source: just a 7
+        [],
+        [],
+        [makeCard('h', 7, true)], // source: just a 7
       ],
       // make col 0's top non-target by saying h7 goes to s8 (col 1 or 3); col 3 exposes more.
     });
@@ -1835,9 +1882,7 @@ import { Move } from './moves';
 import { canPlaceOnFoundation, canPlaceOnTableau, foundationIdxFor } from './rules';
 import { GameState } from './state';
 
-export type AutoMoveSource =
-  | { kind: 'talon' }
-  | { kind: 'tableauTop'; column: number };
+export type AutoMoveSource = { kind: 'talon' } | { kind: 'tableauTop'; column: number };
 
 const tryFoundationFor = (card: Card, foundations: readonly Card[][]): number | null => {
   const idx = foundationIdxFor(card.suit);
@@ -1925,6 +1970,7 @@ git commit -m "feat(game): Add auto-move targeting and auto-complete step"
 ## Task 11: Barrel export + full-engine sanity test (TDD)
 
 **Files:**
+
 - Create: `src/game/index.ts`
 - Create: `src/game/__tests__/integration.test.ts`
 
@@ -2011,6 +2057,7 @@ cd /home/paul/dev/perso/solitaire && npm run test:run && npm run lint && npm run
 ```
 
 Expected:
+
 - vitest: all engine tests pass.
 - eslint: no errors (warnings OK).
 - vite build: success.

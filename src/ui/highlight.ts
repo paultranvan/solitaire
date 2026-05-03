@@ -50,7 +50,10 @@ const matches = (h: HintHighlight, q: HintHighlight): boolean => {
     case 'tableauTop':
       return h.column === (q as { column: number }).column;
     case 'tableauStack':
-      return h.column === (q as { column: number }).column && h.cardIndex === (q as { cardIndex: number }).cardIndex;
+      return (
+        h.column === (q as { column: number }).column &&
+        h.cardIndex === (q as { cardIndex: number }).cardIndex
+      );
     case 'tableauColumn':
       return h.column === (q as { column: number }).column;
     case 'talon':

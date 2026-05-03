@@ -1,7 +1,8 @@
 import { Card } from '@/game/card';
+import { TALON_DRAG_ID } from '@/dnd/types';
 import { CardView } from './Card';
 import { DraggableCard } from './DraggableCard';
-import { HintState, isHintSource, isHintTarget } from './hints';
+import { HintState, isHintSource, isHintTarget } from './highlight';
 import './StockTalon.css';
 
 export function StockTalon({
@@ -37,7 +38,7 @@ export function StockTalon({
         )}
       </button>
       <div
-        className={`stock-talon__slot talon${talonHinted ? ' is-hinted' : ''}`}
+        className={`stock-talon__slot talon${talonHinted ? ' is-hint-pulse' : ''}`}
         onClick={onTalonAutoMove}
       >
         {talonBehind && (
@@ -48,7 +49,7 @@ export function StockTalon({
         {talonTop ? (
           <DraggableCard
             card={talonTop}
-            dragId="talon-top"
+            dragId={TALON_DRAG_ID}
             data={{ source: { kind: 'talonTop' }, cards: [talonTop] }}
             suppressGhost={!!talonBehind}
           />

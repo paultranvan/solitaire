@@ -2,22 +2,8 @@ import { useState } from 'react';
 import { useStatsStore } from '@/store/statsStore';
 import { useSettingsStore, Settings } from '@/store/settingsStore';
 import { Sheet } from './Sheet';
+import { formatBestTime, formatDuration } from './format';
 import './MenuSheet.css';
-
-const fmtTime = (sec: number | null): string => {
-  if (sec === null) return '—';
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
-};
-
-const fmtDuration = (sec: number): string => {
-  if (sec < 60) return `${sec}s`;
-  const m = Math.floor(sec / 60);
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  return `${h}h ${m % 60}m`;
-};
 
 const winPct = (won: number, played: number): string =>
   played === 0 ? '—' : `${Math.round((won / played) * 100)}%`;
@@ -61,7 +47,7 @@ function ModeBlock({
         </div>
         <div className="mode-block__item">
           <dt>Best time</dt>
-          <dd>{fmtTime(bestTimeSec)}</dd>
+          <dd>{formatBestTime(bestTimeSec)}</dd>
         </div>
         <div className="mode-block__item">
           <dt>Min moves</dt>
@@ -110,7 +96,7 @@ function StatsSection() {
 
       <div className="m-row m-row--quiet">
         <span>Total time at table</span>
-        <span className="num">{fmtDuration(stats.totalSecondsPlayed)}</span>
+        <span className="num">{formatDuration(stats.totalSecondsPlayed)}</span>
       </div>
 
       <div className="m-section__action">
@@ -132,11 +118,7 @@ function StatsSection() {
             </button>
           </div>
         ) : (
-          <button
-            type="button"
-            className="btn btn--ghost"
-            onClick={() => setConfirming(true)}
-          >
+          <button type="button" className="btn btn--ghost" onClick={() => setConfirming(true)}>
             Reset stats…
           </button>
         )}
@@ -185,7 +167,9 @@ function SettingsSection() {
       </h3>
 
       <div className="m-row">
-        <span>Draw count<span className="m-row__hint">next game</span></span>
+        <span>
+          Draw count<span className="m-row__hint">next game</span>
+        </span>
         <div className="seg">
           <button
             type="button"
@@ -226,11 +210,7 @@ function SettingsSection() {
         </div>
       </div>
 
-      <Toggle
-        label="Sound effects"
-        value={settings.sound}
-        onChange={(v) => set({ sound: v })}
-      />
+      <Toggle label="Sound effects" value={settings.sound} onChange={(v) => set({ sound: v })} />
       <Toggle
         label="Haptic feedback"
         value={settings.haptics}

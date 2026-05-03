@@ -15,7 +15,7 @@ export type GameState = {
   history: GameState[];
 };
 
-const randomSeed = (): string =>
+export const randomSeed = (): string =>
   Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 export const createInitialState = (opts: { drawCount: 1 | 3; seed?: string }): GameState => {

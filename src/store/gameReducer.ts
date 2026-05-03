@@ -18,6 +18,9 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     case 'undo':
       return undoState(state);
     case 'reset':
-      return action.state;
+      // Defensively clear history so a stale snapshot never leaks into a fresh
+      // game; createInitialState already sets history: [], but keep this so
+      // any future caller can't drift.
+      return { ...action.state, history: [] };
   }
 };

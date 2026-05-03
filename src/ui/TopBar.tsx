@@ -1,14 +1,10 @@
-import type { MouseEvent } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
+import { formatMMSS } from './format';
 import './TopBar.css';
 
-const fmt = (s: number) => {
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `${m.toString().padStart(2, '0')}:${r.toString().padStart(2, '0')}`;
-};
-
 export type TopBarProps = {
-  elapsedSec: number;
+  startedAt: number;
+  paused: boolean;
   moves: number;
   canUndo: boolean;
   canRestart: boolean;
@@ -19,12 +15,38 @@ export type TopBarProps = {
   onMenu: () => void;
 };
 
+const elapsedFrom = (startedAt: number): number =>
+  Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+
+// Self-contained 1Hz tick. Lives inside TopBar so the rest of the board
+// doesn't re-render once a second just to update the time chip.
+function ElapsedChip({ startedAt, paused }: { startedAt: number; paused: boolean }) {
+  const [elapsed, setElapsed] = useState(() => elapsedFrom(startedAt));
+
+  useEffect(() => {
+    setElapsed(elapsedFrom(startedAt));
+    if (paused) return;
+    const id = setInterval(() => setElapsed(elapsedFrom(startedAt)), 1000);
+    return () => clearInterval(id);
+  }, [startedAt, paused]);
+
+  return (
+    <span className="topbar__chip" title="time">
+      <span className="topbar__chip-glyph" aria-hidden="true">
+        ⏱
+      </span>
+      {formatMMSS(elapsed)}
+    </span>
+  );
+}
+
 // Prevents the button from retaining focus after a mouse click, so Enter/Space
 // don't accidentally re-trigger it later. Tab navigation still focuses normally.
 const swallowFocus = (e: MouseEvent) => e.preventDefault();
 
 export function TopBar({
-  elapsedSec,
+  startedAt,
+  paused,
   moves,
   canUndo,
   canRestart,
@@ -37,12 +59,11 @@ export function TopBar({
   return (
     <header className="topbar">
       <div className="topbar__group topbar__group--left">
-        <span className="topbar__chip" title="time">
-          <span className="topbar__chip-glyph" aria-hidden="true">⏱</span>
-          {fmt(elapsedSec)}
-        </span>
+        <ElapsedChip startedAt={startedAt} paused={paused} />
         <span className="topbar__chip" title="moves">
-          <span className="topbar__chip-glyph" aria-hidden="true">♠</span>
+          <span className="topbar__chip-glyph" aria-hidden="true">
+            ♠
+          </span>
           {moves}
         </span>
       </div>

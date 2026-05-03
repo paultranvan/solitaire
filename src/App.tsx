@@ -9,7 +9,6 @@ import './ui/theme.css';
 
 export default function App() {
   const [initial, setInitial] = useState<GameState | null>(null);
-  const settings = useSettingsStore((s) => s.settings);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,7 +24,9 @@ export default function App() {
       if (saved) {
         setInitial(saved);
       } else {
-        setInitial(createInitialState({ drawCount: useSettingsStore.getState().settings.drawCount }));
+        setInitial(
+          createInitialState({ drawCount: useSettingsStore.getState().settings.drawCount }),
+        );
       }
     })();
     return () => {
@@ -52,5 +53,5 @@ export default function App() {
     );
   }
 
-  return <Board initial={initial} key={settings.handedness} />;
+  return <Board initial={initial} />;
 }

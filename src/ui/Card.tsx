@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react';
 import { motion } from 'motion/react';
 import { Card as CardModel, color } from '@/game/card';
 import { SPRING_DEFAULT } from '@/motion/presets';
+import { useSettingsStore } from '@/store/settingsStore';
 import './Card.css';
 
 const SUIT_GLYPH: Record<string, string> = { h: '♥', d: '♦', s: '♠', c: '♣' };
@@ -14,6 +15,8 @@ const labelFor = (rank: number) => RANK_LABEL[rank] ?? String(rank);
 const SkipLayoutAnimContext = createContext(false);
 export const SkipLayoutAnimProvider = SkipLayoutAnimContext.Provider;
 
+const NO_TRANSITION = { duration: 0 } as const;
+
 export type CardProps = {
   card: CardModel;
   /** Set to true to skip layoutId (e.g., when this card is rendered in a DragOverlay). */
@@ -25,7 +28,8 @@ export function CardView({ card, ghost = false }: CardProps) {
   const glyph = SUIT_GLYPH[card.suit];
   const label = labelFor(card.rank);
   const skipLayoutAnim = useContext(SkipLayoutAnimContext);
-  const layoutTransition = skipLayoutAnim ? { duration: 0 } : SPRING_DEFAULT;
+  const animationsOn = useSettingsStore((s) => s.settings.animations);
+  const layoutTransition = skipLayoutAnim || !animationsOn ? NO_TRANSITION : SPRING_DEFAULT;
 
   return (
     <motion.div

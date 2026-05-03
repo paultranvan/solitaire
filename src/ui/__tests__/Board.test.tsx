@@ -1,23 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { makeCard } from '@/game/card';
-import { GameState } from '@/game/state';
+import { blankGameState } from '@/test-utils/factories';
 import { Board } from '../Board';
 
-const blank = (over: Partial<GameState> = {}): GameState => ({
-  schemaVersion: 1,
-  tableau: [[], [], [], [], [], [], []],
-  foundations: [[], [], [], []],
-  stock: [],
-  talon: [],
-  drawCount: 1,
-  startedAt: Date.now(),
-  movesMade: 0,
-  redealCount: 0,
-  seed: 't',
-  history: [],
-  ...over,
-});
+// Board tests need a non-zero startedAt so the elapsed-time chip renders sanely.
+const blank = (over: Parameters<typeof blankGameState>[0] = {}) =>
+  blankGameState({ startedAt: Date.now(), ...over });
 
 describe('Board', () => {
   it('renders the topbar, foundations, and tableau', () => {

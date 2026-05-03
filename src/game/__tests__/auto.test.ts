@@ -1,22 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { makeCard } from '../card';
 import { findAutoMoveTarget, nextAutoCompleteMove } from '../auto';
-import { GameState } from '../state';
-
-const blank = (over: Partial<GameState> = {}): GameState => ({
-  schemaVersion: 1,
-  tableau: [[], [], [], [], [], [], []],
-  foundations: [[], [], [], []],
-  stock: [],
-  talon: [],
-  drawCount: 1,
-  startedAt: 0,
-  movesMade: 0,
-  redealCount: 0,
-  seed: 't',
-  history: [],
-  ...over,
-});
+import { blankGameState as blank } from '@/test-utils/factories';
 
 describe('findAutoMoveTarget — talon source', () => {
   it('targets foundation when the talon top is eligible', () => {
@@ -34,7 +19,10 @@ describe('findAutoMoveTarget — talon source', () => {
         [makeCard('s', 9, true)],
         [makeCard('s', 8, true)],
         [makeCard('c', 8, true)],
-        [], [], [], [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
     expect(findAutoMoveTarget(s, { kind: 'talon' })).toEqual({
@@ -68,9 +56,11 @@ describe('findAutoMoveTarget — tableau stack source', () => {
     const s = blank({
       tableau: [[makeCard('h', 1, true)], [], [], [], [], [], []],
     });
-    expect(
-      findAutoMoveTarget(s, { kind: 'tableauStack', column: 0, cardIndex: 0 }),
-    ).toEqual({ kind: 'tableauToFoundation', from: 0, foundationIdx: 0 });
+    expect(findAutoMoveTarget(s, { kind: 'tableauStack', column: 0, cardIndex: 0 })).toEqual({
+      kind: 'tableauToFoundation',
+      from: 0,
+      foundationIdx: 0,
+    });
   });
 
   it('picks tableau column whose move keeps the most face-down cards exposed', () => {
@@ -79,7 +69,9 @@ describe('findAutoMoveTarget — tableau stack source', () => {
         [makeCard('s', 13, true)],
         [makeCard('s', 8, true)],
         [makeCard('h', 9, false), makeCard('h', 9, false), makeCard('s', 8, true)],
-        [], [], [],
+        [],
+        [],
+        [],
         [makeCard('h', 7, true)],
       ],
     });
@@ -103,7 +95,11 @@ describe('findAutoMoveTarget — tableau stack source', () => {
           makeCard('d', 10, true),
         ],
         [makeCard('h', 12, true)],
-        [], [], [], [], [],
+        [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
     const result = findAutoMoveTarget(s, {

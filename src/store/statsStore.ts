@@ -34,7 +34,7 @@ export const defaultStats = (): Stats => ({
 
 export type RecordGameInput = {
   mode: 1 | 3;
-  outcome: 'won' | 'abandoned' | 'lost';
+  outcome: 'won' | 'abandoned';
   durationSec: number;
   moves: number;
 };

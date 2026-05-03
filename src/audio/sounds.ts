@@ -1,7 +1,4 @@
-/**
- * Web Audio synth-based SFX. Lightweight (no asset files), gated on settings.sound.
- * Designed to be replaced with sampled audio later if desired.
- */
+// Web Audio synth-based SFX. Lightweight (no asset files), gated on settings.sound.
 
 import { useSettingsStore } from '@/store/settingsStore';
 
@@ -17,7 +14,13 @@ const getCtx = (): AudioContext | null => {
   return ctx;
 };
 
-const tone = (freq: number, durationMs: number, gain = 0.05, type: OscillatorType = 'sine', delayMs = 0) => {
+const tone = (
+  freq: number,
+  durationMs: number,
+  gain = 0.05,
+  type: OscillatorType = 'sine',
+  delayMs = 0,
+) => {
   const c = getCtx();
   if (!c) return;
   const t0 = c.currentTime + delayMs / 1000;
@@ -54,13 +57,7 @@ const sweep = (from: number, to: number, durationMs: number, gain = 0.06) => {
   osc.stop(t1 + 0.02);
 };
 
-export type Sfx =
-  | 'pickup'
-  | 'dropValid'
-  | 'dropInvalid'
-  | 'foundation'
-  | 'flip'
-  | 'winCascade';
+export type Sfx = 'pickup' | 'dropValid' | 'dropInvalid' | 'foundation' | 'flip' | 'winCascade';
 
 const enabled = (): boolean => useSettingsStore.getState().settings.sound;
 

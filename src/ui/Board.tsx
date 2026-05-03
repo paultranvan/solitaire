@@ -20,14 +20,14 @@ import { GameState } from '@/game/state';
 import { bestNextMove } from '@/game/hints';
 import { findAutoMoveTarget, AutoMoveSource, nextAutoCompleteMove } from '@/game/auto';
 import { isAutoCompletable, isWon } from '@/game/rules';
-import { dealKlondike } from '@/game/deck';
+import { createInitialState } from '@/game/state';
 import { DragData } from '@/dnd/types';
 import { resolveMove } from '@/dnd/resolveMove';
 import { gameReducer } from '@/store/gameReducer';
 import { useGameAutosave } from '@/persistence/gameAutosave';
 import { useStatsStore } from '@/store/statsStore';
 import { useSettingsStore } from '@/store/settingsStore';
-import { HintState, moveToHint } from './hints';
+import { HintState, moveToHint } from './highlight';
 import { SkipLayoutAnimProvider } from './Card';
 import { DragLayer } from './DragLayer';
 import { Foundations } from './Foundations';
@@ -39,6 +39,7 @@ import { WinSheet } from './WinSheet';
 import { AutoCompleteSheet } from './AutoCompleteSheet';
 import { play, primeAudioOnFirstGesture } from '@/audio/sounds';
 import { haptic } from '@/haptics/haptics';
+import { feedback, feedbackForMove } from './feedback';
 import './Board.css';
 
 const HINT_DURATION_MS = 1600;
@@ -59,22 +60,17 @@ export function Board({ initial }: { initial: GameState }) {
   const [hint, setHint] = useState<HintState>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [winOpen, setWinOpen] = useState(false);
-  // Becomes true for a single render after a drag-drop dispatch, suppressing
-  // the layoutId fly-from-source animation that looks wrong because the card
-  // was visually at the cursor rather than in its source slot.
-  const [skipLayoutAnim, setSkipLayoutAnim] = useState(false);
+  // After a drop, the card was visually at the cursor (not its source slot),
+  // so the layoutId fly-from-source animation looks wrong. We suppress it for
+  // the *one render* whose move count we record here. Derived, no effect bounce.
+  const [skipForMoves, setSkipForMoves] = useState<number | null>(null);
+  const skipLayoutAnim = skipForMoves === state.movesMade;
   // Auto-complete state machine: 'idle' until the tableau has no face-down
   // cards, 'prompt' shows the confirmation sheet, 'running' steps the loop,
   // 'declined' suppresses the prompt for the rest of this game.
   const [autoCompleteState, setAutoCompleteState] = useState<
     'idle' | 'prompt' | 'running' | 'declined'
   >('idle');
-  const [, setTick] = useState(0);
-
-  useEffect(() => {
-    if (!skipLayoutAnim) return;
-    setSkipLayoutAnim(false);
-  }, [skipLayoutAnim]);
   const wonReportedRef = useRef(false);
   const winDurationRef = useRef(0);
   const winMovesRef = useRef(0);
@@ -86,6 +82,8 @@ export function Board({ initial }: { initial: GameState }) {
   const recordGame = useStatsStore((s) => s.recordGame);
   const settingsDrawCount = useSettingsStore((s) => s.settings.drawCount);
   const autoMoveOnTap = useSettingsStore((s) => s.settings.autoMoveOnTap);
+  const animationsOn = useSettingsStore((s) => s.settings.animations);
+  const handedness = useSettingsStore((s) => s.settings.handedness);
 
   useGameAutosave(state);
 
@@ -109,12 +107,6 @@ export function Board({ initial }: { initial: GameState }) {
     const id = setTimeout(() => setWinOpen(true), 600);
     return () => clearTimeout(id);
   }, [state, recordGame]);
-
-  useEffect(() => {
-    if (isWon(state)) return;
-    const id = setInterval(() => setTick((t) => t + 1), 1000);
-    return () => clearInterval(id);
-  }, [state]);
 
   // Open the auto-complete prompt the first time the tableau has no
   // face-downs left in this game. Stays declined until a new game.
@@ -149,8 +141,6 @@ export function Board({ initial }: { initial: GameState }) {
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
   );
 
-  const elapsedSec = Math.max(0, Math.floor((Date.now() - state.startedAt) / 1000));
-
   const handleStockClick = () => {
     const move: Move = state.stock.length > 0 ? { kind: 'draw' } : { kind: 'recycle' };
     dispatch({ type: 'move', move });
@@ -162,34 +152,25 @@ export function Board({ initial }: { initial: GameState }) {
     const data = e.active.data.current as DragData | undefined;
     setActiveCards(data?.cards ?? null);
     setHint(null);
-    play('pickup');
-    haptic('pickup');
+    feedback('pickup');
   };
 
   const handleDragEnd = (e: DragEndEvent) => {
     setActiveCards(null);
     if (!e.over) {
-      play('dropInvalid');
-      haptic('dropInvalid');
+      feedback('dropInvalid');
       return;
     }
     const data = e.active.data.current as DragData | undefined;
     if (!data) return;
     const move = resolveMove(data, String(e.over.id));
     if (move === null || !canApply(state, move)) {
-      play('dropInvalid');
-      haptic('dropInvalid');
+      feedback('dropInvalid');
       return;
     }
-    setSkipLayoutAnim(true);
+    setSkipForMoves(state.movesMade + 1);
     dispatch({ type: 'move', move });
-    if (move.kind === 'tableauToFoundation' || move.kind === 'talonToFoundation') {
-      play('foundation');
-      haptic('foundation');
-    } else {
-      play('dropValid');
-      haptic('dropValid');
-    }
+    feedback(feedbackForMove(move));
   };
 
   const handleAutoMove = useCallback(
@@ -206,13 +187,7 @@ export function Board({ initial }: { initial: GameState }) {
       flushSync(() => {
         dispatch({ type: 'move', move });
       });
-      if (move.kind === 'tableauToFoundation' || move.kind === 'talonToFoundation') {
-        play('foundation');
-        haptic('foundation');
-      } else {
-        play('dropValid');
-        haptic('dropValid');
-      }
+      feedback(feedbackForMove(move));
     },
     [state, autoMoveOnTap],
   );
@@ -237,24 +212,7 @@ export function Board({ initial }: { initial: GameState }) {
     }
     wonReportedRef.current = false;
     setAutoCompleteState('idle');
-    const seed = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const { tableau, stock } = dealKlondike(seed);
-    dispatch({
-      type: 'reset',
-      state: {
-        schemaVersion: 1,
-        tableau,
-        stock,
-        talon: [],
-        foundations: [[], [], [], []],
-        drawCount: settingsDrawCount,
-        startedAt: Date.now(),
-        movesMade: 0,
-        redealCount: 0,
-        seed,
-        history: [],
-      },
-    });
+    dispatch({ type: 'reset', state: createInitialState({ drawCount: settingsDrawCount }) });
   };
 
   // Re-deal the current seed from scratch — same hand, fresh attempt. Doesn't
@@ -263,22 +221,9 @@ export function Board({ initial }: { initial: GameState }) {
   const handleRestart = () => {
     wonReportedRef.current = false;
     setAutoCompleteState('idle');
-    const { tableau, stock } = dealKlondike(state.seed);
     dispatch({
       type: 'reset',
-      state: {
-        schemaVersion: 1,
-        tableau,
-        stock,
-        talon: [],
-        foundations: [[], [], [], []],
-        drawCount: state.drawCount,
-        startedAt: Date.now(),
-        movesMade: 0,
-        redealCount: 0,
-        seed: state.seed,
-        history: [],
-      },
+      state: createInitialState({ drawCount: state.drawCount, seed: state.seed }),
     });
   };
 
@@ -290,9 +235,10 @@ export function Board({ initial }: { initial: GameState }) {
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveCards(null)}
     >
-      <div className="board">
+      <div className="board" data-animations={animationsOn ? 'on' : 'off'}>
         <TopBar
-          elapsedSec={elapsedSec}
+          startedAt={state.startedAt}
+          paused={isWon(state)}
           moves={state.movesMade}
           canUndo={state.history.length > 0}
           canRestart={state.movesMade > 0}
@@ -307,7 +253,7 @@ export function Board({ initial }: { initial: GameState }) {
         <LayoutGroup id={state.seed}>
           <SkipLayoutAnimProvider value={skipLayoutAnim}>
             <div className="board__main">
-              <div className="board__top">
+              <div className="board__top" data-handedness={handedness}>
                 <StockTalon
                   stock={state.stock}
                   talon={state.talon}
@@ -338,6 +284,7 @@ export function Board({ initial }: { initial: GameState }) {
           durationSec={winDurationRef.current}
           moves={winMovesRef.current}
           drawCount={state.drawCount}
+          showConfetti={animationsOn}
         />
       </div>
     </DndContext>

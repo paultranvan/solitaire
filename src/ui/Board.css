@@ -1,11 +1,11 @@
 .board {
   min-height: 100%;
   background: radial-gradient(
-      ellipse at top,
-      var(--felt-light) 0%,
-      var(--felt-dark) 70%,
-      var(--felt-edge) 100%
-    );
+    ellipse at top,
+    var(--felt-light) 0%,
+    var(--felt-dark) 70%,
+    var(--felt-edge) 100%
+  );
   padding-bottom: calc(24px + var(--safe-bottom));
 }
 
@@ -22,4 +22,24 @@
   align-items: flex-start;
   padding-top: 16px;
   gap: var(--gap-col);
+}
+
+/* Left-handed: stock/talon on the right, foundations on the left. */
+.board__top[data-handedness='left'] {
+  flex-direction: row-reverse;
+}
+
+/* Animations toggle: kill the CSS-only motion when the setting is off. The
+   motion/react transitions are handled at the component level; these rules
+   cover the card-flip and hint-pulse keyframes, plus the confetti is
+   suppressed at the React level. */
+.board[data-animations='off'] .card-flip__inner {
+  transition: none;
+}
+
+.board[data-animations='off'] .is-hint-pulse,
+.board[data-animations='off'] .tableau-col.is-hinted .pile-empty,
+.board[data-animations='off'] .tableau-col.is-hinted .tableau-col__slot:last-child,
+.board[data-animations='off'] .tableau-col__slot.is-hinted {
+  animation: none;
 }

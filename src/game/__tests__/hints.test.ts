@@ -1,22 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { makeCard } from '../card';
 import { bestNextMove } from '../hints';
-import { GameState } from '../state';
-
-const blank = (over: Partial<GameState> = {}): GameState => ({
-  schemaVersion: 1,
-  tableau: [[], [], [], [], [], [], []],
-  foundations: [[], [], [], []],
-  stock: [],
-  talon: [],
-  drawCount: 1,
-  startedAt: 0,
-  movesMade: 0,
-  redealCount: 0,
-  seed: 't',
-  history: [],
-  ...over,
-});
+import { blankGameState as blank } from '@/test-utils/factories';
 
 describe('bestNextMove', () => {
   it('prefers talon-to-foundation when an Ace is on the talon', () => {
@@ -36,7 +21,11 @@ describe('bestNextMove', () => {
       tableau: [
         [makeCard('s', 8, true)],
         [makeCard('h', 1, false), makeCard('h', 7, true)],
-        [], [], [], [], [],
+        [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
     expect(bestNextMove(s)).toEqual({

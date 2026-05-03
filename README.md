@@ -78,17 +78,16 @@ npx cap open android   # builds in Android Studio
 
 ## Test coverage
 
-96 unit + component tests, primary focus on the pure game engine: every
-`Move` kind (legal + illegal), undo round-trips, hint correctness on canned
-positions, auto-move targeting, full integration deals.
+Comprehensive unit + component tests — primary focus on the pure game engine:
+every `Move` kind (legal + illegal), undo round-trips, history-cap enforcement,
+hint correctness on canned positions, auto-move targeting, integration deals,
+and the stats store's win/abandon bookkeeping.
 
 ## Design + plans
 
-- `docs/superpowers/specs/2026-05-02-solitaire-reboot-design.md` — the spec
-  brainstormed before building.
-- `docs/superpowers/plans/2026-05-02-phase-1-game-engine.md` — the bite-sized
-  TDD plan that built the engine.
 - `docs/superpowers/specs/native-build-notes.md` — iOS/Android setup steps.
+- `docs/superpowers/archive/` — historical brainstorm spec and the phase-1
+  TDD plan that built the engine. Kept for context only; not maintained.
 
 ## License
 

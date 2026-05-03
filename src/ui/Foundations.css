@@ -9,23 +9,3 @@
   height: var(--card-h);
   position: relative;
 }
-
-.foundations__slot--over::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: calc(var(--card-radius) + 4px);
-  outline: 2px solid rgba(255, 255, 255, 0.55);
-  outline-offset: 0;
-  pointer-events: none;
-}
-
-@keyframes hint-pulse-fnd {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(255, 220, 100, 0.55); }
-  50%      { box-shadow: 0 0 0 10px rgba(255, 220, 100, 0.95); }
-}
-
-.foundations__slot.is-hinted {
-  border-radius: var(--card-radius);
-  animation: hint-pulse-fnd 1.1s ease-in-out infinite;
-}

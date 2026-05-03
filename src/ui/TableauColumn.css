@@ -4,26 +4,12 @@
   align-items: center;
   min-height: var(--card-h);
   position: relative;
+  --drop-over-offset: 2px;
 }
 
 .tableau-col__slot {
   position: relative;
   display: block;
-}
-
-.tableau-col--over::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: calc(var(--card-radius) + 4px);
-  outline: 2px solid rgba(255, 255, 255, 0.55);
-  outline-offset: 2px;
-  pointer-events: none;
-}
-
-@keyframes hint-pulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(255, 220, 100, 0.55); }
-  50%      { box-shadow: 0 0 0 10px rgba(255, 220, 100, 0.95); }
 }
 
 /* Animate on the slot/pile-empty rather than the inner .card-flip — the

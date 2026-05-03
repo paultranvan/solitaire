@@ -33,7 +33,7 @@ export function Sheet({
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
-          <div className="sheet-stage" aria-hidden={false}>
+          <div className="sheet-stage">
             <motion.div
               className="sheet"
               role="dialog"
@@ -46,12 +46,7 @@ export function Sheet({
               <div className="sheet__handle" />
               <header className="sheet__header">
                 <h2 className="sheet__title">{title}</h2>
-                <button
-                  type="button"
-                  className="sheet__close"
-                  onClick={onClose}
-                  aria-label="close"
-                >
+                <button type="button" className="sheet__close" onClick={onClose} aria-label="close">
                   ✕
                 </button>
               </header>

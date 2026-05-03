@@ -19,7 +19,11 @@ export const resolveMove = (data: DragData, dropId: string): Move | null => {
     if (cards.length !== 1) return null;
     switch (source.kind) {
       case 'tableauStack':
-        return { kind: 'tableauToFoundation', from: source.column, foundationIdx: target.foundationIdx };
+        return {
+          kind: 'tableauToFoundation',
+          from: source.column,
+          foundationIdx: target.foundationIdx,
+        };
       case 'talonTop':
         return { kind: 'talonToFoundation', foundationIdx: target.foundationIdx };
       case 'foundationTop':

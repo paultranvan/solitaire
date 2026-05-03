@@ -16,8 +16,7 @@ export function AutoCompleteSheet({
         <div className="autocomplete__hero">✨</div>
         <h2 className="autocomplete__title">Ready to finish</h2>
         <p className="autocomplete__subtitle">
-          All face-down cards are revealed. Auto-resolve the rest to the
-          foundations?
+          All face-down cards are revealed. Auto-resolve the rest to the foundations?
         </p>
         <div className="autocomplete__actions">
           <button type="button" className="btn btn--primary" onClick={onAccept}>

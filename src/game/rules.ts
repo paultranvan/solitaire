@@ -1,18 +1,5 @@
-import { Card, color, Suit } from './card';
+import { Card, color } from './card';
 import { GameState } from './state';
-
-export const foundationIdxFor = (suit: Suit): 0 | 1 | 2 | 3 => {
-  switch (suit) {
-    case 'h':
-      return 0;
-    case 'd':
-      return 1;
-    case 's':
-      return 2;
-    case 'c':
-      return 3;
-  }
-};
 
 export const canPlaceOnTableau = (moving: Card, target: Card | undefined): boolean => {
   if (!moving.faceUp) return false;
@@ -42,6 +29,17 @@ export const isValidStack = (cards: readonly Card[]): boolean => {
 };
 
 export const isWon = (s: GameState): boolean => s.foundations.every((p) => p.length === 13);
+
+// Foundations are not pre-assigned to suits — any of the 4 piles can hold any
+// suit. Returns the first pile index that legally accepts `card`, or null.
+// Both auto-move and the hint planner route foundation placements through here.
+export const findFoundationFor = (card: Card, foundations: readonly Card[][]): number | null => {
+  for (let i = 0; i < foundations.length; i++) {
+    const pile = foundations[i];
+    if (canPlaceOnFoundation(card, pile[pile.length - 1])) return i;
+  }
+  return null;
+};
 
 // True once the tableau has no face-down cards left. Stock and talon may
 // still contain cards — the auto-complete loop will draw from stock and

@@ -1,12 +1,20 @@
 import { useDroppable } from '@dnd-kit/core';
 import { Card } from '@/game/card';
-import { foundationDropId } from '@/dnd/types';
+import { foundationDragId, foundationDropId } from '@/dnd/types';
 import { CardView } from './Card';
 import { DraggableCard } from './DraggableCard';
-import { HintState, isHintSource, isHintTarget } from './hints';
+import { HintState, isHintSource, isHintTarget } from './highlight';
 import './Foundations.css';
 
-const SUIT_GLYPH: Record<number, string> = { 0: '♥', 1: '♦', 2: '♠', 3: '♣' };
+// Decorative empty-pile glyphs only — foundations accept any suit at runtime
+// (see findFoundationFor in game/rules.ts). Don't read business logic into
+// the slot order.
+const EMPTY_FOUNDATION_GLYPH: Record<number, string> = {
+  0: '♥',
+  1: '♦',
+  2: '♠',
+  3: '♣',
+};
 
 function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: HintState }) {
   const { setNodeRef, isOver } = useDroppable({ id: foundationDropId(idx) });
@@ -19,7 +27,7 @@ function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: 
   return (
     <div
       ref={setNodeRef}
-      className={`foundations__slot${isOver ? ' foundations__slot--over' : ''}${hinted ? ' is-hinted' : ''}`}
+      className={`foundations__slot${isOver ? ' is-drop-over' : ''}${hinted ? ' is-hint-pulse' : ''}`}
     >
       {behind && (
         <div className="card-behind" aria-hidden="true">
@@ -29,7 +37,7 @@ function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: 
       {top ? (
         <DraggableCard
           card={top}
-          dragId={`f:${idx}`}
+          dragId={foundationDragId(idx)}
           data={{
             source: { kind: 'foundationTop', foundationIdx: idx },
             cards: [top],
@@ -38,7 +46,7 @@ function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: 
         />
       ) : (
         <div className="pile-empty" aria-label={`foundation ${idx}`}>
-          {SUIT_GLYPH[idx]}
+          {EMPTY_FOUNDATION_GLYPH[idx]}
         </div>
       )}
     </div>

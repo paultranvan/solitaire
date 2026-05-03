@@ -1,30 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { makeCard, Suit } from '../card';
+import { makeCard } from '../card';
 import {
   canPlaceOnFoundation,
   canPlaceOnTableau,
-  foundationIdxFor,
+  findFoundationFor,
   isAutoCompletable,
   isValidStack,
   isWon,
 } from '../rules';
-import { GameState } from '../state';
-
-const fu = (s: Suit, r: number) => makeCard(s, r as 1, true);
-
-const blank = (): GameState => ({
-  schemaVersion: 1,
-  tableau: [[], [], [], [], [], [], []],
-  foundations: [[], [], [], []],
-  stock: [],
-  talon: [],
-  drawCount: 1,
-  startedAt: 0,
-  movesMade: 0,
-  redealCount: 0,
-  seed: 't',
-  history: [],
-});
+import { blankGameState as blank, fu } from '@/test-utils/factories';
 
 describe('canPlaceOnTableau', () => {
   it('allows K on an empty column', () => {
@@ -88,12 +72,19 @@ describe('isValidStack', () => {
   });
 });
 
-describe('foundationIdxFor', () => {
-  it('maps suits to fixed slots h=0 d=1 s=2 c=3', () => {
-    expect(foundationIdxFor('h')).toBe(0);
-    expect(foundationIdxFor('d')).toBe(1);
-    expect(foundationIdxFor('s')).toBe(2);
-    expect(foundationIdxFor('c')).toBe(3);
+describe('findFoundationFor', () => {
+  it('returns the first pile that legally accepts the card', () => {
+    const ace = fu('h', 1);
+    expect(findFoundationFor(ace, [[], [], [], []])).toBe(0);
+    expect(findFoundationFor(ace, [[fu('s', 1)], [], [], []])).toBe(1);
+  });
+  it('returns the matching-suit pile when the card is a follow-up', () => {
+    const piles = [[fu('s', 1)], [fu('h', 1)], [], []];
+    expect(findFoundationFor(fu('h', 2), piles)).toBe(1);
+  });
+  it('returns null when no foundation accepts the card', () => {
+    expect(findFoundationFor(fu('h', 5), [[], [], [], []])).toBe(null);
+    expect(findFoundationFor(fu('h', 5), [[fu('h', 1)], [], [], []])).toBe(null);
   });
 });
 

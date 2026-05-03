@@ -1,5 +1,11 @@
 # Solitaire Reboot — Design Spec
 
+> **Historical document — no longer maintained.**
+> This spec captures the pre-implementation brainstorm. Module names,
+> dependencies, and folder layout have drifted from the live codebase.
+> See [README.md](../../../README.md) and [CLAUDE.md](../../../CLAUDE.md)
+> for the current state of the project.
+
 **Date:** 2026-05-02
 **Branch:** `2026-reboot`
 **Status:** Approved (brainstorm) — ready for implementation planning
@@ -18,25 +24,25 @@ The previous app stays accessible on `master`; the rebuild lives on `2026-reboot
 
 ## Decisions locked in (from brainstorming)
 
-| Topic | Decision |
-| --- | --- |
-| Platform | Web + iOS + Android via **Capacitor** (single web codebase, native shells) |
-| Stack | **React 18 + TypeScript + Vite**; PWA via `vite-plugin-pwa` |
-| Drag-and-drop | **dnd-kit** (PointerSensor + TouchSensor + KeyboardSensor) |
-| Animations | **Motion** (formerly Framer Motion); springy personality |
-| State management | **Zustand** with `immer` middleware |
-| Persistence | **IndexedDB** via `idb-keyval` |
-| Visual style | Classic felt (green table, serif card faces) |
-| Mobile layout | Fit all 7 tableau columns at phone width (no horizontal scroll) |
-| Game variant | Klondike, player picks draw 1 or draw 3 at New Game |
-| Redeals | Unlimited |
-| QoL features | Auto-flip top of column · auto-move on double-tap · auto-complete cascade · hint button · unlimited undo · timer · move counter |
-| Stats v1 | Per-mode played/won/best-time/fewest-moves, current/longest streak, total time. Local-only, history-ready schema. |
-| Auto-resume | Yes — closing mid-game restores exact state on reopen |
-| Audio | SFX on by default; mute toggle in settings |
-| Haptics | Native on iOS/Android via `@capacitor/haptics`; Vibration API fallback on web |
-| Settings | sound · haptics · animations · draw count · auto-move on tap · L/R-handed (mirrors top row) |
-| First launch | Drop directly into a fresh game (no menu) |
+| Topic              | Decision                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Platform           | Web + iOS + Android via **Capacitor** (single web codebase, native shells)                                                            |
+| Stack              | **React 18 + TypeScript + Vite**; PWA via `vite-plugin-pwa`                                                                           |
+| Drag-and-drop      | **dnd-kit** (PointerSensor + TouchSensor + KeyboardSensor)                                                                            |
+| Animations         | **Motion** (formerly Framer Motion); springy personality                                                                              |
+| State management   | **Zustand** with `immer` middleware                                                                                                   |
+| Persistence        | **IndexedDB** via `idb-keyval`                                                                                                        |
+| Visual style       | Classic felt (green table, serif card faces)                                                                                          |
+| Mobile layout      | Fit all 7 tableau columns at phone width (no horizontal scroll)                                                                       |
+| Game variant       | Klondike, player picks draw 1 or draw 3 at New Game                                                                                   |
+| Redeals            | Unlimited                                                                                                                             |
+| QoL features       | Auto-flip top of column · auto-move on double-tap · auto-complete cascade · hint button · unlimited undo · timer · move counter       |
+| Stats v1           | Per-mode played/won/best-time/fewest-moves, current/longest streak, total time. Local-only, history-ready schema.                     |
+| Auto-resume        | Yes — closing mid-game restores exact state on reopen                                                                                 |
+| Audio              | SFX on by default; mute toggle in settings                                                                                            |
+| Haptics            | Native on iOS/Android via `@capacitor/haptics`; Vibration API fallback on web                                                         |
+| Settings           | sound · haptics · animations · draw count · auto-move on tap · L/R-handed (mirrors top row)                                           |
+| First launch       | Drop directly into a fresh game (no menu)                                                                                             |
 | Out of scope (v2+) | Daily challenge · cloud sync / accounts · other variants (FreeCell, Spider…) · achievements · alternate themes · tutorial · E2E tests |
 
 ## Tech stack — concrete versions and roles
@@ -119,7 +125,7 @@ type Suit = 'h' | 'd' | 's' | 'c';
 type Rank = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
 
 type Card = {
-  id: string;          // stable: `${suit}${rank}` — used as Motion layoutId
+  id: string; // stable: `${suit}${rank}` — used as Motion layoutId
   suit: Suit;
   rank: Rank;
   faceUp: boolean;
@@ -127,16 +133,16 @@ type Card = {
 
 type GameState = {
   schemaVersion: 1;
-  tableau: Card[][];           // 7 columns; last item = top of pile
-  foundations: Card[][];       // 4 piles, indexed 0..3 by suit slot
-  stock: Card[];               // face-down, last = next-to-deal
-  talon: Card[];               // face-up, last = visible top
+  tableau: Card[][]; // 7 columns; last item = top of pile
+  foundations: Card[][]; // 4 piles, indexed 0..3 by suit slot
+  stock: Card[]; // face-down, last = next-to-deal
+  talon: Card[]; // face-up, last = visible top
   drawCount: 1 | 3;
-  startedAt: number;           // ms epoch
+  startedAt: number; // ms epoch
   movesMade: number;
   redealCount: number;
   seed: string;
-  history: GameState[];        // for undo, capped at ~200; never includes its own .history
+  history: GameState[]; // for undo, capped at ~200; never includes its own .history
 };
 ```
 
@@ -145,13 +151,13 @@ type GameState = {
 ```ts
 type Move =
   | { kind: 'draw' }
-  | { kind: 'recycle' }                                        // talon back to stock
+  | { kind: 'recycle' } // talon back to stock
   | { kind: 'tableauToTableau'; from: number; cardIndex: number; to: number }
   | { kind: 'tableauToFoundation'; from: number; foundationIdx: number }
   | { kind: 'talonToTableau'; to: number }
   | { kind: 'talonToFoundation'; foundationIdx: number }
   | { kind: 'foundationToTableau'; foundationIdx: number; to: number }
-  | { kind: 'flip'; column: number };                          // auto-flip new top of tableau column
+  | { kind: 'flip'; column: number }; // auto-flip new top of tableau column
 ```
 
 `applyMove(state, move)` is a pure function:
@@ -171,7 +177,7 @@ type Move =
 - **Stack drag from tableau**: cards from `cardIndex` to top must already form a valid descending alternating-color run; that's enforced when picking up, not on drop.
 - **Recycle**: only allowed when stock is empty.
 - **isWon**: all foundations have 13 cards.
-- **isAutoCompletable**: all face-down counts are 0 *and* talon + stock are empty.
+- **isAutoCompletable**: all face-down counts are 0 _and_ talon + stock are empty.
 
 ### Hints (`hints.ts`)
 
@@ -208,7 +214,7 @@ type GameStore = {
   newGame(opts: { drawCount: 1 | 3; seed?: string }): void;
   applyMove(move: Move): void;
   undo(): void;
-  drawFromStock(): void;          // wraps applyMove({kind:'draw'}) or recycle if needed
+  drawFromStock(): void; // wraps applyMove({kind:'draw'}) or recycle if needed
   autoMoveFrom(source: AutoMoveSource): void;
   hydrate(state: GameState): void;
 };
@@ -338,7 +344,7 @@ type DragSource =
 
 type DragData = {
   source: DragSource;
-  cards: Card[];   // 1+ cards (only tableauStack can be >1)
+  cards: Card[]; // 1+ cards (only tableauStack can be >1)
 };
 ```
 
@@ -366,8 +372,8 @@ Custom strategy: rectangle-intersection, but the column's effective rect extends
 
 ```ts
 export const SPRING_DEFAULT = { type: 'spring', stiffness: 500, damping: 32, mass: 0.7 } as const;
-export const SPRING_LIFT    = { type: 'spring', stiffness: 350, damping: 22, mass: 0.6 } as const;
-export const SPRING_DROP    = { type: 'spring', stiffness: 600, damping: 28, mass: 0.7 } as const;
+export const SPRING_LIFT = { type: 'spring', stiffness: 350, damping: 22, mass: 0.6 } as const;
+export const SPRING_DROP = { type: 'spring', stiffness: 600, damping: 28, mass: 0.7 } as const;
 ```
 
 When the `animations` setting is off, all springs are replaced with `{ duration: 0 }` via a context-level provider.
@@ -386,13 +392,13 @@ Every `<Card>` declares `layoutId={card.id}`. State changes that move a card to 
 
 ### Haptics map
 
-| Event | Native (iOS/Android) | Web fallback |
-| --- | --- | --- |
-| Pickup | `Haptics.impact({ style: 'light' })` | `navigator.vibrate(8)` |
-| Valid drop | `impact({ style: 'medium' })` | `vibrate(12)` |
-| Invalid drop | `notification({ type: 'warning' })` | `vibrate([8, 40, 8])` |
-| Foundation success | `impact({ style: 'medium' })` + chime SFX | `vibrate(20)` |
-| Win | `notification({ type: 'success' })` | `vibrate([30, 60, 30])` |
+| Event              | Native (iOS/Android)                      | Web fallback            |
+| ------------------ | ----------------------------------------- | ----------------------- |
+| Pickup             | `Haptics.impact({ style: 'light' })`      | `navigator.vibrate(8)`  |
+| Valid drop         | `impact({ style: 'medium' })`             | `vibrate(12)`           |
+| Invalid drop       | `notification({ type: 'warning' })`       | `vibrate([8, 40, 8])`   |
+| Foundation success | `impact({ style: 'medium' })` + chime SFX | `vibrate(20)`           |
+| Win                | `notification({ type: 'success' })`       | `vibrate([30, 60, 30])` |
 
 All gated on the `haptics` setting.
 

@@ -1,7 +1,7 @@
 import { Card } from '@/game/card';
 import { AutoMoveSource } from '@/game/auto';
 import { TableauColumn } from './TableauColumn';
-import { HintState } from './hints';
+import { HintState } from './highlight';
 import './Tableau.css';
 
 export function Tableau({
@@ -21,9 +21,7 @@ export function Tableau({
           cards={col}
           column={i}
           hint={hint}
-          onAutoMove={(cardIndex) =>
-            onAutoMove({ kind: 'tableauStack', column: i, cardIndex })
-          }
+          onAutoMove={(cardIndex) => onAutoMove({ kind: 'tableauStack', column: i, cardIndex })}
         />
       ))}
     </div>

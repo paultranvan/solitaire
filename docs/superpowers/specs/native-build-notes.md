@@ -62,8 +62,8 @@ edge: the WebView paints behind the system bar regardless of Capacitor's
 reports 0, so a CSS-only inset doesn't park content below the OS clock.
 We embrace this rather than fight it — `overlaysWebView: true` lets the
 felt color bleed through behind the system bar, and `lifecycle.ts`
-hardcodes `--safe-top: 28px` on Android so the topbar's padding still
-clears the system clock. No theme patch required.
+hardcodes a `--safe-top` floor on Android (≈24–32 dp) so the topbar's
+padding still clears the system clock. No theme patch required.
 
 ## Per-build sync
 
@@ -111,10 +111,9 @@ The web codebase calls these gracefully — they no-op on web and use
 native APIs when running inside Capacitor:
 
 - `@capacitor/haptics` (used in `src/haptics/haptics.ts`)
-- `@capacitor/status-bar` + `@capacitor/app` (init in `src/native/lifecycle.ts`)
+- `@capacitor/status-bar` (init in `src/native/lifecycle.ts`)
 - `@capacitor/splash-screen` (auto-managed via `capacitor.config.ts`)
 
-`@capacitor/preferences` is installed but not yet used; we currently store
-all state in IndexedDB (which is fine on iOS WKWebView and Android
-WebView). Switch the small settings/stats stores to Preferences only if
-the WebView storage proves unreliable on a target device.
+State persistence lives in IndexedDB via `idb-keyval` (fine on iOS WKWebView
+and Android WebView). If WebView storage ever proves unreliable on a target
+device, swap the small settings/stats stores onto `@capacitor/preferences`.

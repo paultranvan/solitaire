@@ -33,6 +33,7 @@ hint / auto-move planners (`hints`, `auto`). Everything else (stores, UI, dnd,
 persistence) sits on top and treats `game/` as a black box.
 
 Outer layers:
+
 - `store/gameReducer.ts` — thin React reducer wrapper around `applyMove`. Catches
   `InvalidMoveError` and returns the prior state; rethrows everything else.
 - `store/{statsStore,settingsStore}.ts` — Zustand + immer stores, each
@@ -65,10 +66,9 @@ stats can drift.
 
 The 4 foundation slots accept any suit; the visual suit hint on empty piles is
 decorative. Auto-move (`game/auto.ts`) and hints (`game/hints.ts`) both scan
-all 4 piles for a legal landing — don't rebuild that logic with
-`foundationIdxFor` (which exists in `rules.ts` but is currently a fallback,
-not an assignment). This invariant has caused regressions before; read the
-comment at the top of `auto.ts` before touching foundation routing.
+all 4 piles for a legal landing via `findFoundationFor` in `rules.ts`. This
+invariant has caused regressions before; read the comment at the top of
+`auto.ts` before touching foundation routing.
 
 ### Animation contract (motion/react + layoutId)
 
@@ -81,7 +81,7 @@ non-obvious rules:
 - `Card.tsx` sets `key={card.id}` on the `motion.div`. Without this, when a
   parent slot's `card` prop swaps (e.g. the talon top after a draw), motion
   reuses the same node and its shared-layout crossfade fades the new card
-  *into* the old one. See the inline comment.
+  _into_ the old one. See the inline comment.
 - After a drag-drop, `Board` flips `skipLayoutAnim` true for one render via a
   context provider so the dropped card doesn't fly from the source slot
   (visually it was at the cursor, not the slot). Auto-moves keep the
@@ -103,14 +103,15 @@ mid-animation. All four are flicker-prone.
 back to `closestCenter` when the pointer is in a gap. `pointerWithin` handles
 the heavy negative margins between stacked tableau cards better than
 `rectIntersection` (which would prefer the source column). PointerSensor
-activates after 5 px of movement; TouchSensor uses a 100 ms delay + 6 px
-tolerance to coexist with double-tap auto-move.
+activates after 5 px of movement; TouchSensor uses a 200 ms delay + 6 px
+tolerance to coexist with single-tap auto-move (anything below ~150 ms
+swallows clicks on real devices).
 
 ### Persistence / hydration order
 
-`App.tsx` hydrates settings + stats *before* loading the saved game, because
+`App.tsx` hydrates settings + stats _before_ loading the saved game, because
 the new-game default `drawCount` comes from settings. The saved-game loader
-returns `null` on schema mismatch *and* on a fully-foundation-stacked state
+returns `null` on schema mismatch _and_ on a fully-foundation-stacked state
 (belt-and-braces — the autosave clears on win, but defend anyway).
 
 ### Native shell
@@ -123,9 +124,10 @@ on web. `ios/` and `android/` are gitignored until signing/icons are final.
 
 Vitest + jsdom (`vite.config.ts → test`); setup at `src/test-setup.ts` pulls in
 `@testing-library/jest-dom` matchers. Tests live next to their subject in
-`__tests__/` directories. The bulk of coverage is on `src/game/` — every `Move`
-kind has legal/illegal cases, undo round-trips, and there is an integration
-test that plays full deals. UI tests are limited to `Board.test.tsx`.
+`__tests__/` directories. Shared factories live in `src/test-utils/`. The
+bulk of coverage is on `src/game/` — every `Move` kind has legal/illegal
+cases, undo round-trips, history-cap enforcement, and integration coverage.
+UI tests are limited to `Board.test.tsx`.
 
 ## Conventions
 

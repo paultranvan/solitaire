@@ -1,23 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { color, makeCard } from '../card';
+import { makeCard } from '../card';
 import { applyMove, InvalidMoveError, undo } from '../moves';
-import { canPlaceOnFoundation, canPlaceOnTableau } from '../rules';
 import { GameState } from '../state';
-
-const blank = (over: Partial<GameState> = {}): GameState => ({
-  schemaVersion: 1,
-  tableau: [[], [], [], [], [], [], []],
-  foundations: [[], [], [], []],
-  stock: [],
-  talon: [],
-  drawCount: 1,
-  startedAt: 0,
-  movesMade: 0,
-  redealCount: 0,
-  seed: 't',
-  history: [],
-  ...over,
-});
+import { blankGameState as blank } from '@/test-utils/factories';
 
 describe('applyMove: draw (drawCount=1)', () => {
   it('moves the top stock card face-up onto the talon', () => {
@@ -92,9 +77,9 @@ describe('applyMove: tableauToTableau (single card)', () => {
     const s = blank({
       tableau: [[makeCard('s', 7, true)], [makeCard('h', 7, true)], [], [], [], [], []],
     });
-    expect(() =>
-      applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 }),
-    ).toThrow(InvalidMoveError);
+    expect(() => applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 })).toThrow(
+      InvalidMoveError,
+    );
   });
 
   it('auto-flips the new top of the source column if it is face-down', () => {
@@ -102,7 +87,11 @@ describe('applyMove: tableauToTableau (single card)', () => {
       tableau: [
         [makeCard('h', 5, true)],
         [makeCard('s', 9, false), makeCard('c', 4, true)],
-        [], [], [], [], [],
+        [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
     const next = applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 1, to: 0 });
@@ -118,7 +107,11 @@ describe('applyMove: tableauToTableau (stack)', () => {
       tableau: [
         [makeCard('s', 8, true)],
         [makeCard('h', 7, true), makeCard('c', 6, true), makeCard('d', 5, true)],
-        [], [], [], [], [],
+        [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
     const next = applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 });
@@ -132,28 +125,32 @@ describe('applyMove: tableauToTableau (stack)', () => {
         [makeCard('s', 8, true)],
         // h7 (red) + d6 (red) — same color, not a valid descending alternating stack
         [makeCard('h', 7, true), makeCard('d', 6, true)],
-        [], [], [], [], [],
+        [],
+        [],
+        [],
+        [],
+        [],
       ],
     });
-    expect(() =>
-      applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 }),
-    ).toThrow(InvalidMoveError);
+    expect(() => applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 })).toThrow(
+      InvalidMoveError,
+    );
   });
 
   it('rejects moving a face-down card', () => {
     const s = blank({
       tableau: [[makeCard('s', 8, true)], [makeCard('h', 7, false)], [], [], [], [], []],
     });
-    expect(() =>
-      applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 }),
-    ).toThrow(InvalidMoveError);
+    expect(() => applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 })).toThrow(
+      InvalidMoveError,
+    );
   });
 
   it('rejects from === to', () => {
     const s = blank({ tableau: [[makeCard('s', 8, true)], [], [], [], [], [], []] });
-    expect(() =>
-      applyMove(s, { kind: 'tableauToTableau', from: 0, cardIndex: 0, to: 0 }),
-    ).toThrow(InvalidMoveError);
+    expect(() => applyMove(s, { kind: 'tableauToTableau', from: 0, cardIndex: 0, to: 0 })).toThrow(
+      InvalidMoveError,
+    );
   });
 });
 
@@ -180,9 +177,9 @@ describe('applyMove: tableauToFoundation', () => {
     const s = blank({
       tableau: [[makeCard('h', 5, true)], [], [], [], [], [], []],
     });
-    expect(() =>
-      applyMove(s, { kind: 'tableauToFoundation', from: 0, foundationIdx: 0 }),
-    ).toThrow(InvalidMoveError);
+    expect(() => applyMove(s, { kind: 'tableauToFoundation', from: 0, foundationIdx: 0 })).toThrow(
+      InvalidMoveError,
+    );
   });
 });
 
@@ -231,9 +228,9 @@ describe('applyMove: foundationToTableau', () => {
   });
 
   it('rejects when foundation empty', () => {
-    expect(() => applyMove(blank(), { kind: 'foundationToTableau', foundationIdx: 0, to: 0 })).toThrow(
-      InvalidMoveError,
-    );
+    expect(() =>
+      applyMove(blank(), { kind: 'foundationToTableau', foundationIdx: 0, to: 0 }),
+    ).toThrow(InvalidMoveError);
   });
 });
 
@@ -269,13 +266,5 @@ describe('undo', () => {
     const s = blank();
     const u = undo(s);
     expect(u).toEqual(s);
-  });
-});
-
-describe('rules helpers reused', () => {
-  it('imports work', () => {
-    expect(color('h')).toBe('red');
-    expect(canPlaceOnFoundation(makeCard('h', 1, true), undefined)).toBe(true);
-    expect(canPlaceOnTableau(makeCard('s', 13, true), undefined)).toBe(true);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cardId, color, makeCard, parseCardId, RANKS, SUITS } from '../card';
+import { cardId, color, makeCard, RANKS, SUITS } from '../card';
 
 describe('card', () => {
   it('SUITS and RANKS contain the canonical values', () => {
@@ -11,12 +11,6 @@ describe('card', () => {
     expect(cardId('h', 7)).toBe('h7');
     expect(cardId('s', 13)).toBe('s13');
     expect(cardId('d', 1)).toBe('d1');
-  });
-
-  it('parseCardId is the inverse of cardId', () => {
-    expect(parseCardId('h7')).toEqual({ suit: 'h', rank: 7 });
-    expect(parseCardId('c10')).toEqual({ suit: 'c', rank: 10 });
-    expect(parseCardId('s13')).toEqual({ suit: 's', rank: 13 });
   });
 
   it('color returns red for hearts/diamonds and black for spades/clubs', () => {

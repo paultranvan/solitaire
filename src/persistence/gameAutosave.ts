@@ -5,6 +5,15 @@ import { KEY_GAME, loadKey, removeKey, saveKey } from './db';
 
 const SAVE_DEBOUNCE_MS = 250;
 
+// Autosave doesn't persist history — undo doesn't survive reloads, and
+// keeping it would write up to 200 prior snapshots on every move.
+type SavedGame = Omit<GameState, 'history'>;
+
+const stripHistory = (state: GameState): SavedGame => {
+  const { history: _h, ...rest } = state;
+  return rest;
+};
+
 export const useGameAutosave = (state: GameState): void => {
   const timer = useRef<number | null>(null);
 
@@ -18,7 +27,7 @@ export const useGameAutosave = (state: GameState): void => {
     }
 
     timer.current = window.setTimeout(() => {
-      saveKey(KEY_GAME, state.schemaVersion, state);
+      saveKey(KEY_GAME, state.schemaVersion, stripHistory(state));
     }, SAVE_DEBOUNCE_MS);
 
     return () => {
@@ -28,11 +37,11 @@ export const useGameAutosave = (state: GameState): void => {
 };
 
 export const loadSavedGame = async (): Promise<GameState | null> => {
-  const loaded = await loadKey<GameState>(KEY_GAME);
+  const loaded = await loadKey<SavedGame>(KEY_GAME);
   if (!loaded || loaded.schemaVersion !== 1) return null;
-  // Sanity: a saved won game should not exist (we clear it), but defend anyway.
-  if (loaded.foundations && loaded.foundations.every((p) => p.length === 13)) return null;
-  return loaded;
+  const restored: GameState = { ...loaded, history: [] };
+  // Belt-and-braces: the autosave clears on win, but defend in case a stale
+  // won state survives (downgrade, manual IDB write, etc.).
+  if (isWon(restored)) return null;
+  return restored;
 };
-
-export const clearSavedGame = (): Promise<void> => removeKey(KEY_GAME);

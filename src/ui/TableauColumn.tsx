@@ -1,9 +1,9 @@
 import { useDndContext, useDroppable } from '@dnd-kit/core';
 import { Card } from '@/game/card';
-import { DragData, tableauColumnDropId } from '@/dnd/types';
+import { DragData, tableauCardDragId, tableauColumnDropId } from '@/dnd/types';
 import { CardView } from './Card';
 import { DraggableCard } from './DraggableCard';
-import { HintState, isHintSource, isHintTarget } from './hints';
+import { HintState, isHintSource, isHintTarget } from './highlight';
 import './TableauColumn.css';
 
 export function TableauColumn({
@@ -33,7 +33,7 @@ export function TableauColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`tableau-col${isOver ? ' tableau-col--over' : ''}${columnHinted ? ' is-hinted' : ''}`}
+      className={`tableau-col${isOver ? ' is-drop-over' : ''}${columnHinted ? ' is-hinted' : ''}`}
     >
       {cards.length === 0 ? (
         <div className="pile-empty" />
@@ -61,7 +61,7 @@ export function TableauColumn({
               {card.faceUp ? (
                 <DraggableCard
                   card={card}
-                  dragId={`t:${column}:${i}`}
+                  dragId={tableauCardDragId(column, i)}
                   data={{
                     source: { kind: 'tableauStack', column, fromIndex: i },
                     cards: cards.slice(i),

@@ -1,29 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { makeCard } from '@/game/card';
-import { GameState } from '@/game/state';
+import { blankGameState as blank } from '@/test-utils/factories';
 import { gameReducer } from '../gameReducer';
-
-const blank = (over: Partial<GameState> = {}): GameState => ({
-  schemaVersion: 1,
-  tableau: [[], [], [], [], [], [], []],
-  foundations: [[], [], [], []],
-  stock: [],
-  talon: [],
-  drawCount: 1,
-  startedAt: 0,
-  movesMade: 0,
-  redealCount: 0,
-  seed: 't',
-  history: [],
-  ...over,
-});
 
 describe('gameReducer', () => {
   it('applies a legal move', () => {
     const s = blank({
       tableau: [[makeCard('h', 1, true)], [], [], [], [], [], []],
     });
-    const next = gameReducer(s, { type: 'move', move: { kind: 'tableauToFoundation', from: 0, foundationIdx: 0 } });
+    const next = gameReducer(s, {
+      type: 'move',
+      move: { kind: 'tableauToFoundation', from: 0, foundationIdx: 0 },
+    });
     expect(next.foundations[0].map((c) => c.id)).toEqual(['h1']);
     expect(next.movesMade).toBe(1);
   });
@@ -32,7 +20,10 @@ describe('gameReducer', () => {
     const s = blank({
       tableau: [[makeCard('h', 5, true)], [], [], [], [], [], []],
     });
-    const next = gameReducer(s, { type: 'move', move: { kind: 'tableauToFoundation', from: 0, foundationIdx: 0 } });
+    const next = gameReducer(s, {
+      type: 'move',
+      move: { kind: 'tableauToFoundation', from: 0, foundationIdx: 0 },
+    });
     expect(next).toBe(s);
   });
 
