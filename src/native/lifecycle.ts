@@ -13,6 +13,11 @@ export const initNativeLifecycle = async (): Promise<void> => {
     );
   }
 
+  // Native shells need extra breathing room below the buttons so the
+  // dark topbar band doesn't feel top-heavy under the OS status bar.
+  // Web defaults to 10px (theme.css) for a tight, balanced strip.
+  document.documentElement.style.setProperty('--topbar-pad-bottom', '22px');
+
   try {
     const { StatusBar, Style } = await import('@capacitor/status-bar');
     await StatusBar.setOverlaysWebView({ overlay: true });

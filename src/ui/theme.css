@@ -36,10 +36,15 @@
      Strong, mostly-opaque dark felt — needs to read as a defined band so
      the buttons clearly sit on a darker ground than the playing felt
      below. A translucent overlay over the bright top of the radial felt
-     gradient is too subtle. */
+     gradient is too subtle.
+     --topbar-pad-bottom defaults to a tight 10px on web (the band reads
+     as a clean strip around the buttons). lifecycle.ts bumps this to
+     22px on native, where the safe-area-top of ~56px sits above the
+     buttons and we need similar breathing room below to balance it. */
   --topbar-h: clamp(52px, 4.5vh, 64px);
   --topbar-bg: rgba(6, 26, 12, 0.92);
   --topbar-fg: rgba(255, 255, 255, 0.95);
+  --topbar-pad-bottom: 10px;
 
   /* Menu surface — parchment & aged gold on dark felt */
   --ink: #f3ecd9;

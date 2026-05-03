@@ -3,10 +3,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* Generous padding-bottom so there's a visible band of dark below the
-     buttons before the felt gradient takes over — keeps the buttons
-     squarely on the dark zone. */
-  padding: var(--safe-top) calc(16px + var(--safe-right)) 22px calc(16px + var(--safe-left));
+  /* Top padding floors at 8px so the buttons get visible breathing room on
+     web (where --safe-top is 0). On native, --safe-top is set to the
+     status-bar inset (≥56px on Android), which dominates and pushes the
+     buttons down clear of the OS bar.
+     Bottom padding is variable: 10px on web for a clean tight band, 22px
+     on native to balance the larger top inset. */
+  padding: max(var(--safe-top), 8px) calc(16px + var(--safe-right)) var(--topbar-pad-bottom)
+    calc(16px + var(--safe-left));
   background: var(--topbar-bg);
   color: var(--topbar-fg);
   position: sticky;
@@ -20,7 +24,8 @@
 
 @media (min-width: 720px) {
   .topbar {
-    padding: var(--safe-top) calc(28px + var(--safe-right)) 22px calc(28px + var(--safe-left));
+    padding: max(var(--safe-top), 8px) calc(28px + var(--safe-right)) var(--topbar-pad-bottom)
+      calc(28px + var(--safe-left));
   }
 }
 
