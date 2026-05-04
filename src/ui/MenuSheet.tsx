@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useStatsStore } from '@/store/statsStore';
 import { useSettingsStore, Settings } from '@/store/settingsStore';
+import { useT, Translator } from '@/i18n/useT';
 import { Sheet } from './Sheet';
-import { formatBestTime, formatDuration } from './format';
 import './MenuSheet.css';
 
-const winPct = (won: number, played: number): string =>
-  played === 0 ? '—' : `${Math.round((won / played) * 100)}%`;
+const winPct = (won: number, played: number, tr: Translator): string =>
+  played === 0 ? '—' : `${tr.formatNumber(Math.round((won / played) * 100))}%`;
 
 function StatHero({ value, label }: { value: string | number; label: string }) {
   return (
@@ -32,32 +32,34 @@ function ModeBlock({
   fewestMovesWin: number | null;
   bestScore: number | null;
 }) {
+  const tr = useT();
+  const { t, formatNumber, formatBestTime } = tr;
   return (
     <div className="mode-block">
       <div className="mode-block__head">
-        <span className="mode-block__name">Draw {mode}</span>
-        <span className="mode-block__rate">{winPct(won, played)}</span>
+        <span className="mode-block__name">{t('stats.draw', { n: mode })}</span>
+        <span className="mode-block__rate">{winPct(won, played, tr)}</span>
       </div>
       <dl className="mode-block__list">
         <div className="mode-block__item">
-          <dt>Played</dt>
-          <dd>{played}</dd>
+          <dt>{t('stats.played')}</dt>
+          <dd>{formatNumber(played)}</dd>
         </div>
         <div className="mode-block__item">
-          <dt>Won</dt>
-          <dd>{won}</dd>
+          <dt>{t('stats.won')}</dt>
+          <dd>{formatNumber(won)}</dd>
         </div>
         <div className="mode-block__item">
-          <dt>Best score</dt>
-          <dd>{bestScore === null ? '—' : bestScore.toLocaleString()}</dd>
+          <dt>{t('stats.bestScore')}</dt>
+          <dd>{bestScore === null ? '—' : formatNumber(bestScore)}</dd>
         </div>
         <div className="mode-block__item">
-          <dt>Best time</dt>
+          <dt>{t('stats.bestTime')}</dt>
           <dd>{formatBestTime(bestTimeSec)}</dd>
         </div>
         <div className="mode-block__item">
-          <dt>Min moves</dt>
-          <dd>{fewestMovesWin ?? '—'}</dd>
+          <dt>{t('stats.minMoves')}</dt>
+          <dd>{fewestMovesWin === null ? '—' : formatNumber(fewestMovesWin)}</dd>
         </div>
       </dl>
     </div>
@@ -68,6 +70,8 @@ function StatsSection() {
   const stats = useStatsStore((s) => s.stats);
   const reset = useStatsStore((s) => s.reset);
   const [confirming, setConfirming] = useState(false);
+  const tr = useT();
+  const { t, formatNumber, formatDuration } = tr;
 
   const totalWon = stats.byMode['1'].won + stats.byMode['3'].won;
   const totalPlayed = stats.byMode['1'].played + stats.byMode['3'].played;
@@ -76,15 +80,15 @@ function StatsSection() {
     <section className="m-section">
       <h3 className="m-eyebrow">
         <span className="m-eyebrow__line" />
-        Statistics
+        {t('stats.title')}
         <span className="m-eyebrow__line" />
       </h3>
 
       <div className="stat-hero-grid">
-        <StatHero value={totalWon} label="Wins" />
-        <StatHero value={winPct(totalWon, totalPlayed)} label="Win rate" />
-        <StatHero value={stats.currentStreak} label="Streak" />
-        <StatHero value={stats.longestStreak} label="Best" />
+        <StatHero value={formatNumber(totalWon)} label={t('stats.wins')} />
+        <StatHero value={winPct(totalWon, totalPlayed, tr)} label={t('stats.winRate')} />
+        <StatHero value={formatNumber(stats.currentStreak)} label={t('stats.streak')} />
+        <StatHero value={formatNumber(stats.longestStreak)} label={t('stats.best')} />
       </div>
 
       <div className="mode-pair">
@@ -102,14 +106,14 @@ function StatsSection() {
       </div>
 
       <div className="m-row m-row--quiet">
-        <span>Total time at table</span>
+        <span>{t('stats.totalTime')}</span>
         <span className="num">{formatDuration(stats.totalSecondsPlayed)}</span>
       </div>
 
       <div className="m-section__action">
         {confirming ? (
           <div className="confirm-row">
-            <span>Reset all statistics?</span>
+            <span>{t('stats.resetPrompt')}</span>
             <button
               type="button"
               className="btn btn--danger"
@@ -118,15 +122,15 @@ function StatsSection() {
                 setConfirming(false);
               }}
             >
-              Yes, reset
+              {t('stats.resetYes')}
             </button>
             <button type="button" className="btn" onClick={() => setConfirming(false)}>
-              Cancel
+              {t('stats.resetNo')}
             </button>
           </div>
         ) : (
           <button type="button" className="btn btn--ghost" onClick={() => setConfirming(true)}>
-            Reset stats…
+            {t('stats.resetButton')}
           </button>
         )}
       </div>
@@ -162,6 +166,7 @@ function Toggle({
 function SettingsSection() {
   const settings = useSettingsStore((s) => s.settings);
   const update = useSettingsStore((s) => s.update);
+  const { t } = useT();
 
   const set = (patch: Partial<Settings>) => update(patch);
 
@@ -169,13 +174,14 @@ function SettingsSection() {
     <section className="m-section">
       <h3 className="m-eyebrow">
         <span className="m-eyebrow__line" />
-        Settings
+        {t('settings.title')}
         <span className="m-eyebrow__line" />
       </h3>
 
       <div className="m-row">
         <span>
-          Draw count<span className="m-row__hint">next game</span>
+          {t('settings.drawCount')}
+          <span className="m-row__hint">{t('settings.drawCountHint')}</span>
         </span>
         <div className="seg">
           <button
@@ -196,45 +202,64 @@ function SettingsSection() {
       </div>
 
       <div className="m-row">
-        <span>Layout</span>
+        <span>{t('settings.layout')}</span>
         <div className="seg">
           <button
             type="button"
             className={`seg__btn${settings.handedness === 'right' ? ' is-active' : ''}`}
             onClick={() => set({ handedness: 'right' })}
-            title="Stock on the left, foundations on the right"
+            title={t('settings.rightHandedTitle')}
           >
-            Right-handed
+            {t('settings.rightHanded')}
           </button>
           <button
             type="button"
             className={`seg__btn${settings.handedness === 'left' ? ' is-active' : ''}`}
             onClick={() => set({ handedness: 'left' })}
-            title="Stock on the right, foundations on the left"
+            title={t('settings.leftHandedTitle')}
           >
-            Left-handed
+            {t('settings.leftHanded')}
           </button>
         </div>
       </div>
 
-      <Toggle label="Sound effects" value={settings.sound} onChange={(v) => set({ sound: v })} />
+      <div className="m-row">
+        <span>{t('settings.language')}</span>
+        <div className="seg">
+          <button
+            type="button"
+            className={`seg__btn${settings.language === 'en' ? ' is-active' : ''}`}
+            onClick={() => set({ language: 'en' })}
+          >
+            English
+          </button>
+          <button
+            type="button"
+            className={`seg__btn${settings.language === 'fr' ? ' is-active' : ''}`}
+            onClick={() => set({ language: 'fr' })}
+          >
+            Français
+          </button>
+        </div>
+      </div>
+
       <Toggle
-        label="Haptic feedback"
+        label={t('settings.sound')}
+        value={settings.sound}
+        onChange={(v) => set({ sound: v })}
+      />
+      <Toggle
+        label={t('settings.haptics')}
         value={settings.haptics}
         onChange={(v) => set({ haptics: v })}
       />
       <Toggle
-        label="Animations"
+        label={t('settings.animations')}
         value={settings.animations}
         onChange={(v) => set({ animations: v })}
       />
       <Toggle
-        label="Auto-move on tap"
-        value={settings.autoMoveOnTap}
-        onChange={(v) => set({ autoMoveOnTap: v })}
-      />
-      <Toggle
-        label="Solvable deals only"
+        label={t('settings.requireWinnable')}
         value={settings.requireWinnable}
         onChange={(v) => set({ requireWinnable: v })}
       />
@@ -251,6 +276,7 @@ function GameActions({
   onRestart: () => void;
   canRestart: boolean;
 }) {
+  const { t } = useT();
   return (
     <div className="m-game-actions">
       <button
@@ -261,7 +287,7 @@ function GameActions({
         <span className="m-game-action__glyph" aria-hidden="true">
           +
         </span>
-        <span className="m-game-action__label">New Game</span>
+        <span className="m-game-action__label">{t('menu.newGame')}</span>
       </button>
       <button
         type="button"
@@ -284,7 +310,7 @@ function GameActions({
           <path d="M3 12a9 9 0 1 0 3-6.7" />
           <path d="M3 4v5h5" />
         </svg>
-        <span className="m-game-action__label">Restart</span>
+        <span className="m-game-action__label">{t('menu.restart')}</span>
       </button>
     </div>
   );
@@ -303,6 +329,7 @@ export function MenuSheet({
   onRestart: () => void;
   canRestart: boolean;
 }) {
+  const { t } = useT();
   // Close the sheet after a game-changing action so the player sees the new
   // board immediately. Defer one tick so the click finishes before the sheet
   // begins its exit animation.
@@ -311,7 +338,7 @@ export function MenuSheet({
     onClose();
   };
   return (
-    <Sheet open={open} onClose={onClose} title="Menu">
+    <Sheet open={open} onClose={onClose} title={t('menu.title')}>
       <GameActions
         onNewGame={fire(onNewGame)}
         onRestart={fire(onRestart)}

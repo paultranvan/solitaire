@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { useT } from '@/i18n/useT';
 import { Sheet } from './Sheet';
 import { formatMMSS } from './format';
 import './WinSheet.css';
@@ -52,42 +53,43 @@ export function WinSheet({
   isNewBest: boolean;
   showConfetti?: boolean;
 }) {
+  const { t, formatNumber } = useT();
   return (
     <>
       {open && showConfetti && <Confetti />}
-      <Sheet open={open} onClose={onClose} title="You won!">
+      <Sheet open={open} onClose={onClose} title={t('win.title')}>
         <div className="win">
           <div className="win__hero">🎉</div>
-          <h2 className="win__title">Congratulations</h2>
-          <p className="win__subtitle">You cleared the board.</p>
+          <h2 className="win__title">{t('win.heading')}</h2>
+          <p className="win__subtitle">{t('win.subtitle')}</p>
 
           <div className="win__score">
-            <div className="win__score-value">{score.toLocaleString()}</div>
-            <div className="win__score-label">Score</div>
-            {isNewBest && <div className="win__score-badge">New best!</div>}
+            <div className="win__score-value">{formatNumber(score)}</div>
+            <div className="win__score-label">{t('win.score')}</div>
+            {isNewBest && <div className="win__score-badge">{t('win.newBest')}</div>}
           </div>
 
           <div className="win__stats">
             <div className="win__stat">
               <div className="win__stat-value">{formatMMSS(durationSec)}</div>
-              <div className="win__stat-label">Time</div>
+              <div className="win__stat-label">{t('win.time')}</div>
             </div>
             <div className="win__stat">
-              <div className="win__stat-value">{moves}</div>
-              <div className="win__stat-label">Moves</div>
+              <div className="win__stat-value">{formatNumber(moves)}</div>
+              <div className="win__stat-label">{t('win.moves')}</div>
             </div>
             <div className="win__stat">
               <div className="win__stat-value">{drawCount}</div>
-              <div className="win__stat-label">Draw</div>
+              <div className="win__stat-label">{t('win.draw')}</div>
             </div>
           </div>
 
           <div className="win__actions">
             <button type="button" className="btn btn--primary" onClick={onPlayAgain}>
-              Play again
+              {t('win.playAgain')}
             </button>
             <button type="button" className="btn btn--ghost" onClick={onClose}>
-              Close
+              {t('win.close')}
             </button>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { Card } from '@/game/card';
 import { TALON_DRAG_ID } from '@/dnd/types';
+import { useT } from '@/i18n/useT';
 import { CardView } from './Card';
 import { DraggableCard } from './DraggableCard';
 import { HintState, isHintSource, isHintTarget } from './highlight';
@@ -18,6 +19,7 @@ export function StockTalon({
   onTalonAutoMove: () => void;
   hint: HintState;
 }) {
+  const { t } = useT();
   const talonTop = talon[talon.length - 1];
   const talonBehind = talon[talon.length - 2];
   const talonHinted =
@@ -29,7 +31,7 @@ export function StockTalon({
         type="button"
         className="stock-talon__slot stock"
         onClick={onStockClick}
-        aria-label={stock.length > 0 ? 'draw' : 'recycle'}
+        aria-label={stock.length > 0 ? t('stock.draw') : t('stock.recycle')}
       >
         {stock.length > 0 ? (
           <CardView card={{ ...stock[stock.length - 1], faceUp: false }} />

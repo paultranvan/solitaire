@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { useT } from '@/i18n/useT';
 import './Sheet.css';
 
 export function Sheet({
@@ -13,6 +14,7 @@ export function Sheet({
   title: string;
   children: ReactNode;
 }) {
+  const { t } = useT();
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -46,7 +48,12 @@ export function Sheet({
               <div className="sheet__handle" />
               <header className="sheet__header">
                 <h2 className="sheet__title">{title}</h2>
-                <button type="button" className="sheet__close" onClick={onClose} aria-label="close">
+                <button
+                  type="button"
+                  className="sheet__close"
+                  onClick={onClose}
+                  aria-label={t('sheet.close')}
+                >
                   ✕
                 </button>
               </header>

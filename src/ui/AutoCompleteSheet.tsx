@@ -1,3 +1,4 @@
+import { useT } from '@/i18n/useT';
 import { Sheet } from './Sheet';
 import './AutoCompleteSheet.css';
 
@@ -10,20 +11,19 @@ export function AutoCompleteSheet({
   onAccept: () => void;
   onDecline: () => void;
 }) {
+  const { t } = useT();
   return (
-    <Sheet open={open} onClose={onDecline} title="auto-complete?">
+    <Sheet open={open} onClose={onDecline} title={t('autoComplete.title')}>
       <div className="autocomplete">
         <div className="autocomplete__hero">✨</div>
-        <h2 className="autocomplete__title">Ready to finish</h2>
-        <p className="autocomplete__subtitle">
-          All face-down cards are revealed. Auto-resolve the rest to the foundations?
-        </p>
+        <h2 className="autocomplete__title">{t('autoComplete.heading')}</h2>
+        <p className="autocomplete__subtitle">{t('autoComplete.subtitle')}</p>
         <div className="autocomplete__actions">
           <button type="button" className="btn btn--primary" onClick={onAccept}>
-            Auto-complete
+            {t('autoComplete.accept')}
           </button>
           <button type="button" className="btn btn--ghost" onClick={onDecline}>
-            Keep playing
+            {t('autoComplete.decline')}
           </button>
         </div>
       </div>

@@ -9,6 +9,7 @@ import './ui/theme.css';
 
 export default function App() {
   const [initial, setInitial] = useState<GameState | null>(null);
+  const language = useSettingsStore((s) => s.settings.language);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,6 +34,12 @@ export default function App() {
       cancelled = true;
     };
   }, []);
+
+  // Mirror the chosen language onto <html lang> so screen readers and the
+  // browser pick the right pronunciation/hyphenation.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   if (!initial) {
     return (

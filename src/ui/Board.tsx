@@ -23,6 +23,7 @@ import { isAutoCompletable, isWon } from '@/game/rules';
 import { computeScore } from '@/game/score';
 import { createInitialState } from '@/game/state';
 import { findWinnableSeed } from '@/game/solverClient';
+import { useT } from '@/i18n/useT';
 import { DragData } from '@/dnd/types';
 import { resolveMove } from '@/dnd/resolveMove';
 import { gameReducer } from '@/store/gameReducer';
@@ -169,10 +170,10 @@ export function Board({ initial }: { initial: GameState }) {
 
   const recordGame = useStatsStore((s) => s.recordGame);
   const settingsDrawCount = useSettingsStore((s) => s.settings.drawCount);
-  const autoMoveOnTap = useSettingsStore((s) => s.settings.autoMoveOnTap);
   const animationsOn = useSettingsStore((s) => s.settings.animations);
   const handedness = useSettingsStore((s) => s.settings.handedness);
   const requireWinnable = useSettingsStore((s) => s.settings.requireWinnable);
+  const { t } = useT();
 
   useGameAutosave(state);
 
@@ -292,7 +293,6 @@ export function Board({ initial }: { initial: GameState }) {
 
   const handleAutoMove = useCallback(
     (source: AutoMoveSource) => {
-      if (!autoMoveOnTap) return;
       const move = findAutoMoveTarget(state, source);
       if (move === null) return;
       if (!canApply(state, move)) return;
@@ -306,7 +306,7 @@ export function Board({ initial }: { initial: GameState }) {
       });
       feedback(feedbackForMove(move));
     },
-    [state, autoMoveOnTap],
+    [state],
   );
 
   const handleUndo = () => dispatch({ type: 'undo' });
@@ -493,7 +493,7 @@ export function Board({ initial }: { initial: GameState }) {
           <div className="board__shuffling" role="status" aria-live="polite">
             <div className="board__shuffling-card">
               <span className="board__shuffling-spinner" aria-hidden />
-              <span>Finding a solvable deal…</span>
+              <span>{t('board.shuffling')}</span>
             </div>
           </div>
         ) : null}

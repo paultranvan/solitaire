@@ -1,4 +1,5 @@
 import { useEffect, useState, type MouseEvent } from 'react';
+import { useT } from '@/i18n/useT';
 import { formatMMSS } from './format';
 import './TopBar.css';
 
@@ -28,6 +29,7 @@ function ElapsedChip({
   activeMs: number;
   runningSince: number | null;
 }) {
+  const { t } = useT();
   const [elapsed, setElapsed] = useState(() => elapsedSeconds(activeMs, runningSince));
 
   useEffect(() => {
@@ -38,7 +40,7 @@ function ElapsedChip({
   }, [activeMs, runningSince]);
 
   return (
-    <span className="topbar__chip" title="time">
+    <span className="topbar__chip" title={t('topbar.time')}>
       <span className="topbar__chip-glyph" aria-hidden="true">
         ⏱
       </span>
@@ -60,11 +62,12 @@ export function TopBar({
   onHint,
   onMenu,
 }: TopBarProps) {
+  const { t } = useT();
   return (
     <header className="topbar">
       <div className="topbar__group topbar__group--left">
         <ElapsedChip activeMs={activeMs} runningSince={runningSince} />
-        <span className="topbar__chip" title="moves">
+        <span className="topbar__chip" title={t('topbar.moves')}>
           <span className="topbar__chip-glyph" aria-hidden="true">
             ♠
           </span>
@@ -75,8 +78,8 @@ export function TopBar({
         <button
           type="button"
           className="topbar__btn"
-          title="undo"
-          aria-label="undo"
+          title={t('topbar.undo')}
+          aria-label={t('topbar.undo')}
           onMouseDown={swallowFocus}
           onClick={onUndo}
           disabled={!canUndo}
@@ -100,8 +103,8 @@ export function TopBar({
         <button
           type="button"
           className="topbar__btn topbar__btn--hint"
-          title="hint"
-          aria-label="hint"
+          title={t('topbar.hint')}
+          aria-label={t('topbar.hint')}
           onMouseDown={swallowFocus}
           onClick={onHint}
         >
@@ -110,8 +113,8 @@ export function TopBar({
         <button
           type="button"
           className="topbar__btn"
-          title="menu"
-          aria-label="menu"
+          title={t('topbar.menu')}
+          aria-label={t('topbar.menu')}
           onMouseDown={swallowFocus}
           onClick={onMenu}
         >
