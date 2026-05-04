@@ -43,3 +43,56 @@
 .board[data-animations='off'] .tableau-col__slot.is-hinted {
   animation: none;
 }
+
+/* Transient overlay shown while the solver is hunting for a winnable deal.
+   Mounted only after a 250 ms grace period so quick attempts don't flash. */
+.board__shuffling {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 50;
+  animation: board-shuffling-fade 160ms ease-out both;
+}
+
+.board__shuffling-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 22px;
+  border-radius: 14px;
+  background: rgba(20, 22, 28, 0.92);
+  color: #fff;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.board__shuffling-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: board-shuffling-spin 0.9s linear infinite;
+}
+
+.board[data-animations='off'] .board__shuffling-spinner {
+  animation: none;
+}
+
+@keyframes board-shuffling-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes board-shuffling-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

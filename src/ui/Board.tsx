@@ -22,6 +22,7 @@ import { findAutoMoveTarget, AutoMoveSource, nextAutoCompleteMove } from '@/game
 import { isAutoCompletable, isWon } from '@/game/rules';
 import { computeScore } from '@/game/score';
 import { createInitialState } from '@/game/state';
+import { findWinnableSeed } from '@/game/solverClient';
 import { DragData } from '@/dnd/types';
 import { resolveMove } from '@/dnd/resolveMove';
 import { gameReducer } from '@/store/gameReducer';
@@ -83,6 +84,13 @@ export function Board({ initial }: { initial: GameState }) {
   // Holds the pending WinSheet open timer so handleNewGame/handleRestart can
   // cancel it. Survives effect re-runs (cleanup intentionally omitted).
   const winSheetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Tracks an in-flight winnable-only shuffle so successive new-game clicks
+  // cancel the prior search instead of stacking workers.
+  const shuffleAbortRef = useRef<AbortController | null>(null);
+  // Set true when an abandoned-game stat has already been booked for the
+  // current state, so re-entering handleNewGame mid-shuffle doesn't double-count.
+  const abandonRecordedRef = useRef(false);
+  const [isShuffling, setIsShuffling] = useState(false);
 
   // Active-play timer. activeSinceRef holds the ms-epoch when the current
   // "running" segment began (null = paused). flushActiveTime commits the
@@ -116,6 +124,18 @@ export function Board({ initial }: { initial: GameState }) {
   useEffect(() => {
     primeAudioOnFirstGesture();
   }, []);
+
+  // Abort any in-flight winnable-only shuffle when Board unmounts so the
+  // worker doesn't try to dispatch into a dead component.
+  useEffect(
+    () => () => {
+      if (shuffleAbortRef.current !== null) {
+        shuffleAbortRef.current.abort();
+        shuffleAbortRef.current = null;
+      }
+    },
+    [],
+  );
 
   // Mount-only: register visibility listeners and start the timer if eligible.
   // Reads wonRef so the listeners stay valid across won transitions without
@@ -152,6 +172,7 @@ export function Board({ initial }: { initial: GameState }) {
   const autoMoveOnTap = useSettingsStore((s) => s.settings.autoMoveOnTap);
   const animationsOn = useSettingsStore((s) => s.settings.animations);
   const handedness = useSettingsStore((s) => s.settings.handedness);
+  const requireWinnable = useSettingsStore((s) => s.settings.requireWinnable);
 
   useGameAutosave(state);
 
@@ -296,18 +317,32 @@ export function Board({ initial }: { initial: GameState }) {
     setHint(moveToHint(move));
   };
 
-  const handleNewGame = () => {
-    // Count abandoned game if there were moves but it wasn't won.
-    if (state.movesMade > 0 && !isWon(state) && !wonReportedRef.current) {
+  const handleNewGame = async () => {
+    // Cancel an in-flight winnable-only shuffle if the user re-clicks; we
+    // skip re-recording abandon stats since the first call already booked it.
+    if (shuffleAbortRef.current !== null) {
+      shuffleAbortRef.current.abort();
+      shuffleAbortRef.current = null;
+    }
+    // Count abandoned game if there were moves but it wasn't won. The
+    // abandonRecordedRef guard prevents double-booking when the user clicks
+    // new-game again before the shuffle that's still in flight finishes.
+    if (
+      state.movesMade > 0 &&
+      !isWon(state) &&
+      !wonReportedRef.current &&
+      !abandonRecordedRef.current
+    ) {
       recordGame({
         mode: state.drawCount,
         outcome: 'abandoned',
         durationSec: Math.max(0, Math.floor(liveActiveMs() / 1000)),
         moves: state.movesMade,
       });
+      abandonRecordedRef.current = true;
     }
-    // Drop the running segment without dispatching a tick — we already used
-    // it for the abandoned record (if any), and the reset below installs a
+    // Drop the running segment without dispatching a tick — the abandoned
+    // record (if any) already consumed it, and the reset below installs a
     // fresh activeMs=0. The won-state effect will restart the timer.
     activeSinceRef.current = null;
     setRunningSince(null);
@@ -318,7 +353,42 @@ export function Board({ initial }: { initial: GameState }) {
       winSheetTimerRef.current = null;
     }
     setAutoCompleteState('idle');
-    dispatch({ type: 'reset', state: createInitialState({ drawCount: settingsDrawCount }) });
+
+    const finish = (seed?: string) => {
+      abandonRecordedRef.current = false;
+      dispatch({
+        type: 'reset',
+        state: createInitialState({ drawCount: settingsDrawCount, seed }),
+      });
+    };
+
+    if (!requireWinnable) {
+      finish();
+      return;
+    }
+
+    const ac = new AbortController();
+    shuffleAbortRef.current = ac;
+    // Only flash the "Shuffling…" overlay if the search runs long enough to
+    // notice — most attempts return well under 250 ms.
+    const overlayTimer = window.setTimeout(() => setIsShuffling(true), 250);
+    try {
+      const r = await findWinnableSeed(
+        { drawCount: settingsDrawCount, deadlineMs: 200, maxAttempts: 25 },
+        ac.signal,
+      );
+      if (ac.signal.aborted) return;
+      finish(r.seed);
+    } catch (e) {
+      if ((e as { name?: string }).name === 'AbortError') return;
+      // Solver path failed unexpectedly — fall back to an unfiltered deal so
+      // the new-game button always produces a board.
+      finish();
+    } finally {
+      window.clearTimeout(overlayTimer);
+      setIsShuffling(false);
+      if (shuffleAbortRef.current === ac) shuffleAbortRef.current = null;
+    }
   };
 
   // Hidden cheat: typing "win" anywhere installs a winning state that preserves
@@ -419,6 +489,14 @@ export function Board({ initial }: { initial: GameState }) {
           onRestart={handleRestart}
           canRestart={state.movesMade > 0}
         />
+        {isShuffling ? (
+          <div className="board__shuffling" role="status" aria-live="polite">
+            <div className="board__shuffling-card">
+              <span className="board__shuffling-spinner" aria-hidden />
+              <span>Finding a solvable deal…</span>
+            </div>
+          </div>
+        ) : null}
         <WinSheet
           open={winOpen}
           onClose={() => setWinOpen(false)}

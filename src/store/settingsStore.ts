@@ -10,6 +10,10 @@ export type Settings = {
   animations: boolean;
   autoMoveOnTap: boolean;
   handedness: 'right' | 'left';
+  // When on, "New game" reshuffles until the solver proves the deal
+  // winnable (within a short per-attempt budget). The toggle is opt-in
+  // because it adds a sub-second pause to new-game.
+  requireWinnable: boolean;
 };
 
 export const defaultSettings = (): Settings => ({
@@ -20,6 +24,7 @@ export const defaultSettings = (): Settings => ({
   animations: true,
   autoMoveOnTap: true,
   handedness: 'right',
+  requireWinnable: false,
 });
 
 type SettingsStore = {

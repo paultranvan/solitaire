@@ -233,6 +233,11 @@ function SettingsSection() {
         value={settings.autoMoveOnTap}
         onChange={(v) => set({ autoMoveOnTap: v })}
       />
+      <Toggle
+        label="Solvable deals only"
+        value={settings.requireWinnable}
+        onChange={(v) => set({ requireWinnable: v })}
+      />
     </section>
   );
 }
