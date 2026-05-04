@@ -69,15 +69,6 @@
   --safe-right: env(safe-area-inset-right, 0px);
 }
 
-/* Restore tighter desktop fan — the default values above are the looser
-   mobile spacing, where larger touch targets help. */
-@media (min-width: 720px) {
-  :root {
-    --fan-faceup: calc(var(--card-h) * 0.32);
-    --fan-facedown: calc(var(--card-h) * 0.16);
-  }
-}
-
 html,
 body,
 #root {
