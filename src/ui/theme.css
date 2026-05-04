@@ -28,8 +28,8 @@
      notched/curved screens don't push the rightmost column off-canvas. */
   --card-w: clamp(38px, calc((100vw - 28px - var(--safe-left) - var(--safe-right)) / 8.08), 120px);
   --card-h: calc(var(--card-w) * 1.4);
-  --fan-faceup: calc(var(--card-h) * 0.32);
-  --fan-facedown: calc(var(--card-h) * 0.16);
+  --fan-faceup: calc(var(--card-h) * 0.36);
+  --fan-facedown: calc(var(--card-h) * 0.18);
   --gap-col: calc(var(--card-w) * 0.18);
 
   /* Top bar
@@ -67,6 +67,15 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Restore tighter desktop fan — the default values above are the looser
+   mobile spacing, where larger touch targets help. */
+@media (min-width: 720px) {
+  :root {
+    --fan-faceup: calc(var(--card-h) * 0.32);
+    --fan-facedown: calc(var(--card-h) * 0.16);
+  }
 }
 
 html,
