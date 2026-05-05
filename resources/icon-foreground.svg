@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="1024" height="1024">
+  <defs>
+    <filter id="cardShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="2" dy="5" stdDeviation="3" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <g transform="translate(100 100) scale(0.78) translate(-100 -100) rotate(-7 100 100)">
+    <g filter="url(#cardShadow)">
+      <rect x="55" y="32" width="90" height="135" rx="9" fill="#fffaf0"/>
+    </g>
+    <text x="64" y="58" font-size="22" font-weight="700" fill="#c41e3a" font-family="serif">A</text>
+    <text x="64" y="80" font-size="22" fill="#c41e3a" font-family="serif">♦</text>
+    <g transform="rotate(180 100 99.5)">
+      <text x="64" y="58" font-size="22" font-weight="700" fill="#c41e3a" font-family="serif">A</text>
+      <text x="64" y="80" font-size="22" fill="#c41e3a" font-family="serif">♦</text>
+    </g>
+    <text x="100" y="135" font-size="64" text-anchor="middle" fill="#c41e3a" font-family="serif">♦</text>
+  </g>
+</svg>
