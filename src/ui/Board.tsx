@@ -235,12 +235,26 @@ export function Board({ initial }: { initial: GameState }) {
     setAutoCompleteState('prompt');
   }, [state, autoCompleteState]);
 
+  // Foundation card total at the most recent recycle issued by the auto-complete
+  // loop. If a second recycle is proposed without the total having grown in
+  // between, no foundation progress is possible (in draw-3 the talon order
+  // repeats exactly after one full cycle), so we bail out instead of spinning.
+  const lastAutoRecycleFoundationTotalRef = useRef<number | null>(null);
+
   // Step the auto-complete loop while the player has accepted.
   useEffect(() => {
-    if (autoCompleteState !== 'running') return;
+    if (autoCompleteState !== 'running') {
+      lastAutoRecycleFoundationTotalRef.current = null;
+      return;
+    }
     if (isWon(state)) return;
     const move = nextAutoCompleteMove(state);
     if (move === null) return;
+    if (move.kind === 'recycle') {
+      const foundationTotal = state.foundations.reduce((n, p) => n + p.length, 0);
+      if (lastAutoRecycleFoundationTotalRef.current === foundationTotal) return;
+      lastAutoRecycleFoundationTotalRef.current = foundationTotal;
+    }
     const id = setTimeout(() => dispatch({ type: 'move', move }), AUTOCOMPLETE_STEP_MS);
     return () => clearTimeout(id);
   }, [state, autoCompleteState]);

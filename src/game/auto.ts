@@ -55,8 +55,11 @@ export const findAutoMoveTarget = (state: GameState, source: AutoMoveSource): Mo
 };
 
 // Step the auto-complete loop: prefer foundation moves (tableau or talon),
-// otherwise draw from the stock so a future iteration may unblock a move.
-// Returns null when nothing more can be done automatically.
+// otherwise draw from the stock or recycle the talon back into the stock so a
+// future iteration may unblock a move. Returns null when nothing more can be
+// done automatically. The caller is responsible for stopping if a recycle
+// fails to make foundation progress (otherwise we'd cycle forever in draw-3
+// mode when talon size is a multiple of the draw count).
 export const nextAutoCompleteMove = (state: GameState): Move | null => {
   for (let from = 0; from < state.tableau.length; from++) {
     const col = state.tableau[from];
@@ -72,5 +75,6 @@ export const nextAutoCompleteMove = (state: GameState): Move | null => {
     if (idx !== null) return { kind: 'talonToFoundation', foundationIdx: idx };
   }
   if (state.stock.length > 0) return { kind: 'draw' };
+  if (state.talon.length > 0) return { kind: 'recycle' };
   return null;
 };

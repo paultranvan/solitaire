@@ -166,4 +166,25 @@ describe('nextAutoCompleteMove', () => {
     });
     expect(nextAutoCompleteMove(s)).toBeNull();
   });
+
+  it('recycles when stock is empty and the talon top has no legal foundation move', () => {
+    // Tableau is fully face-up but inert (top is ♥7, foundations are empty).
+    // Stock is empty and the talon top (♠5) cannot land on any foundation.
+    // Without recycling here, the auto-complete loop would deadlock until
+    // the user manually clicked the stock to recycle.
+    const s = blank({
+      tableau: [[makeCard('h', 7, true)], [], [], [], [], [], []],
+      talon: [makeCard('s', 5, true)],
+    });
+    expect(nextAutoCompleteMove(s)).toEqual({ kind: 'recycle' });
+  });
+
+  it('prefers draw over recycle when stock still has cards', () => {
+    const s = blank({
+      tableau: [[makeCard('h', 7, true)], [], [], [], [], [], []],
+      stock: [makeCard('c', 5, false)],
+      talon: [makeCard('s', 5, true)],
+    });
+    expect(nextAutoCompleteMove(s)).toEqual({ kind: 'draw' });
+  });
 });
