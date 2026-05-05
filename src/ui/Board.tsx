@@ -158,16 +158,6 @@ export function Board({ initial }: { initial: GameState }) {
     };
   }, [flushActiveTime, startActiveTime]);
 
-  // React to won transitions: flush on win, start on new-deal-after-win/undo.
-  // Cheap & idempotent on every state change (start/flush early-return when
-  // already in target state), so depending on `state` is safe.
-  useEffect(() => {
-    const won = isWon(state);
-    wonRef.current = won;
-    if (won) flushActiveTime();
-    else startActiveTime();
-  }, [state, flushActiveTime, startActiveTime]);
-
   const recordGame = useStatsStore((s) => s.recordGame);
   const settingsDrawCount = useSettingsStore((s) => s.settings.drawCount);
   const animationsOn = useSettingsStore((s) => s.settings.animations);
@@ -225,6 +215,20 @@ export function Board({ initial }: { initial: GameState }) {
       setWinOpen(true);
     }, 600);
   }, [state, recordGame]);
+
+  // React to won transitions: flush on win, start on new-deal-after-win/undo.
+  // Cheap & idempotent on every state change (start/flush early-return when
+  // already in target state), so depending on `state` is safe. Declared *after*
+  // the win-record effect above so React fires win-record first on the won
+  // render: flushActiveTime() nullifies activeSinceRef synchronously, and if
+  // win-record ran second it would read a null ref and lose the entire running
+  // segment from the recorded duration.
+  useEffect(() => {
+    const won = isWon(state);
+    wonRef.current = won;
+    if (won) flushActiveTime();
+    else startActiveTime();
+  }, [state, flushActiveTime, startActiveTime]);
 
   // Open the auto-complete prompt the first time the tableau has no
   // face-downs left in this game. Stays declined until a new game.
