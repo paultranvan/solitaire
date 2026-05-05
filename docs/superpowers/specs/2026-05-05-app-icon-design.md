@@ -72,9 +72,11 @@ circle, squircle, or rounded-square shapes. Splitting the layers prevents
 the card from being clipped:
 
 - **Background layer** — felt green with vignette, full bleed. No card.
-- **Foreground layer** — card only, on transparent background, scaled to
-  78% (linear, applied to width and height) so it sits inside the safe
-  zone (the inscribed circle of the canvas) and survives every OEM mask.
+- **Foreground layer** — card only, on transparent background, with the same
+  card proportions as the master (no extra pre-scale). Capacitor's generated
+  `ic_launcher.xml` wraps both layers in an `InsetDrawable` with 16.7% inset
+  on each side, which provides the standard Android adaptive-icon safe-zone
+  shrinkage. Pre-scaling the SVG on top of that would double-shrink the card.
 
 `@capacitor/assets` generates the legacy `mipmap-{density}/ic_launcher.png`
 plus the adaptive XML and density-bucketed foreground/background PNGs.

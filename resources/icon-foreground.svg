@@ -4,7 +4,7 @@
       <feDropShadow dx="2" dy="5" stdDeviation="3" flood-opacity="0.45"/>
     </filter>
   </defs>
-  <g transform="translate(100 100) scale(0.78) translate(-100 -100) rotate(-7 100 100)">
+  <g transform="rotate(-7 100 100)">
     <g filter="url(#cardShadow)">
       <rect x="55" y="32" width="90" height="135" rx="9" fill="#fffaf0"/>
     </g>

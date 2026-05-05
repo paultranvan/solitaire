@@ -4,9 +4,10 @@
 // invocation is added in a later task.
 
 import { Resvg } from '@resvg/resvg-js';
-import { mkdirSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -43,5 +44,31 @@ for (const t of targets) {
 mkdirSync(resolve(root, 'public'), { recursive: true });
 copyFileSync(resolve(root, 'resources/icon.svg'), resolve(root, 'public/favicon.svg'));
 console.log('  copied public/favicon.svg');
+
+// If a Capacitor native shell exists, regenerate its icon/splash assets.
+const hasIos = existsSync(resolve(root, 'ios'));
+const hasAndroid = existsSync(resolve(root, 'android'));
+
+if (hasIos || hasAndroid) {
+  console.log(`Generating Capacitor assets (ios=${hasIos}, android=${hasAndroid})...`);
+  const result = spawnSync(
+    'npx',
+    [
+      'capacitor-assets',
+      'generate',
+      '--iconBackgroundColor', '#0f3818',
+      '--iconBackgroundColorDark', '#0f3818',
+      '--splashBackgroundColor', '#0f3818',
+      '--splashBackgroundColorDark', '#0f3818',
+    ],
+    { stdio: 'inherit', cwd: root },
+  );
+  if (result.status !== 0) {
+    console.error('capacitor-assets generate failed');
+    process.exit(result.status ?? 1);
+  }
+} else {
+  console.log('No ios/ or android/ found; skipping capacitor-assets.');
+}
 
 console.log('Done.');

@@ -95,15 +95,55 @@ signed AAB via Build > Generate Signed Bundle.
 
 ## Splash + icon
 
-Use `@capacitor/assets` (separately installed) to generate launcher icons
-and splash images from a single source PNG/SVG:
+Source SVGs live in `resources/`:
+
+- `icon.svg` — full-bleed master (used for iOS, the legacy Android
+  `ic_launcher`, and the web favicon)
+- `icon-foreground.svg` — card only on transparent background (Android
+  adaptive icon foreground; Capacitor's generated XML insets it 16.7% to
+  fit the safe zone)
+- `icon-background.svg` — felt vignette only (Android adaptive icon
+  background)
+- `splash.svg` — icon centered on a 2732² felt canvas (Capacitor splash
+  drawable, shown after the Android 12+ system splash)
+
+The pipeline is wired up; just run:
 
 ```bash
-npm install --save-dev @capacitor/assets
-npx capacitor-assets generate --iconBackgroundColor "#0f3818"
+npm run assets:generate
 ```
 
-Provide `resources/icon.png` (1024×1024) and `resources/splash.png` (2732×2732).
+This rasterizes the SVGs to PNG via `@resvg/resvg-js`, copies the favicon
+into `public/`, and runs `capacitor-assets generate` to populate `ios/`
+and `android/`. The PNG intermediates in `resources/` are gitignored —
+only the SVG sources are committed.
+
+Re-run `npm run assets:generate` after re-scaffolding `ios/` or
+`android/` (both are gitignored by default). The script no-ops the
+Capacitor step if neither native folder exists, so it works on web-only
+checkouts too.
+
+### Android 12+ system splash patch
+
+`android/app/src/main/res/values/styles.xml` needs three additional theme
+items so the system splash on Android 12+ uses the felt-green background
+and the master icon (instead of the default light gray + bare foreground
+clipped by the system mask). Inside the `AppTheme.NoActionBarLaunch`
+style, add:
+
+```xml
+<item name="windowSplashScreenBackground">#0f3818</item>
+<item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+<item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+```
+
+(Keep the existing `<item name="android:background">@drawable/splash</item>`
+underneath — Capacitor's splash drawable runs after the system splash on
+12+ and as the only splash on older versions.)
+
+This patch sits next to the Kotlin stdlib dedup patch above — both live
+in the gitignored `android/` directory and need re-applying after
+`cap add android`.
 
 ## Plugins already wired
 
