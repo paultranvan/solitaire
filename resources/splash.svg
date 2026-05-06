@@ -10,7 +10,7 @@
     </filter>
   </defs>
   <rect width="2732" height="2732" fill="url(#feltGrad)"/>
-  <g transform="translate(915 915) scale(4.51)">
+  <g transform="translate(666 666) scale(7)">
     <g transform="rotate(-7 100 100)">
       <g filter="url(#cardShadow)">
         <rect x="55" y="32" width="90" height="135" rx="9" fill="#fffaf0"/>

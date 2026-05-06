@@ -67,7 +67,41 @@ if (hasIos || hasAndroid) {
     console.error('capacitor-assets generate failed');
     process.exit(result.status ?? 1);
   }
-} else {
+}
+
+if (hasAndroid) {
+  /* capacitor-assets 3.x writes adaptive-icon foreground/background PNGs
+     at the LEGACY launcher icon sizes (e.g. 192px at xxxhdpi). Android's
+     adaptive icon spec wants them 3x larger — the visible 108dp safe area
+     × density factor — so the Android 12+ Splash Screen API has enough
+     pixels when it renders the icon at 192dp inside a 288dp circle on
+     high-DPI screens. Re-rasterize the correct sizes over capacitor-assets'
+     output. Sizes: 81/108/162/216/324/432 for ldpi…xxxhdpi. */
+  console.log('Upscaling Android adaptive-icon mipmaps to spec sizes...');
+  const adaptiveIconBuckets = [
+    { dir: 'mipmap-ldpi',    size: 81 },
+    { dir: 'mipmap-mdpi',    size: 108 },
+    { dir: 'mipmap-hdpi',    size: 162 },
+    { dir: 'mipmap-xhdpi',   size: 216 },
+    { dir: 'mipmap-xxhdpi',  size: 324 },
+    { dir: 'mipmap-xxxhdpi', size: 432 },
+  ];
+  for (const bucket of adaptiveIconBuckets) {
+    const outDir = `android/app/src/main/res/${bucket.dir}`;
+    rasterize(
+      resolve(root, 'resources/icon-foreground.svg'),
+      resolve(root, `${outDir}/ic_launcher_foreground.png`),
+      bucket.size,
+    );
+    rasterize(
+      resolve(root, 'resources/icon-background.svg'),
+      resolve(root, `${outDir}/ic_launcher_background.png`),
+      bucket.size,
+    );
+  }
+}
+
+if (!hasIos && !hasAndroid) {
   console.log('No ios/ or android/ found; skipping capacitor-assets.');
 }
 
