@@ -3,9 +3,9 @@ import { motion } from 'motion/react';
 import { Card as CardModel, color } from '@/game/card';
 import { SPRING_DEFAULT } from '@/motion/presets';
 import { useSettingsStore } from '@/store/settingsStore';
+import { Suit } from './Suit';
 import './Card.css';
 
-const SUIT_GLYPH: Record<string, string> = { h: '♥', d: '♦', s: '♠', c: '♣' };
 const RANK_LABEL: Record<number, string> = { 1: 'A', 11: 'J', 12: 'Q', 13: 'K' };
 const labelFor = (rank: number) => RANK_LABEL[rank] ?? String(rank);
 
@@ -25,7 +25,6 @@ export type CardProps = {
 
 export function CardView({ card, ghost = false }: CardProps) {
   const c = color(card.suit);
-  const glyph = SUIT_GLYPH[card.suit];
   const label = labelFor(card.rank);
   const skipLayoutAnim = useContext(SkipLayoutAnimContext);
   const animationsOn = useSettingsStore((s) => s.settings.animations);
@@ -60,9 +59,9 @@ export function CardView({ card, ghost = false }: CardProps) {
         >
           <div className="card__corner">
             <span className="card__rank">{label}</span>
-            <span className="card__suit">{glyph}</span>
+            <Suit suit={card.suit} className="card__suit" />
           </div>
-          <div className="card__center">{glyph}</div>
+          <Suit suit={card.suit} className="card__center" />
         </div>
       </div>
     </motion.div>

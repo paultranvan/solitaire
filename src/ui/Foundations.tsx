@@ -1,19 +1,20 @@
 import { useDroppable } from '@dnd-kit/core';
-import { Card } from '@/game/card';
+import { Card, Suit as SuitT } from '@/game/card';
 import { foundationDragId, foundationDropId } from '@/dnd/types';
 import { CardView } from './Card';
 import { DraggableCard } from './DraggableCard';
 import { HintState, isHintSource, isHintTarget } from './highlight';
+import { Suit } from './Suit';
 import './Foundations.css';
 
 // Decorative empty-pile glyphs only — foundations accept any suit at runtime
 // (see findFoundationFor in game/rules.ts). Don't read business logic into
 // the slot order.
-const EMPTY_FOUNDATION_GLYPH: Record<number, string> = {
-  0: '♥',
-  1: '♦',
-  2: '♠',
-  3: '♣',
+const EMPTY_FOUNDATION_SUIT: Record<number, SuitT> = {
+  0: 'h',
+  1: 'd',
+  2: 's',
+  3: 'c',
 };
 
 function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: HintState }) {
@@ -46,7 +47,7 @@ function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: 
         />
       ) : (
         <div className="pile-empty" aria-label={`foundation ${idx}`}>
-          {EMPTY_FOUNDATION_GLYPH[idx]}
+          <Suit suit={EMPTY_FOUNDATION_SUIT[idx]} className="pile-empty__hint" />
         </div>
       )}
     </div>
