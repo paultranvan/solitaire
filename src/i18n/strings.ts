@@ -62,12 +62,11 @@ const en = {
   'win.playAgain': 'Play again',
   'win.close': 'Close',
 
-  'autoComplete.title': 'auto-complete?',
-  'autoComplete.heading': 'Ready to finish',
-  'autoComplete.subtitle':
-    'All face-down cards are revealed. Auto-resolve the rest to the foundations?',
-  'autoComplete.accept': 'Auto-complete',
-  'autoComplete.decline': 'Keep playing',
+  'autoComplete.title': 'Well played!',
+  'autoComplete.heading': 'You’ve almost won 🎉',
+  'autoComplete.subtitle': 'Shall we lay down the rest of the cards?',
+  'autoComplete.accept': 'Finish for me ✅',
+  'autoComplete.decline': 'Let me enjoy it ➡️',
 
   'board.shuffling': 'Finding a solvable deal…',
 
@@ -139,12 +138,11 @@ const fr: Record<StringKey, string> = {
   'win.playAgain': 'Rejouer',
   'win.close': 'Fermer',
 
-  'autoComplete.title': 'auto-complétion ?',
-  'autoComplete.heading': 'Prêt à finir',
-  'autoComplete.subtitle':
-    'Toutes les cartes faces cachées sont retournées. Envoyer le reste aux fondations ?',
-  'autoComplete.accept': 'Auto-compléter',
-  'autoComplete.decline': 'Continuer',
+  'autoComplete.title': 'Bien joué !',
+  'autoComplete.heading': 'C’est presque gagné 🎉',
+  'autoComplete.subtitle': 'On pose le reste des cartes ?',
+  'autoComplete.accept': 'Termine pour moi ✅',
+  'autoComplete.decline': 'Laisse-moi profiter ➡️',
 
   'board.shuffling': 'Recherche d’une donne gagnable…',
 
