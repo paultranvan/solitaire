@@ -41,6 +41,7 @@ export function WinSheet({
   drawCount,
   score,
   isNewBest,
+  bestScore,
   showConfetti = true,
 }: {
   open: boolean;
@@ -51,6 +52,7 @@ export function WinSheet({
   drawCount: 1 | 3;
   score: number;
   isNewBest: boolean;
+  bestScore: number | null;
   showConfetti?: boolean;
 }) {
   const { t, formatNumber } = useT();
@@ -66,6 +68,11 @@ export function WinSheet({
           <div className="win__score">
             <div className="win__score-value">{formatNumber(score)}</div>
             <div className="win__score-label">{t('win.score')}</div>
+            {!isNewBest && bestScore !== null && (
+              <div className="win__score-best">
+                {t('win.best')} {formatNumber(bestScore)}
+              </div>
+            )}
             {isNewBest && <div className="win__score-badge">{t('win.newBest')}</div>}
           </div>
 

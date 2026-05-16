@@ -47,6 +47,13 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
+.win__score-best {
+  margin-top: 8px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(253, 230, 138, 0.75);
+}
+
 .win__score-badge {
   position: absolute;
   top: -10px;

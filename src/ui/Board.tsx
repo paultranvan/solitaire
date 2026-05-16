@@ -79,6 +79,8 @@ export function Board({ initial }: { initial: GameState }) {
   const winMovesRef = useRef(0);
   const winScoreRef = useRef(0);
   const winIsNewBestRef = useRef(false);
+  // Prior best score for the won mode (null = no recorded win yet).
+  const winBestScoreRef = useRef<number | null>(null);
   // True when the current win came from the "win" cheat key sequence — skip
   // stats recording and the new-best badge so the preview leaves no trace.
   const cheatWinRef = useRef(false);
@@ -192,6 +194,7 @@ export function Board({ initial }: { initial: GameState }) {
     winMovesRef.current = state.movesMade;
     winScoreRef.current = score;
     winIsNewBestRef.current = !isCheat && (priorBest === null || score > priorBest);
+    winBestScoreRef.current = priorBest;
     if (!isCheat) {
       recordGame({
         mode: state.drawCount,
@@ -527,6 +530,7 @@ export function Board({ initial }: { initial: GameState }) {
           drawCount={state.drawCount}
           score={winScoreRef.current}
           isNewBest={winIsNewBestRef.current}
+          bestScore={winBestScoreRef.current}
           showConfetti={animationsOn}
         />
       </div>
