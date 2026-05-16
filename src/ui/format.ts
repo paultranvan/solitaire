@@ -4,3 +4,11 @@ export const formatMMSS = (sec: number): string => {
   const r = sec % 60;
   return `${m.toString().padStart(2, '0')}:${r.toString().padStart(2, '0')}`;
 };
+
+// Formats an epoch-ms timestamp as zero-padded DD/MM/YYYY (fixed for all locales).
+export const formatDMY = (ms: number): string => {
+  const d = new Date(ms);
+  const dd = d.getDate().toString().padStart(2, '0');
+  const mm = (d.getMonth() + 1).toString().padStart(2, '0');
+  return `${dd}/${mm}/${d.getFullYear()}`;
+};
