@@ -6,6 +6,39 @@
   margin-bottom: 18px;
 }
 
+.records__summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.records__stat {
+  background: rgba(243, 236, 217, 0.04);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 12px 6px;
+  text-align: center;
+}
+
+.records__stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 19px;
+  color: var(--gold);
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1;
+}
+
+.records__stat-label {
+  display: block;
+  margin-top: 5px;
+  font-size: 9px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+}
+
 .records__heading {
   margin: 0 0 8px;
   font-size: 12px;

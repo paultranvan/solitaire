@@ -32,6 +32,18 @@ describe('RecordsSheet', () => {
     expect(screen.queryByText('200')).not.toBeInTheDocument();
   });
 
+  it('shows the best score / time / moves summary for the active mode', () => {
+    const stats = defaultStats();
+    stats.byMode['1'].bestScore = 8420;
+    stats.byMode['1'].bestTimeSec = 192;
+    stats.byMode['1'].fewestMovesWin = 142;
+    useStatsStore.setState({ stats });
+    render(<RecordsSheet open onClose={() => {}} />);
+    expect(screen.getByText('8,420')).toBeInTheDocument();
+    expect(screen.getByText('03:12')).toBeInTheDocument();
+    expect(screen.getByText('142')).toBeInTheDocument();
+  });
+
   it('switches mode when the Draw-3 tab is clicked', () => {
     const stats = defaultStats();
     stats.byMode['1'].wins = [win(500)];

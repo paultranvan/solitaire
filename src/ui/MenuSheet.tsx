@@ -22,19 +22,13 @@ function ModeBlock({
   mode,
   played,
   won,
-  bestTimeSec,
-  fewestMovesWin,
-  bestScore,
 }: {
   mode: '1' | '3';
   played: number;
   won: number;
-  bestTimeSec: number | null;
-  fewestMovesWin: number | null;
-  bestScore: number | null;
 }) {
   const tr = useT();
-  const { t, formatNumber, formatBestTime } = tr;
+  const { t, formatNumber } = tr;
   return (
     <div className="mode-block">
       <div className="mode-block__head">
@@ -49,18 +43,6 @@ function ModeBlock({
         <div className="mode-block__item">
           <dt>{t('stats.won')}</dt>
           <dd>{formatNumber(won)}</dd>
-        </div>
-        <div className="mode-block__item">
-          <dt>{t('stats.bestScore')}</dt>
-          <dd>{bestScore === null ? '—' : formatNumber(bestScore)}</dd>
-        </div>
-        <div className="mode-block__item">
-          <dt>{t('stats.bestTime')}</dt>
-          <dd>{formatBestTime(bestTimeSec)}</dd>
-        </div>
-        <div className="mode-block__item">
-          <dt>{t('stats.minMoves')}</dt>
-          <dd>{fewestMovesWin === null ? '—' : formatNumber(fewestMovesWin)}</dd>
         </div>
       </dl>
     </div>
@@ -100,9 +82,6 @@ function StatsSection() {
             mode={m}
             played={stats.byMode[m].played}
             won={stats.byMode[m].won}
-            bestTimeSec={stats.byMode[m].bestTimeSec}
-            fewestMovesWin={stats.byMode[m].fewestMovesWin}
-            bestScore={stats.byMode[m].bestScore}
           />
         ))}
       </div>
