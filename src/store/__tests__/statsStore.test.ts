@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defaultStats, useStatsStore } from '../statsStore';
 
 describe('statsStore.recordGame', () => {
@@ -68,5 +68,52 @@ describe('statsStore.recordGame', () => {
     const rec = useStatsStore.getState().recordGame;
     rec({ mode: 3, outcome: 'won', durationSec: 90, moves: 70 });
     expect(useStatsStore.getState().stats.byMode['3'].bestScore).toBeNull();
+  });
+});
+
+describe('statsStore.recordGame — win records', () => {
+  beforeEach(() => {
+    useStatsStore.setState({ stats: defaultStats() });
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-14T10:00:00Z'));
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it('appends a WinRecord on a win with score', () => {
+    useStatsStore.getState().recordGame({
+      mode: 1,
+      outcome: 'won',
+      durationSec: 192,
+      moves: 142,
+      score: 8420,
+    });
+    const wins = useStatsStore.getState().stats.byMode['1'].wins;
+    expect(wins).toHaveLength(1);
+    expect(wins[0]).toEqual({
+      score: 8420,
+      durationSec: 192,
+      moves: 142,
+      dateMs: new Date('2026-05-14T10:00:00Z').getTime(),
+    });
+  });
+
+  it('does not append a WinRecord for an abandoned game', () => {
+    useStatsStore.getState().recordGame({
+      mode: 1,
+      outcome: 'abandoned',
+      durationSec: 30,
+      moves: 5,
+    });
+    expect(useStatsStore.getState().stats.byMode['1'].wins).toHaveLength(0);
+  });
+
+  it('does not append a WinRecord for a win with no score', () => {
+    useStatsStore.getState().recordGame({
+      mode: 1,
+      outcome: 'won',
+      durationSec: 100,
+      moves: 50,
+    });
+    expect(useStatsStore.getState().stats.byMode['1'].wins).toHaveLength(0);
   });
 });

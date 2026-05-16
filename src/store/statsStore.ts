@@ -2,12 +2,20 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { KEY_STATS, loadKey, saveKey } from '@/persistence/db';
 
+export type WinRecord = {
+  score: number;
+  durationSec: number;
+  moves: number;
+  dateMs: number;
+};
+
 export type ModeStats = {
   played: number;
   won: number;
   bestTimeSec: number | null;
   fewestMovesWin: number | null;
   bestScore: number | null;
+  wins: WinRecord[];
 };
 
 export type Stats = {
@@ -24,6 +32,7 @@ const emptyMode = (): ModeStats => ({
   bestTimeSec: null,
   fewestMovesWin: null,
   bestScore: null,
+  wins: [],
 });
 
 // Older saves predate `bestScore`; merge in a default so reads stay safe.
@@ -81,6 +90,9 @@ export const useStatsStore = create<StatsStore>()(
           if (m.fewestMovesWin === null || moves < m.fewestMovesWin) m.fewestMovesWin = moves;
           if (score !== undefined && (m.bestScore === null || score > m.bestScore)) {
             m.bestScore = score;
+          }
+          if (score !== undefined) {
+            m.wins.push({ score, durationSec, moves, dateMs: Date.now() });
           }
           state.stats.currentStreak += 1;
           if (state.stats.currentStreak > state.stats.longestStreak) {
