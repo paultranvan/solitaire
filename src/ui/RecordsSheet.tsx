@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useStatsStore } from '@/store/statsStore';
 import { useT } from '@/i18n/useT';
-import { topScores } from '@/store/records';
+import { modeWins, topScores } from '@/store/records';
 import { Sheet } from './Sheet';
 import { formatDMY, formatMMSS } from './format';
 import './RecordsSheet.css';
@@ -14,7 +14,7 @@ export function RecordsSheet({ open, onClose }: { open: boolean; onClose: () => 
   const [tab, setTab] = useState<'1' | '3'>('1');
 
   const mode = stats.byMode[tab];
-  const rows = topScores(mode.wins, 10);
+  const rows = topScores(modeWins(stats.games, Number(tab) as 1 | 3), 10);
 
   return (
     <Sheet open={open} onClose={onClose} title={t('records.title')}>

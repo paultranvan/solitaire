@@ -71,7 +71,7 @@ describe('statsStore.recordGame', () => {
   });
 });
 
-describe('statsStore.recordGame — win records', () => {
+describe('statsStore.recordGame — game log', () => {
   beforeEach(() => {
     useStatsStore.setState({ stats: defaultStats() });
     vi.useFakeTimers();
@@ -79,41 +79,56 @@ describe('statsStore.recordGame — win records', () => {
   });
   afterEach(() => vi.useRealTimers());
 
-  it('appends a WinRecord on a win with score', () => {
+  it('appends a won GameRecord with all fields', () => {
     useStatsStore.getState().recordGame({
       mode: 1,
       outcome: 'won',
       durationSec: 192,
       moves: 142,
       score: 8420,
+      seed: 'abc',
+      redealCount: 2,
+      hintsUsed: 3,
+      undosUsed: 1,
     });
-    const wins = useStatsStore.getState().stats.byMode['1'].wins;
-    expect(wins).toHaveLength(1);
-    expect(wins[0]).toEqual({
+    const games = useStatsStore.getState().stats.games;
+    expect(games).toHaveLength(1);
+    expect(games[0]).toEqual({
+      outcome: 'won',
       score: 8420,
       durationSec: 192,
       moves: 142,
       dateMs: new Date('2026-05-14T10:00:00Z').getTime(),
+      drawCount: 1,
+      seed: 'abc',
+      redealCount: 2,
+      hintsUsed: 3,
+      undosUsed: 1,
     });
   });
 
-  it('does not append a WinRecord for an abandoned game', () => {
+  it('appends an abandoned GameRecord with a null score', () => {
     useStatsStore.getState().recordGame({
       mode: 1,
       outcome: 'abandoned',
       durationSec: 30,
       moves: 5,
     });
-    expect(useStatsStore.getState().stats.byMode['1'].wins).toHaveLength(0);
+    const games = useStatsStore.getState().stats.games;
+    expect(games).toHaveLength(1);
+    expect(games[0].outcome).toBe('abandoned');
+    expect(games[0].score).toBeNull();
   });
 
-  it('does not append a WinRecord for a win with no score', () => {
+  it('records a null score for a win logged without a score', () => {
     useStatsStore.getState().recordGame({
       mode: 1,
       outcome: 'won',
       durationSec: 100,
       moves: 50,
     });
-    expect(useStatsStore.getState().stats.byMode['1'].wins).toHaveLength(0);
+    const games = useStatsStore.getState().stats.games;
+    expect(games).toHaveLength(1);
+    expect(games[0].score).toBeNull();
   });
 });

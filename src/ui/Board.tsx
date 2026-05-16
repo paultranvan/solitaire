@@ -21,7 +21,7 @@ import { bestNextMove } from '@/game/hints';
 import { findAutoMoveTarget, AutoMoveSource, nextAutoCompleteMove } from '@/game/auto';
 import { isAutoCompletable, isWon } from '@/game/rules';
 import { computeScore } from '@/game/score';
-import { rankWin, type Ranking } from '@/store/records';
+import { modeWins, rankWin, type Ranking } from '@/store/records';
 import { createInitialState } from '@/game/state';
 import { findWinnableSeed } from '@/game/solverClient';
 import { useT } from '@/i18n/useT';
@@ -195,11 +195,14 @@ export function Board({ initial }: { initial: GameState }) {
         durationSec,
         moves: state.movesMade,
         score,
+        seed: state.seed,
+        redealCount: state.redealCount,
+        hintsUsed: state.hintsUsed,
+        undosUsed: state.undosUsed,
       });
-      // recordGame has appended this win — rank it against the updated list.
-      const mWins =
-        useStatsStore.getState().stats.byMode[String(state.drawCount) as '1' | '3'].wins;
-      winRankingRef.current = rankWin(mWins, { score, durationSec, moves: state.movesMade });
+      // recordGame appended this win — rank it against the mode's win log.
+      const wins = modeWins(useStatsStore.getState().stats.games, state.drawCount);
+      winRankingRef.current = rankWin(wins, { score, durationSec, moves: state.movesMade });
     } else {
       winRankingRef.current = null;
     }
@@ -334,6 +337,7 @@ export function Board({ initial }: { initial: GameState }) {
   const handleHint = () => {
     const move = bestNextMove(state);
     if (move === null) return;
+    dispatch({ type: 'hint' });
     setHint(moveToHint(move));
   };
 
@@ -358,6 +362,10 @@ export function Board({ initial }: { initial: GameState }) {
         outcome: 'abandoned',
         durationSec: Math.max(0, Math.floor(liveActiveMs() / 1000)),
         moves: state.movesMade,
+        seed: state.seed,
+        redealCount: state.redealCount,
+        hintsUsed: state.hintsUsed,
+        undosUsed: state.undosUsed,
       });
       abandonRecordedRef.current = true;
     }
