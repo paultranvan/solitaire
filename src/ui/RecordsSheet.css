@@ -1,0 +1,73 @@
+.records {
+  padding: 4px 0 8px;
+}
+
+.records__tabs {
+  margin-bottom: 18px;
+}
+
+.records__heading {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+}
+
+.records__empty {
+  text-align: center;
+  padding: 32px 12px;
+  color: var(--ink-quiet);
+  font-size: 14px;
+}
+
+.records__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lbrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.lbrow:last-child {
+  border-bottom: 0;
+}
+
+.lbrow__rank {
+  width: 30px;
+  flex: none;
+  text-align: center;
+  font-size: 15px;
+  color: var(--ink-quiet);
+  font-variant-numeric: tabular-nums;
+}
+
+.lbrow--medal .lbrow__rank {
+  font-size: 19px;
+}
+
+.lbrow__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.lbrow__score {
+  display: block;
+  font-size: 18px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.lbrow__meta {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ink-quiet);
+  font-variant-numeric: tabular-nums;
+}
