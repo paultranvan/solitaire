@@ -47,27 +47,34 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
-.win__score-best {
-  margin-top: 8px;
-  font-size: 12px;
+.win__rank {
+  margin: -8px 0 18px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.66);
   font-variant-numeric: tabular-nums;
-  color: rgba(253, 230, 138, 0.75);
 }
 
-.win__score-badge {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #facc15;
-  color: #1f1300;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 4px 10px;
-  border-radius: 999px;
-  box-shadow: 0 4px 12px rgba(250, 204, 21, 0.35);
+.win__banner {
+  margin: -6px 0 18px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.2), rgba(250, 204, 21, 0.08));
+  border: 1px solid rgba(250, 204, 21, 0.4);
+}
+
+.win__banner-msg {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fde68a;
+}
+
+.win__banner-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  font-variant-numeric: tabular-nums;
 }
 
 .win__stats {
@@ -75,6 +82,19 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-bottom: 24px;
+}
+
+.win__stats--pair {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.win__stat--medal {
+  background: rgba(250, 204, 21, 0.14);
+  border: 1px solid rgba(250, 204, 21, 0.38);
+}
+
+.win__stat--medal .win__stat-label {
+  color: rgba(253, 230, 138, 0.85);
 }
 
 .win__stat {

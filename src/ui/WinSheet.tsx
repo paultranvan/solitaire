@@ -1,11 +1,31 @@
 import { motion } from 'motion/react';
 import { useT } from '@/i18n/useT';
+import type { Ranking } from '@/store/records';
 import { Sheet } from './Sheet';
 import { formatMMSS } from './format';
 import './WinSheet.css';
 
 const COLORS = ['#f97316', '#facc15', '#4ade80', '#22d3ee', '#a78bfa', '#f472b6', '#ef4444'];
 const PIECES = 60;
+
+// "1st", "2nd", "3rd", "21st", "26th"… English only; French uses "{n}e".
+const ordinalEn = (n: number): string => {
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1:
+      return `${n}st`;
+    case 2:
+      return `${n}nd`;
+    case 3:
+      return `${n}rd`;
+    default:
+      return `${n}th`;
+  }
+};
+
+const ordinal = (n: number, lang: 'en' | 'fr'): string =>
+  lang === 'fr' ? (n === 1 ? '1re' : `${n}e`) : ordinalEn(n);
 
 function Confetti() {
   return (
@@ -38,10 +58,8 @@ export function WinSheet({
   onPlayAgain,
   durationSec,
   moves,
-  drawCount,
   score,
-  isNewBest,
-  bestScore,
+  ranking,
   showConfetti = true,
 }: {
   open: boolean;
@@ -49,13 +67,20 @@ export function WinSheet({
   onPlayAgain: () => void;
   durationSec: number;
   moves: number;
-  drawCount: 1 | 3;
   score: number;
-  isNewBest: boolean;
-  bestScore: number | null;
+  ranking: Ranking | null;
   showConfetti?: boolean;
 }) {
-  const { t, formatNumber } = useT();
+  const { t, formatNumber, lang } = useT();
+
+  const bannerKey =
+    ranking === null || ranking.rank > 3
+      ? null
+      : (['win.bannerGold', 'win.bannerSilver', 'win.bannerBronze'] as const)[ranking.rank - 1];
+
+  const medalLabel = (kind: 'Time' | 'Moves', placement: 0 | 1 | 2 | 3) =>
+    placement === 0 ? null : t(`win.medal${kind}${placement}` as const);
+
   return (
     <>
       {open && showConfetti && <Confetti />}
@@ -68,26 +93,41 @@ export function WinSheet({
           <div className="win__score">
             <div className="win__score-value">{formatNumber(score)}</div>
             <div className="win__score-label">{t('win.score')}</div>
-            {!isNewBest && bestScore !== null && (
-              <div className="win__score-best">
-                {t('win.best')} {formatNumber(bestScore)}
-              </div>
-            )}
-            {isNewBest && <div className="win__score-badge">{t('win.newBest')}</div>}
           </div>
 
-          <div className="win__stats">
-            <div className="win__stat">
+          {ranking !== null && bannerKey === null && (
+            <p className="win__rank">
+              {t('win.rankLine', {
+                rank: ordinal(ranking.rank, lang),
+                total: formatNumber(ranking.total),
+              })}
+            </p>
+          )}
+          {ranking !== null && bannerKey !== null && (
+            <div className="win__banner">
+              <span className="win__banner-msg">{t(bannerKey)}</span>
+              <span className="win__banner-sub">
+                {t('win.rankOutOf', { total: formatNumber(ranking.total) })}
+              </span>
+            </div>
+          )}
+
+          <div className="win__stats win__stats--pair">
+            <div
+              className={`win__stat${ranking && ranking.timeMedal ? ' win__stat--medal' : ''}`}
+            >
               <div className="win__stat-value">{formatMMSS(durationSec)}</div>
-              <div className="win__stat-label">{t('win.time')}</div>
+              <div className="win__stat-label">
+                {medalLabel('Time', ranking?.timeMedal ?? 0) ?? t('win.time')}
+              </div>
             </div>
-            <div className="win__stat">
+            <div
+              className={`win__stat${ranking && ranking.movesMedal ? ' win__stat--medal' : ''}`}
+            >
               <div className="win__stat-value">{formatNumber(moves)}</div>
-              <div className="win__stat-label">{t('win.moves')}</div>
-            </div>
-            <div className="win__stat">
-              <div className="win__stat-value">{drawCount}</div>
-              <div className="win__stat-label">{t('win.draw')}</div>
+              <div className="win__stat-label">
+                {medalLabel('Moves', ranking?.movesMedal ?? 0) ?? t('win.moves')}
+              </div>
             </div>
           </div>
 
