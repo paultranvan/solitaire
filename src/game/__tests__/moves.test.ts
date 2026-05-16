@@ -267,4 +267,12 @@ describe('undo', () => {
     const u = undo(s);
     expect(u).toEqual(s);
   });
+
+  it('counts each undo and does not let it revert the counter', () => {
+    const s = blank({
+      tableau: [[makeCard('s', 7, true)], [makeCard('h', 6, true)], [], [], [], [], []],
+    });
+    const after = applyMove(s, { kind: 'tableauToTableau', from: 1, cardIndex: 0, to: 0 });
+    expect(undo(after).undosUsed).toBe(1);
+  });
 });

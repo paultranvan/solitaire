@@ -156,5 +156,9 @@ export const undo = (state: GameState): GameState => {
   return {
     ...prior,
     history: state.history.slice(0, -1),
+    // Carry the assistance counters forward — the popped snapshot holds stale,
+    // lower values, but undosUsed / hintsUsed are monotonic for the game.
+    undosUsed: state.undosUsed + 1,
+    hintsUsed: state.hintsUsed,
   };
 };

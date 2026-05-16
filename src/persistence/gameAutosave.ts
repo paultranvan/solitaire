@@ -45,6 +45,9 @@ export const loadSavedGame = async (): Promise<GameState | null> => {
   const restored: GameState = {
     ...loaded,
     activeMs: typeof loaded.activeMs === 'number' ? loaded.activeMs : 0,
+    // undosUsed / hintsUsed were added later — default for pre-migration saves.
+    undosUsed: typeof loaded.undosUsed === 'number' ? loaded.undosUsed : 0,
+    hintsUsed: typeof loaded.hintsUsed === 'number' ? loaded.hintsUsed : 0,
     history: [],
   };
   // Belt-and-braces: the autosave clears on win, but defend in case a stale

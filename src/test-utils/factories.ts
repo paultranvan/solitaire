@@ -12,6 +12,8 @@ export const blankGameState = (over: Partial<GameState> = {}): GameState => ({
   activeMs: 0,
   movesMade: 0,
   redealCount: 0,
+  undosUsed: 0,
+  hintsUsed: 0,
   seed: 't',
   history: [],
   ...over,

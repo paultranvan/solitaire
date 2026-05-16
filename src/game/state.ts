@@ -15,6 +15,9 @@ export type GameState = {
   activeMs: number;
   movesMade: number;
   redealCount: number;
+  // Per-game assistance counters — persisted so they survive autosave.
+  undosUsed: number;
+  hintsUsed: number;
   seed: string;
   history: GameState[];
 };
@@ -36,6 +39,8 @@ export const createInitialState = (opts: { drawCount: 1 | 3; seed?: string }): G
     activeMs: 0,
     movesMade: 0,
     redealCount: 0,
+    undosUsed: 0,
+    hintsUsed: 0,
     seed,
     history: [],
   };
