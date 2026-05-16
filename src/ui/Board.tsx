@@ -21,6 +21,7 @@ import { bestNextMove } from '@/game/hints';
 import { findAutoMoveTarget, AutoMoveSource, nextAutoCompleteMove } from '@/game/auto';
 import { isAutoCompletable, isWon } from '@/game/rules';
 import { computeScore } from '@/game/score';
+import { rankWin, type Ranking } from '@/store/records';
 import { createInitialState } from '@/game/state';
 import { findWinnableSeed } from '@/game/solverClient';
 import { useT } from '@/i18n/useT';
@@ -78,9 +79,8 @@ export function Board({ initial }: { initial: GameState }) {
   const winDurationRef = useRef(0);
   const winMovesRef = useRef(0);
   const winScoreRef = useRef(0);
-  const winIsNewBestRef = useRef(false);
-  // Prior best score for the won mode (null = no recorded win yet).
-  const winBestScoreRef = useRef<number | null>(null);
+  // Ranking of the current win (null for cheat wins — no record was kept).
+  const winRankingRef = useRef<Ranking | null>(null);
   // True when the current win came from the "win" cheat key sequence — skip
   // stats recording and the new-best badge so the preview leaves no trace.
   const cheatWinRef = useRef(false);
@@ -185,16 +185,9 @@ export function Board({ initial }: { initial: GameState }) {
       drawCount: state.drawCount,
     });
     const isCheat = cheatWinRef.current;
-    // Read the prior best for this mode *before* recordGame mutates it so the
-    // "New best!" badge reflects the comparison the player just made. Suppress
-    // the badge entirely on a cheat win since the score isn't saved.
-    const priorBest =
-      useStatsStore.getState().stats.byMode[String(state.drawCount) as '1' | '3'].bestScore;
     winDurationRef.current = durationSec;
     winMovesRef.current = state.movesMade;
     winScoreRef.current = score;
-    winIsNewBestRef.current = !isCheat && (priorBest === null || score > priorBest);
-    winBestScoreRef.current = priorBest;
     if (!isCheat) {
       recordGame({
         mode: state.drawCount,
@@ -203,6 +196,12 @@ export function Board({ initial }: { initial: GameState }) {
         moves: state.movesMade,
         score,
       });
+      // recordGame has appended this win — rank it against the updated list.
+      const mWins =
+        useStatsStore.getState().stats.byMode[String(state.drawCount) as '1' | '3'].wins;
+      winRankingRef.current = rankWin(mWins, { score, durationSec, moves: state.movesMade });
+    } else {
+      winRankingRef.current = null;
     }
     play('winCascade');
     haptic('win');
@@ -527,10 +526,8 @@ export function Board({ initial }: { initial: GameState }) {
           }}
           durationSec={winDurationRef.current}
           moves={winMovesRef.current}
-          drawCount={state.drawCount}
           score={winScoreRef.current}
-          isNewBest={winIsNewBestRef.current}
-          bestScore={winBestScoreRef.current}
+          ranking={winRankingRef.current}
           showConfetti={animationsOn}
         />
       </div>
