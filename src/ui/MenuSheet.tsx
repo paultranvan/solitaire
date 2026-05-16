@@ -3,6 +3,7 @@ import { useStatsStore } from '@/store/statsStore';
 import { useSettingsStore, Settings } from '@/store/settingsStore';
 import { useT, Translator } from '@/i18n/useT';
 import { Sheet } from './Sheet';
+import { RecordsSheet } from './RecordsSheet';
 import './MenuSheet.css';
 
 const winPct = (won: number, played: number, tr: Translator): string =>
@@ -70,6 +71,7 @@ function StatsSection() {
   const stats = useStatsStore((s) => s.stats);
   const reset = useStatsStore((s) => s.reset);
   const [confirming, setConfirming] = useState(false);
+  const [recordsOpen, setRecordsOpen] = useState(false);
   const tr = useT();
   const { t, formatNumber, formatDuration } = tr;
 
@@ -105,6 +107,17 @@ function StatsSection() {
         ))}
       </div>
 
+      <button
+        type="button"
+        className="records-link"
+        onClick={() => setRecordsOpen(true)}
+      >
+        <span className="records-link__label">🏆 {t('records.open')}</span>
+        <span className="records-link__chev" aria-hidden="true">
+          ›
+        </span>
+      </button>
+
       <div className="m-row m-row--quiet">
         <span>{t('stats.totalTime')}</span>
         <span className="num">{formatDuration(stats.totalSecondsPlayed)}</span>
@@ -134,6 +147,8 @@ function StatsSection() {
           </button>
         )}
       </div>
+
+      <RecordsSheet open={recordsOpen} onClose={() => setRecordsOpen(false)} />
     </section>
   );
 }

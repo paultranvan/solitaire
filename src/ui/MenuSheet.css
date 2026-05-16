@@ -477,3 +477,24 @@
 .confirm-row > span {
   flex: 1;
 }
+
+.records-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 14px 0 4px;
+  padding: 13px 14px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--gold-soft);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.records-link__chev {
+  color: var(--gold);
+  font-size: 18px;
+}
