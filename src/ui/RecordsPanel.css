@@ -1,9 +1,57 @@
 .records {
-  padding: 4px 0 8px;
+  background: rgba(243, 236, 217, 0.025);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 16px 16px 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.records::before {
+  /* Gold edge along the top, matching the menu's card treatment. */
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-soft), transparent);
 }
 
 .records__tabs {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
+}
+
+.records__counts {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+}
+
+.records__count b {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.records__rate {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--gold);
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .records__summary {
@@ -49,7 +97,7 @@
 
 .records__empty {
   text-align: center;
-  padding: 32px 12px;
+  padding: 24px 12px;
   color: var(--ink-quiet);
   font-size: 14px;
 }

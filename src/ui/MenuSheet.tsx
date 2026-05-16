@@ -3,7 +3,7 @@ import { useStatsStore } from '@/store/statsStore';
 import { useSettingsStore, Settings } from '@/store/settingsStore';
 import { useT, Translator } from '@/i18n/useT';
 import { Sheet } from './Sheet';
-import { RecordsSheet } from './RecordsSheet';
+import { RecordsPanel } from './RecordsPanel';
 import './MenuSheet.css';
 
 const winPct = (won: number, played: number, tr: Translator): string =>
@@ -18,42 +18,10 @@ function StatHero({ value, label }: { value: string | number; label: string }) {
   );
 }
 
-function ModeBlock({
-  mode,
-  played,
-  won,
-}: {
-  mode: '1' | '3';
-  played: number;
-  won: number;
-}) {
-  const tr = useT();
-  const { t, formatNumber } = tr;
-  return (
-    <div className="mode-block">
-      <div className="mode-block__head">
-        <span className="mode-block__name">{t('stats.draw', { n: mode })}</span>
-        <span className="mode-block__rate">{winPct(won, played, tr)}</span>
-      </div>
-      <dl className="mode-block__list">
-        <div className="mode-block__item">
-          <dt>{t('stats.played')}</dt>
-          <dd>{formatNumber(played)}</dd>
-        </div>
-        <div className="mode-block__item">
-          <dt>{t('stats.won')}</dt>
-          <dd>{formatNumber(won)}</dd>
-        </div>
-      </dl>
-    </div>
-  );
-}
-
 function StatsSection() {
   const stats = useStatsStore((s) => s.stats);
   const reset = useStatsStore((s) => s.reset);
   const [confirming, setConfirming] = useState(false);
-  const [recordsOpen, setRecordsOpen] = useState(false);
   const tr = useT();
   const { t, formatNumber, formatDuration } = tr;
 
@@ -75,27 +43,7 @@ function StatsSection() {
         <StatHero value={formatNumber(stats.longestStreak)} label={t('stats.best')} />
       </div>
 
-      <div className="mode-pair">
-        {(['1', '3'] as const).map((m) => (
-          <ModeBlock
-            key={m}
-            mode={m}
-            played={stats.byMode[m].played}
-            won={stats.byMode[m].won}
-          />
-        ))}
-      </div>
-
-      <button
-        type="button"
-        className="records-link"
-        onClick={() => setRecordsOpen(true)}
-      >
-        <span className="records-link__label">🏆 {t('records.open')}</span>
-        <span className="records-link__chev" aria-hidden="true">
-          ›
-        </span>
-      </button>
+      <RecordsPanel />
 
       <div className="m-row m-row--quiet">
         <span>{t('stats.totalTime')}</span>
@@ -126,8 +74,6 @@ function StatsSection() {
           </button>
         )}
       </div>
-
-      <RecordsSheet open={recordsOpen} onClose={() => setRecordsOpen(false)} />
     </section>
   );
 }

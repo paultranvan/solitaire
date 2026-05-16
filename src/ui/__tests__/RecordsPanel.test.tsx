@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { RecordsSheet } from '../RecordsSheet';
+import { RecordsPanel } from '../RecordsPanel';
 import { defaultStats, useStatsStore, type GameRecord } from '@/store/statsStore';
 
 const won = (score: number, drawCount: 1 | 3 = 1): GameRecord => ({
@@ -24,16 +24,16 @@ const seed = (drawCount: 1 | 3, scores: number[]) => {
   useStatsStore.setState({ stats });
 };
 
-describe('RecordsSheet', () => {
+describe('RecordsPanel', () => {
   it('shows the empty state when a mode has no wins', () => {
     seed(1, []);
-    render(<RecordsSheet open onClose={() => {}} />);
+    render(<RecordsPanel />);
     expect(screen.getByText(/no wins yet/i)).toBeInTheDocument();
   });
 
   it('renders at most 10 rows, sorted by score descending', () => {
     seed(1, Array.from({ length: 12 }, (_, i) => (i + 1) * 100));
-    render(<RecordsSheet open onClose={() => {}} />);
+    render(<RecordsPanel />);
     expect(screen.getByText('1,200')).toBeInTheDocument();
     expect(screen.queryByText('200')).not.toBeInTheDocument();
   });
@@ -44,17 +44,28 @@ describe('RecordsSheet', () => {
     stats.byMode['1'].bestTimeSec = 192;
     stats.byMode['1'].fewestMovesWin = 142;
     useStatsStore.setState({ stats });
-    render(<RecordsSheet open onClose={() => {}} />);
+    render(<RecordsPanel />);
     expect(screen.getByText('8,420')).toBeInTheDocument();
     expect(screen.getByText('03:12')).toBeInTheDocument();
     expect(screen.getByText('142')).toBeInTheDocument();
+  });
+
+  it('shows the active mode play counts and win rate', () => {
+    const stats = defaultStats();
+    stats.byMode['1'].played = 8;
+    stats.byMode['1'].won = 6;
+    useStatsStore.setState({ stats });
+    render(<RecordsPanel />);
+    expect(screen.getByText('8')).toBeInTheDocument();
+    expect(screen.getByText('6')).toBeInTheDocument();
+    expect(screen.getByText('75%')).toBeInTheDocument();
   });
 
   it('switches mode when the Draw-3 tab is clicked', () => {
     const stats = defaultStats();
     stats.games = [won(500, 1), won(999, 3)];
     useStatsStore.setState({ stats });
-    render(<RecordsSheet open onClose={() => {}} />);
+    render(<RecordsPanel />);
     expect(screen.queryByText('999')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /draw 3/i }));
     expect(screen.getByText('999')).toBeInTheDocument();
