@@ -1,5 +1,20 @@
 /* ============= Solitaire theme — Classic Felt ============= */
 
+/* Self-hosted card-index face. Tinos is metric-compatible with Times New
+   Roman (Apache-2.0; see assets/fonts/Tinos-LICENSE.txt) and subset to just
+   the rank glyphs (A J Q K 0-9). It is bundled so the rank renders
+   identically on web, iOS, and Android —
+   platform serif fallbacks diverge (Android's Noto Serif gives bold J/Q
+   large descenders, so face cards would render taller than number cards).
+   `font-display: block` avoids a flash of the wrong-metric system serif. */
+@font-face {
+  font-family: 'Tinos';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('../assets/fonts/tinos-700-subset.woff2') format('woff2');
+}
+
 :root {
   /* Surface */
   --felt-light: #1d5e2e;

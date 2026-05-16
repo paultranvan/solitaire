@@ -77,10 +77,13 @@
 }
 
 .card__rank {
-  /* Times New Roman ships lining figures by default — its digits all sit
-     cleanly between cap-height and baseline, unlike Georgia where 6/9/5
-     drift above or below. */
-  font-family: 'Times New Roman', Times, serif;
+  /* Bundled Tinos (see @font-face in theme.css) — metric-compatible with
+     Times New Roman, so digits sit cleanly between cap-height and baseline
+     and the J/Q/K caps match the digit height. Self-hosting it keeps the
+     rank identical on web/iOS/Android instead of inheriting whatever serif
+     the platform supplies (Android's Noto Serif renders bold J/Q with large
+     descenders, making face cards read as larger than number cards). */
+  font-family: 'Tinos', 'Times New Roman', Times, serif;
   font-size: calc(var(--card-w) * 0.52);
   font-weight: 700;
   letter-spacing: -0.06em;
