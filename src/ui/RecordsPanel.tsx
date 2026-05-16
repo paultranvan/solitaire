@@ -1,11 +1,20 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useStatsStore } from '@/store/statsStore';
 import { useT } from '@/i18n/useT';
 import { modeWins, topScores } from '@/store/records';
-import { formatDMY, formatMMSS } from './format';
+import { formatDMY, formatMMSS, formatWinPct } from './format';
 import './RecordsPanel.css';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
+
+function SummaryStat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="records__stat">
+      <span className="records__stat-value">{value}</span>
+      <span className="records__stat-label">{label}</span>
+    </div>
+  );
+}
 
 /**
  * Inline per-mode stats panel: a Draw-1 / Draw-3 tab, the mode's play counts,
@@ -17,11 +26,11 @@ export function RecordsPanel() {
   const [tab, setTab] = useState<'1' | '3'>('1');
 
   const mode = stats.byMode[tab];
-  const rows = topScores(modeWins(stats.games, Number(tab) as 1 | 3), 10);
-  const winRate =
-    mode.played === 0
-      ? '—'
-      : `${formatNumber(Math.round((mode.won / mode.played) * 100))}%`;
+  const rows = useMemo(
+    () => topScores(modeWins(stats.games, Number(tab) as 1 | 3), 10),
+    [stats.games, tab],
+  );
+  const numOrDash = (n: number | null) => (n === null ? '—' : formatNumber(n));
 
   return (
     <div className="records">
@@ -45,26 +54,13 @@ export function RecordsPanel() {
         <span className="records__count">
           <b>{formatNumber(mode.won)}</b> {t('stats.won')}
         </span>
-        <span className="records__rate">{winRate}</span>
+        <span className="records__rate">{formatWinPct(mode.won, mode.played)}</span>
       </div>
 
       <div className="records__summary">
-        <div className="records__stat">
-          <span className="records__stat-value">
-            {mode.bestScore === null ? '—' : formatNumber(mode.bestScore)}
-          </span>
-          <span className="records__stat-label">{t('stats.bestScore')}</span>
-        </div>
-        <div className="records__stat">
-          <span className="records__stat-value">{formatBestTime(mode.bestTimeSec)}</span>
-          <span className="records__stat-label">{t('stats.bestTime')}</span>
-        </div>
-        <div className="records__stat">
-          <span className="records__stat-value">
-            {mode.fewestMovesWin === null ? '—' : formatNumber(mode.fewestMovesWin)}
-          </span>
-          <span className="records__stat-label">{t('stats.minMoves')}</span>
-        </div>
+        <SummaryStat value={numOrDash(mode.bestScore)} label={t('stats.bestScore')} />
+        <SummaryStat value={formatBestTime(mode.bestTimeSec)} label={t('stats.bestTime')} />
+        <SummaryStat value={numOrDash(mode.fewestMovesWin)} label={t('stats.minMoves')} />
       </div>
 
       <h3 className="records__heading">{t('records.topScores')}</h3>

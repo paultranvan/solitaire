@@ -162,7 +162,6 @@ export const useStatsStore = create<StatsStore>()(
         } else {
           state.stats.currentStreak = 0;
         }
-        // Append the raw record for every game — won or abandoned.
         state.stats.games.push({
           outcome,
           score: score ?? null,

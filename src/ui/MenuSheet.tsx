@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useStatsStore } from '@/store/statsStore';
 import { useSettingsStore, Settings } from '@/store/settingsStore';
-import { useT, Translator } from '@/i18n/useT';
+import { useT } from '@/i18n/useT';
 import { Sheet } from './Sheet';
 import { RecordsPanel } from './RecordsPanel';
+import { formatWinPct } from './format';
 import './MenuSheet.css';
-
-const winPct = (won: number, played: number, tr: Translator): string =>
-  played === 0 ? '—' : `${tr.formatNumber(Math.round((won / played) * 100))}%`;
 
 function StatHero({ value, label }: { value: string | number; label: string }) {
   return (
@@ -22,8 +20,7 @@ function StatsSection() {
   const stats = useStatsStore((s) => s.stats);
   const reset = useStatsStore((s) => s.reset);
   const [confirming, setConfirming] = useState(false);
-  const tr = useT();
-  const { t, formatNumber, formatDuration } = tr;
+  const { t, formatNumber, formatDuration } = useT();
 
   const totalWon = stats.byMode['1'].won + stats.byMode['3'].won;
   const totalPlayed = stats.byMode['1'].played + stats.byMode['3'].played;
@@ -38,7 +35,7 @@ function StatsSection() {
 
       <div className="stat-hero-grid">
         <StatHero value={formatNumber(totalWon)} label={t('stats.wins')} />
-        <StatHero value={winPct(totalWon, totalPlayed, tr)} label={t('stats.winRate')} />
+        <StatHero value={formatWinPct(totalWon, totalPlayed)} label={t('stats.winRate')} />
         <StatHero value={formatNumber(stats.currentStreak)} label={t('stats.streak')} />
         <StatHero value={formatNumber(stats.longestStreak)} label={t('stats.best')} />
       </div>

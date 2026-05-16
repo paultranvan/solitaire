@@ -58,6 +58,16 @@ const collision: CollisionDetection = (args) => {
   return closestCenter(args);
 };
 
+// The slice of a recordGame payload that comes straight off the game state.
+const recordContext = (s: GameState) => ({
+  mode: s.drawCount,
+  moves: s.movesMade,
+  seed: s.seed,
+  redealCount: s.redealCount,
+  hintsUsed: s.hintsUsed,
+  undosUsed: s.undosUsed,
+});
+
 export function Board({ initial }: { initial: GameState }) {
   const [state, dispatch] = useReducer(gameReducer, initial);
   const [activeCards, setActiveCards] = useState<Card[] | null>(null);
@@ -189,18 +199,8 @@ export function Board({ initial }: { initial: GameState }) {
     winMovesRef.current = state.movesMade;
     winScoreRef.current = score;
     if (!isCheat) {
-      recordGame({
-        mode: state.drawCount,
-        outcome: 'won',
-        durationSec,
-        moves: state.movesMade,
-        score,
-        seed: state.seed,
-        redealCount: state.redealCount,
-        hintsUsed: state.hintsUsed,
-        undosUsed: state.undosUsed,
-      });
-      // recordGame appended this win — rank it against the mode's win log.
+      recordGame({ ...recordContext(state), outcome: 'won', durationSec, score });
+      // Rank against the log *after* recordGame has appended this win.
       const wins = modeWins(useStatsStore.getState().stats.games, state.drawCount);
       winRankingRef.current = rankWin(wins, { score, durationSec, moves: state.movesMade });
     } else {
@@ -358,14 +358,9 @@ export function Board({ initial }: { initial: GameState }) {
       !abandonRecordedRef.current
     ) {
       recordGame({
-        mode: state.drawCount,
+        ...recordContext(state),
         outcome: 'abandoned',
         durationSec: Math.max(0, Math.floor(liveActiveMs() / 1000)),
-        moves: state.movesMade,
-        seed: state.seed,
-        redealCount: state.redealCount,
-        hintsUsed: state.hintsUsed,
-        undosUsed: state.undosUsed,
       });
       abandonRecordedRef.current = true;
     }

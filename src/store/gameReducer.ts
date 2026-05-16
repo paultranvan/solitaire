@@ -20,8 +20,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     case 'undo':
       return undoState(state);
     case 'hint':
-      // A hint doesn't change the board or push history — it only bumps the
-      // per-game counter so stats can track assistance use.
+      // Unlike a move, a hint doesn't push history — it only bumps the counter.
       return { ...state, hintsUsed: state.hintsUsed + 1 };
     case 'reset':
       // Defensively clear history so a stale snapshot never leaks into a fresh
