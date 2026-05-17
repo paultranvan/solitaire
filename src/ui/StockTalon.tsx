@@ -24,12 +24,14 @@ export function StockTalon({
   const talonBehind = talon[talon.length - 2];
   const talonHinted =
     isHintSource(hint, { kind: 'talon' }) || isHintTarget(hint, { kind: 'talon' });
+  const stockHinted =
+    isHintSource(hint, { kind: 'stock' }) || isHintTarget(hint, { kind: 'stock' });
 
   return (
     <div className="stock-talon">
       <button
         type="button"
-        className="stock-talon__slot stock"
+        className={`stock-talon__slot stock${stockHinted ? ' is-hint-pulse' : ''}`}
         onClick={onStockClick}
         aria-label={stock.length > 0 ? t('stock.draw') : t('stock.recycle')}
       >

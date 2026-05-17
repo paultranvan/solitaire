@@ -5,6 +5,7 @@ export type HintHighlight =
   | { kind: 'tableauStack'; column: number; cardIndex: number }
   | { kind: 'tableauColumn'; column: number }
   | { kind: 'talon' }
+  | { kind: 'stock' }
   | { kind: 'foundation'; idx: number };
 
 export type HintState = {
@@ -39,8 +40,14 @@ export const moveToHint = (move: Move): HintState => {
         source: { kind: 'foundation', idx: move.foundationIdx },
         target: { kind: 'tableauColumn', column: move.to },
       };
-    default:
-      return null;
+    // Draw / recycle have no card-level source or target — pulse the stock
+    // pile so "press Hint, nothing happens" becomes "press Hint, draw a card".
+    case 'draw':
+    case 'recycle':
+      return {
+        source: { kind: 'stock' },
+        target: { kind: 'stock' },
+      };
   }
 };
 
@@ -57,6 +64,7 @@ const matches = (h: HintHighlight, q: HintHighlight): boolean => {
     case 'tableauColumn':
       return h.column === (q as { column: number }).column;
     case 'talon':
+    case 'stock':
       return true;
     case 'foundation':
       return h.idx === (q as { idx: number }).idx;

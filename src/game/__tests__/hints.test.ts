@@ -36,9 +36,27 @@ describe('bestNextMove', () => {
     });
   });
 
-  it('returns null when no move helps progress', () => {
+  it('suggests a draw when no board move helps but the stock is not empty', () => {
+    // Drawing surfaces the A♠ in the stock — point the player at it rather
+    // than reporting "no hint".
     const s = blank({
       stock: [makeCard('s', 1)],
+      tableau: [[makeCard('h', 13, true)], [], [], [], [], [], []],
+    });
+    expect(bestNextMove(s)).toEqual({ kind: 'draw' });
+  });
+
+  it('suggests a recycle when the stock is spent but the talon still has cards', () => {
+    const s = blank({
+      stock: [],
+      talon: [makeCard('s', 5, true)],
+      tableau: [[makeCard('h', 13, true)], [], [], [], [], [], []],
+    });
+    expect(bestNextMove(s)).toEqual({ kind: 'recycle' });
+  });
+
+  it('returns null only when stock and talon are both empty', () => {
+    const s = blank({
       tableau: [[makeCard('h', 13, true)], [], [], [], [], [], []],
     });
     expect(bestNextMove(s)).toBeNull();

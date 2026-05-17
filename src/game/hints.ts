@@ -41,5 +41,12 @@ export const bestNextMove = (state: GameState): Move | null => {
     }
   }
 
+  // No move is available among the cards currently in view. Rather than
+  // report "no hint", point the player at the stock: drawing (or recycling
+  // once the stock is spent) is the only way to surface a fresh card. This
+  // matters most in draw-3, where most turns are spent cycling the stock.
+  if (state.stock.length > 0) return { kind: 'draw' };
+  if (state.talon.length > 0) return { kind: 'recycle' };
+
   return null;
 };
