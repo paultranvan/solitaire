@@ -45,14 +45,58 @@
   border: 1px solid var(--card-border);
 }
 
+/* Structural rules shared by every back design. The chosen design's
+   background comes from a .card--back--<id> variant class applied
+   alongside this one (see Card.tsx). */
 .card--back {
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.18), transparent 50%),
-    repeating-linear-gradient(45deg, var(--card-back) 0 4px, #2d4ea8 4px 8px);
   border: 1.5px solid #fff;
   box-shadow:
     inset 0 0 0 1px rgba(0, 0, 0, 0.4),
     0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* Design variants — background only. Defined after .card so they win the
+   cascade over .card's --card-bg fill. */
+.card--back--navy {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.18), transparent 50%),
+    repeating-linear-gradient(45deg, var(--card-back) 0 4px, #2d4ea8 4px 8px);
+}
+
+.card--back--crimson {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.16), transparent 55%),
+    repeating-linear-gradient(45deg, transparent 0 10px, rgba(0, 0, 0, 0.22) 10px 12px),
+    repeating-linear-gradient(-45deg, transparent 0 10px, rgba(0, 0, 0, 0.22) 10px 12px),
+    linear-gradient(#9c2727, #7d1a1a);
+}
+
+.card--back--emerald {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.16), transparent 55%),
+    radial-gradient(rgba(255, 255, 255, 0.28) 1.6px, transparent 2px),
+    linear-gradient(#15663a, #0e4a2a);
+  background-size: auto, 12px 12px, auto;
+}
+
+/* Crossfade overlay: the outgoing design, painted on top of the new back
+   and faded out. A keyframe animation (not a transition) so it plays on
+   mount with no double-render trick. Removed on animationend by Card.tsx. */
+.card--back-fade {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+  pointer-events: none;
+  animation: card-back-fade-out 220ms ease forwards;
+}
+
+@keyframes card-back-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .card--face.card--red {
