@@ -375,3 +375,28 @@
 .confirm-row > span {
   flex: 1;
 }
+
+.swatches {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.swatch {
+  width: 34px;
+  height: 48px;
+  padding: 0;
+  border-radius: 5px;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: transform 0.12s;
+}
+
+.swatch:hover {
+  transform: translateY(-1px);
+}
+
+.swatch.is-active {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}

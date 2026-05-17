@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStatsStore } from '@/store/statsStore';
-import { useSettingsStore, Settings } from '@/store/settingsStore';
+import { useSettingsStore, Settings, CARD_BACKS } from '@/store/settingsStore';
 import { useT } from '@/i18n/useT';
 import { Sheet } from './Sheet';
 import { RecordsPanel } from './RecordsPanel';
@@ -177,6 +177,24 @@ function SettingsSection() {
           >
             Français
           </button>
+        </div>
+      </div>
+
+      <div className="m-row">
+        <span>{t('settings.cardBack')}</span>
+        <div className="swatches">
+          {CARD_BACKS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              aria-label={id}
+              aria-pressed={settings.cardBack === id}
+              className={`swatch card--back--${id}${
+                settings.cardBack === id ? ' is-active' : ''
+              }`}
+              onClick={() => set({ cardBack: id })}
+            />
+          ))}
         </div>
       </div>
 
