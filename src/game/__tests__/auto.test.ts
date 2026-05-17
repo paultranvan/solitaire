@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { makeCard } from '../card';
+import { Card, makeCard, RANKS, SUITS } from '../card';
 import { findAutoMoveTarget, nextAutoCompleteMove } from '../auto';
+import { applyMove } from '../moves';
+import { isWon } from '../rules';
+import { GameState } from '../state';
 import { blankGameState as blank } from '@/test-utils/factories';
 
 describe('findAutoMoveTarget — talon source', () => {
@@ -157,7 +160,7 @@ describe('nextAutoCompleteMove', () => {
       tableau: [[makeCard('h', 7, true)], [], [], [], [], [], []],
       stock: [makeCard('s', 5, false)],
     });
-    expect(nextAutoCompleteMove(s)).toEqual({ kind: 'draw' });
+    expect(nextAutoCompleteMove(s)).toEqual({ kind: 'draw', count: 1 });
   });
 
   it('returns null when nothing can move and stock is empty', () => {
@@ -185,6 +188,50 @@ describe('nextAutoCompleteMove', () => {
       stock: [makeCard('c', 5, false)],
       talon: [makeCard('s', 5, true)],
     });
-    expect(nextAutoCompleteMove(s)).toEqual({ kind: 'draw' });
+    expect(nextAutoCompleteMove(s)).toEqual({ kind: 'draw', count: 1 });
+  });
+});
+
+describe('nextAutoCompleteMove — draw-3 completes winnable states', () => {
+  // Mirrors the auto-complete loop in Board.tsx, including the recycle guard
+  // that bails out once a full cycle makes no foundation progress.
+  const runAutoComplete = (initial: GameState): boolean => {
+    let state = initial;
+    let lastRecycleFoundationTotal: number | null = null;
+    for (let steps = 0; steps < 100000; steps++) {
+      if (isWon(state)) return true;
+      const move = nextAutoCompleteMove(state);
+      if (move === null) return false;
+      if (move.kind === 'recycle') {
+        const total = state.foundations.reduce((n, p) => n + p.length, 0);
+        if (lastRecycleFoundationTotal === total) return false;
+        lastRecycleFoundationTotal = total;
+      }
+      state = applyMove(state, move);
+    }
+    return false;
+  };
+
+  // All 52 cards in the stock, empty tableau & foundations — trivially
+  // winnable by ferrying. The four aces sit at stock indices that a 3-card
+  // draw never surfaces as the talon top, so a draw-3 loop that drew 3 at a
+  // time would stall short of a win (regression: "draw-3 can't be won").
+  const buildStuckStock = (): Card[] => {
+    const aces = SUITS.map((s) => makeCard(s, 1, false));
+    const rest: Card[] = [];
+    for (const s of SUITS) for (const r of RANKS) if (r !== 1) rest.push(makeCard(s, r, false));
+    const stock = new Array<Card>(52);
+    [3, 6, 9, 12].forEach((pos, i) => (stock[pos] = aces[i]));
+    let cursor = 0;
+    for (let i = 0; i < 52; i++) if (stock[i] === undefined) stock[i] = rest[cursor++];
+    return stock;
+  };
+
+  it('wins a phase-hostile stock in draw-1 mode', () => {
+    expect(runAutoComplete(blank({ drawCount: 1, stock: buildStuckStock() }))).toBe(true);
+  });
+
+  it('wins the same phase-hostile stock in draw-3 mode', () => {
+    expect(runAutoComplete(blank({ drawCount: 3, stock: buildStuckStock() }))).toBe(true);
   });
 });

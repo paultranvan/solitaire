@@ -58,8 +58,9 @@ export const findAutoMoveTarget = (state: GameState, source: AutoMoveSource): Mo
 // otherwise draw from the stock or recycle the talon back into the stock so a
 // future iteration may unblock a move. Returns null when nothing more can be
 // done automatically. The caller is responsible for stopping if a recycle
-// fails to make foundation progress (otherwise we'd cycle forever in draw-3
-// mode when talon size is a multiple of the draw count).
+// fails to make foundation progress — once a full single-card pass over the
+// stock plays nothing, the remaining cards are genuinely unreachable and the
+// loop would otherwise spin forever.
 export const nextAutoCompleteMove = (state: GameState): Move | null => {
   for (let from = 0; from < state.tableau.length; from++) {
     const col = state.tableau[from];
@@ -74,7 +75,10 @@ export const nextAutoCompleteMove = (state: GameState): Move | null => {
     const idx = findFoundationFor(top, state.foundations);
     if (idx !== null) return { kind: 'talonToFoundation', foundationIdx: idx };
   }
-  if (state.stock.length > 0) return { kind: 'draw' };
+  // Draw one card at a time: in draw-3 mode a 3-card draw only ever exposes
+  // every third stock card as the talon top, so cards at the other two phases
+  // would never reach a foundation and the loop would stall short of a win.
+  if (state.stock.length > 0) return { kind: 'draw', count: 1 };
   if (state.talon.length > 0) return { kind: 'recycle' };
   return null;
 };

@@ -3,7 +3,9 @@ import { canPlaceOnFoundation, canPlaceOnTableau, isValidStack } from './rules';
 import { GameState } from './state';
 
 export type Move =
-  | { kind: 'draw' }
+  // `count` overrides the player's drawCount — the auto-complete loop draws
+  // one card at a time so every stock card surfaces as the talon top.
+  | { kind: 'draw'; count?: 1 | 3 }
   | { kind: 'recycle' }
   | { kind: 'tableauToTableau'; from: number; cardIndex: number; to: number }
   | { kind: 'tableauToFoundation'; from: number; foundationIdx: number }
@@ -46,7 +48,7 @@ export const applyMove = (state: GameState, move: Move): GameState => {
   switch (move.kind) {
     case 'draw': {
       if (state.stock.length === 0) throw new InvalidMoveError('cannot draw: stock empty');
-      const count = Math.min(state.drawCount, state.stock.length);
+      const count = Math.min(move.count ?? state.drawCount, state.stock.length);
       const drawn = next.stock.splice(next.stock.length - count, count);
       for (let i = drawn.length - 1; i >= 0; i--) {
         next.talon.push({ ...drawn[i], faceUp: true });

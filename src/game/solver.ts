@@ -209,7 +209,7 @@ const generateMoves = (m: Mini): Move[] => {
 const applyInPlace = (m: Mini, move: Move): void => {
   switch (move.kind) {
     case 'draw': {
-      const count = Math.min(m.drawCount, m.stock.length);
+      const count = Math.min(move.count ?? m.drawCount, m.stock.length);
       const drawn = m.stock.splice(m.stock.length - count, count);
       for (let i = drawn.length - 1; i >= 0; i--) {
         m.talon.push({ ...drawn[i], faceUp: true });
