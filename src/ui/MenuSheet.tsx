@@ -182,13 +182,14 @@ function SettingsSection() {
 
       <div className="m-row">
         <span>{t('settings.cardBack')}</span>
-        <div className="swatches">
+        <div className="swatches" role="radiogroup" aria-label={t('settings.cardBack')}>
           {CARD_BACKS.map((id) => (
             <button
               key={id}
               type="button"
+              role="radio"
               aria-label={id}
-              aria-pressed={settings.cardBack === id}
+              aria-checked={settings.cardBack === id}
               className={`swatch card--back--${id}${
                 settings.cardBack === id ? ' is-active' : ''
               }`}
