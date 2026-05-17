@@ -1,8 +1,8 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Card as CardModel, color } from '@/game/card';
 import { SPRING_DEFAULT } from '@/motion/presets';
-import { useSettingsStore } from '@/store/settingsStore';
+import { useSettingsStore, CardBack } from '@/store/settingsStore';
 import { Suit } from './Suit';
 import './Card.css';
 
@@ -28,6 +28,21 @@ export function CardView({ card, ghost = false }: CardProps) {
   const label = labelFor(card.rank);
   const skipLayoutAnim = useContext(SkipLayoutAnimContext);
   const animationsOn = useSettingsStore((s) => s.settings.animations);
+  const cardBack = useSettingsStore((s) => s.settings.cardBack);
+
+  // Crossfade backs: when the chosen design changes, paint the previous
+  // design as an overlay that fades out over the new base. Using a CSS
+  // keyframe (see .card--back-fade) means it plays on mount with no
+  // double-render dance. With animations off the swap is instant.
+  const prevBackRef = useRef(cardBack);
+  const [fadingBack, setFadingBack] = useState<CardBack | null>(null);
+  useEffect(() => {
+    if (prevBackRef.current !== cardBack) {
+      if (animationsOn) setFadingBack(prevBackRef.current);
+      prevBackRef.current = cardBack;
+    }
+  }, [cardBack, animationsOn]);
+
   const layoutTransition = skipLayoutAnim || !animationsOn ? NO_TRANSITION : SPRING_DEFAULT;
 
   return (
@@ -50,9 +65,18 @@ export function CardView({ card, ghost = false }: CardProps) {
           flashing the card backs across the whole board. */}
       <div className={`card-flip__inner${card.faceUp ? ' is-faceup' : ''}`}>
         <div
-          className="card-flip__face card-flip__back card card--back"
+          className={`card-flip__face card-flip__back card card--back card--back--${cardBack}`}
           aria-hidden={card.faceUp}
-        />
+        >
+          {fadingBack && (
+            <div
+              key={fadingBack}
+              className={`card--back-fade card--back--${fadingBack}`}
+              onAnimationEnd={() => setFadingBack(null)}
+              aria-hidden
+            />
+          )}
+        </div>
         <div
           className={`card-flip__face card-flip__front card card--face card--${c}`}
           aria-hidden={!card.faceUp}
