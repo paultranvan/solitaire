@@ -3,6 +3,11 @@ import { immer } from 'zustand/middleware/immer';
 import { KEY_SETTINGS, loadKey, saveKey } from '@/persistence/db';
 import { detectInitialLang, Lang } from '@/i18n/strings';
 
+export type CardBack = 'navy' | 'crimson' | 'emerald';
+
+// Canonical order — shared by the picker UI and tests.
+export const CARD_BACKS: CardBack[] = ['navy', 'crimson', 'emerald'];
+
 export type Settings = {
   schemaVersion: 1;
   drawCount: 1 | 3;
@@ -10,6 +15,8 @@ export type Settings = {
   haptics: boolean;
   animations: boolean;
   handedness: 'right' | 'left';
+  // Chosen card-back design. See CARD_BACKS / Card.css variant classes.
+  cardBack: CardBack;
   // When on, "New game" reshuffles until the solver proves the deal
   // winnable (within a short per-attempt budget). The toggle is opt-in
   // because it adds a sub-second pause to new-game.
@@ -27,6 +34,7 @@ export const defaultSettings = (): Settings => ({
   haptics: true,
   animations: true,
   handedness: 'right',
+  cardBack: 'navy',
   requireWinnable: false,
   language: detectInitialLang(),
 });
