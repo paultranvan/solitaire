@@ -55,7 +55,8 @@ function Confetti() {
 export function WinSheet({
   open,
   onClose,
-  onPlayAgain,
+  onNewGame,
+  onReplay,
   durationSec,
   moves,
   score,
@@ -64,7 +65,8 @@ export function WinSheet({
 }: {
   open: boolean;
   onClose: () => void;
-  onPlayAgain: () => void;
+  onNewGame: () => void;
+  onReplay: () => void;
   durationSec: number;
   moves: number;
   score: number;
@@ -132,8 +134,11 @@ export function WinSheet({
           </div>
 
           <div className="win__actions">
-            <button type="button" className="btn btn--primary" onClick={onPlayAgain}>
-              {t('win.playAgain')}
+            <button type="button" className="btn btn--primary" onClick={onNewGame}>
+              {t('win.newGame')}
+            </button>
+            <button type="button" className="btn btn--ghost" onClick={onReplay}>
+              {t('win.replay')}
             </button>
             <button type="button" className="btn btn--ghost" onClick={onClose}>
               {t('win.close')}

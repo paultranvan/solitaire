@@ -523,9 +523,13 @@ export function Board({ initial }: { initial: GameState }) {
         <WinSheet
           open={winOpen}
           onClose={() => setWinOpen(false)}
-          onPlayAgain={() => {
+          onNewGame={() => {
             setWinOpen(false);
             handleNewGame();
+          }}
+          onReplay={() => {
+            setWinOpen(false);
+            handleRestart();
           }}
           durationSec={winDurationRef.current}
           moves={winMovesRef.current}
