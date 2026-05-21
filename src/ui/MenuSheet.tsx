@@ -1,11 +1,125 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useStatsStore } from '@/store/statsStore';
 import { useSettingsStore, Settings, CARD_BACKS } from '@/store/settingsStore';
 import { useT } from '@/i18n/useT';
+import { parseImport, serializeExport, type ParseResult } from '@/persistence/statsTransfer';
 import { Sheet } from './Sheet';
 import { RecordsPanel } from './RecordsPanel';
 import { formatWinPct } from './format';
 import './MenuSheet.css';
+
+type ImportFeedback =
+  | { kind: 'success'; added: number; skipped: number }
+  | { kind: 'noNew' }
+  | { kind: 'error'; reason: Exclude<ParseResult, { ok: true }>['reason'] };
+
+function BackupRow() {
+  const stats = useStatsStore((s) => s.stats);
+  const mergeImported = useStatsStore((s) => s.mergeImported);
+  const { t } = useT();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [feedback, setFeedback] = useState<ImportFeedback | null>(null);
+  const timerRef = useRef<number | null>(null);
+
+  const showFeedback = (f: ImportFeedback) => {
+    setFeedback(f);
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => setFeedback(null), 4000);
+  };
+
+  const handleExport = () => {
+    const json = serializeExport(stats);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const today = new Date().toISOString().slice(0, 10);
+    a.download = `solitaire-stats-${today}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportClick = () => inputRef.current?.click();
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      showFeedback({ kind: 'error', reason: 'not-json' });
+      return;
+    }
+    const result = parseImport(text);
+    if (!result.ok) {
+      showFeedback({ kind: 'error', reason: result.reason });
+      return;
+    }
+    const { added, skipped } = mergeImported(result.games);
+    if (added === 0) {
+      showFeedback({ kind: 'noNew' });
+    } else {
+      showFeedback({ kind: 'success', added, skipped });
+    }
+  };
+
+  const renderFeedback = () => {
+    if (!feedback) return null;
+    if (feedback.kind === 'success') {
+      const head = t('stats.importResultAdded', { added: feedback.added });
+      const tail =
+        feedback.skipped > 0 ? t('stats.importResultSkipped', { skipped: feedback.skipped }) : '';
+      return (
+        <div className="m-backup-feedback m-backup-feedback--ok" role="status">
+          {head + tail}
+        </div>
+      );
+    }
+    if (feedback.kind === 'noNew') {
+      return (
+        <div className="m-backup-feedback m-backup-feedback--ok" role="status">
+          {t('stats.importNoNew')}
+        </div>
+      );
+    }
+    const key =
+      feedback.reason === 'wrong-kind'
+        ? 'stats.importErrorKind'
+        : feedback.reason === 'unsupported-version'
+          ? 'stats.importErrorVersion'
+          : 'stats.importErrorRead';
+    return (
+      <div className="m-backup-feedback m-backup-feedback--err" role="alert">
+        {t(key)}
+      </div>
+    );
+  };
+
+  return (
+    <div className="m-backup">
+      <div className="m-backup-row">
+        <button type="button" className="btn btn--ghost" onClick={handleExport}>
+          {t('stats.exportButton')}
+        </button>
+        <button type="button" className="btn btn--ghost" onClick={handleImportClick}>
+          {t('stats.importButton')}
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="application/json,.json"
+          className="m-backup-input"
+          onChange={handleFile}
+        />
+      </div>
+      {renderFeedback()}
+    </div>
+  );
+}
 
 function StatHero({ value, label }: { value: string | number; label: string }) {
   return (
@@ -46,6 +160,8 @@ function StatsSection() {
         <span>{t('stats.totalTime')}</span>
         <span className="num">{formatDuration(stats.totalSecondsPlayed)}</span>
       </div>
+
+      <BackupRow />
 
       <div className="m-section__action">
         {confirming ? (
