@@ -99,6 +99,39 @@ export const defaultStats = (): Stats => ({
   games: [],
 });
 
+const dedupeKey = (r: GameRecord): string => `${r.seed}|${r.dateMs}|${r.outcome}`;
+
+// Re-derive every cached aggregate from the time-sorted game log so the
+// post-merge state is independent of insert order or the imported file's
+// own aggregate values.
+const recomputeAggregates = (
+  games: GameRecord[],
+): Omit<Stats, 'schemaVersion' | 'games'> => {
+  const sorted = [...games].sort((a, b) => a.dateMs - b.dateMs);
+  const byMode: Stats['byMode'] = { '1': emptyMode(), '3': emptyMode() };
+  let totalSecondsPlayed = 0;
+  let currentStreak = 0;
+  let longestStreak = 0;
+  for (const g of sorted) {
+    const m = byMode[String(g.drawCount) as '1' | '3'];
+    m.played += 1;
+    totalSecondsPlayed += g.durationSec;
+    if (g.outcome === 'won') {
+      m.won += 1;
+      if (m.bestTimeSec === null || g.durationSec < m.bestTimeSec) m.bestTimeSec = g.durationSec;
+      if (m.fewestMovesWin === null || g.moves < m.fewestMovesWin) m.fewestMovesWin = g.moves;
+      if (g.score !== null && (m.bestScore === null || g.score > m.bestScore)) {
+        m.bestScore = g.score;
+      }
+      currentStreak += 1;
+      if (currentStreak > longestStreak) longestStreak = currentStreak;
+    } else {
+      currentStreak = 0;
+    }
+  }
+  return { byMode, currentStreak, longestStreak, totalSecondsPlayed };
+};
+
 export type RecordGameInput = {
   mode: 1 | 3;
   outcome: 'won' | 'abandoned';
@@ -117,6 +150,7 @@ type StatsStore = {
   stats: Stats;
   hydrate: (s: Stats) => void;
   recordGame: (input: RecordGameInput) => void;
+  mergeImported: (records: GameRecord[]) => { added: number; skipped: number };
   reset: () => void;
 };
 
@@ -176,6 +210,32 @@ export const useStatsStore = create<StatsStore>()(
         });
       });
       persist(useStatsStore.getState().stats);
+    },
+    mergeImported: (records) => {
+      const existing = useStatsStore.getState().stats.games;
+      const keys = new Set(existing.map(dedupeKey));
+      const fresh: GameRecord[] = [];
+      let skipped = 0;
+      for (const r of records) {
+        const k = dedupeKey(r);
+        if (keys.has(k)) {
+          skipped += 1;
+          continue;
+        }
+        keys.add(k);
+        fresh.push(r);
+      }
+      const merged = [...existing, ...fresh].sort((a, b) => a.dateMs - b.dateMs);
+      const aggs = recomputeAggregates(merged);
+      set((state) => {
+        state.stats = {
+          schemaVersion: 1,
+          games: merged,
+          ...aggs,
+        };
+      });
+      persist(useStatsStore.getState().stats);
+      return { added: fresh.length, skipped };
     },
     reset: () => {
       set((state) => {
