@@ -1,12 +1,23 @@
 .stock-talon {
   display: grid;
-  grid-template-columns: var(--card-w) var(--card-w);
+  /* In draw-3 the talon column widens to fit the fan. The fan-offset variable
+     is 0 in draw-1 so the column collapses to a single card width — keeping
+     the original two-card-wide layout and the existing top + peek behaviour. */
+  grid-template-columns: var(--card-w) calc(var(--card-w) + 2 * var(--talon-fan-offset));
   gap: var(--gap-col);
+  --talon-fan-offset: 0px;
+}
+
+/* ~30 % of a card width per step exposes the rank+suit corner cleanly without
+   stealing space from the foundations on a board at its layout cap (the gap
+   between the stock/talon group and the foundations has ~1.36·card-w of
+   slack on a maxed-out board). */
+.stock-talon[data-draw='3'] {
+  --talon-fan-offset: calc(var(--card-w) * 0.3);
 }
 
 .stock-talon__slot {
   position: relative;
-  width: var(--card-w);
   height: var(--card-h);
   padding: 0;
   border: none;
@@ -15,5 +26,32 @@
 }
 
 .stock-talon__slot.stock {
+  width: var(--card-w);
   cursor: pointer;
+}
+
+.stock-talon__slot.talon {
+  width: calc(var(--card-w) + 2 * var(--talon-fan-offset));
+}
+
+/* Each peek card sits one fan-offset further left of the top, so newer cards
+   visually overlap older ones with their leftmost corner exposed. With
+   fan-offset=0 (draw-1) every peek collapses onto the same position and only
+   the immediate "card-behind" — the single card under the top — is visible
+   through the suppressGhost gap when the top is dragged. */
+.talon-fan__behind {
+  position: absolute;
+  top: 0;
+  left: calc(var(--talon-fan-i, 0) * var(--talon-fan-offset));
+  width: var(--card-w);
+  height: var(--card-h);
+  pointer-events: none;
+}
+
+.talon-fan__top {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--card-w);
+  height: var(--card-h);
 }
