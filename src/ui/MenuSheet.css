@@ -400,3 +400,42 @@
   outline: 2px solid var(--gold);
   outline-offset: 2px;
 }
+
+/* ---- Backup (export / import) ---- */
+
+.m-backup {
+  margin-top: 18px;
+}
+
+.m-backup-row {
+  display: flex;
+  gap: 10px;
+}
+
+.m-backup-row .btn {
+  flex: 1;
+}
+
+.m-backup-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.m-backup-feedback {
+  margin-top: 10px;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.m-backup-feedback--ok {
+  color: var(--ink-soft);
+}
+
+.m-backup-feedback--err {
+  color: #c98686;
+}
