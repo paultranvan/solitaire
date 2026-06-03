@@ -144,14 +144,16 @@
   flex-shrink: 0;
 }
 
-/* Solid center pip — sits below the header in the lower 70% of the card so
-   it never bleeds into the corner row. SVG, sized via width to keep its
+/* Solid center pip — sits low enough to stay hidden under the next card when
+   piles are fanned. --fan-faceup reveals 0.42·card-h (≈ 0.59·card-w) of each
+   covered card; the pip top must clear that strip, otherwise its top edge
+   peeks out above the card stacked below. SVG, sized via width to keep its
    appearance identical across platforms. */
 .card__center {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  top: calc(var(--card-w) * 0.55);
+  top: calc(var(--card-w) * 0.64);
   width: calc(var(--card-w) * 0.6);
   height: calc(var(--card-w) * 0.6);
   pointer-events: none;
