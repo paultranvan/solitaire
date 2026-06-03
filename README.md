@@ -1,6 +1,6 @@
 # Solitaire
 
-A polished Klondike solitaire that runs on the web, iOS, and Android from a single codebase.
+A simple Klondike solitaire that runs on the web, iOS, and Android from a single codebase.
 
 ## Stack
 
@@ -59,37 +59,10 @@ npx cap open ios       # builds in Xcode
 npx cap open android   # builds in Android Studio
 ```
 
-## Features
-
-- Klondike with draw-1 or draw-3, unlimited redeals.
-- Optional **winnable-only deals** — a bounded solver runs in a Web Worker and
-  reshuffles until it finds a deal it can prove is solvable.
-- Drag a single card or a contiguous descending alternating-color stack.
-- Double-tap to auto-move (best legal target).
-- Auto-flip the top of any column whose face-up card moves away.
-- Auto-complete cascade when the board is solvable.
-- Hint button with pulsing source/target highlights.
-- Unlimited undo, capped at 200 history entries.
-- Live timer + move counter.
-- Auto-save mid-game; close the tab and resume exactly where you left off.
-- Per-win **score** (time + move-efficiency, doubled for draw-3) with a
-  records panel: top-10 leaderboard, rank, and best-time / fewest-moves medals.
-- Stats: per-mode played/won/best-time/fewest-moves, current and longest
-  win streak, total time played — with export / import for backup.
-- Right- or left-handed layout (mirrors stock/talon and foundations).
-- Three card-back designs (navy, crimson, emerald).
-- English + French, auto-detected from the browser locale.
-- Sound, haptics, and animations all toggle in settings.
-- Win celebration with confetti + a stats sheet.
-
-## Test coverage
-
-Comprehensive unit + component tests — primary focus on the pure game engine:
-every `Move` kind (legal + illegal), undo round-trips, history-cap enforcement,
-hint correctness on canned positions, auto-move targeting, solver soundness,
-scoring, integration deals, the stats store's win/abandon bookkeeping, and
-stats backup round-trips.
 
 ## License
 
-Private project; no public license.
+Licensed under the **GNU Affero General Public License v3.0 or later**
+(AGPL-3.0-or-later) — see [LICENSE](LICENSE) for the full text.
+
+Copyright (C) 2026 Paul Tran-Van
