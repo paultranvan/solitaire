@@ -38,7 +38,7 @@ jobs:
           if [ -z "$TAG" ]; then echo "No tag provided" >&2; exit 1; fi
           VERSION_NAME="${TAG#v}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NAME"
-          VERSION_CODE=$(( ${MAJOR:-0} * 10000 + ${MINOR:-0} * 100 + ${PATCH:-0} ))
+          VERSION_CODE=$(( 10#${MAJOR:-0} * 10000 + 10#${MINOR:-0} * 100 + 10#${PATCH:-0} ))
           if [ "$VERSION_CODE" -le 0 ]; then
             echo "Tag '$TAG' is not numeric semver (vMAJOR.MINOR.PATCH)" >&2; exit 1
           fi
