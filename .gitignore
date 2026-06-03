@@ -29,6 +29,7 @@ yarn-error.log*
 
 TODO.txt
 .superpowers/
+docs/superpowers/
 
 # Icon build intermediates — only the SVG sources in resources/ are committed
 resources/*.png
