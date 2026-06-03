@@ -19,8 +19,7 @@ Run a single test by name: `npx vitest run -t "tableau to foundation"`
 Path alias `@/*` resolves to `src/*` (configured in both `tsconfig.json` and `vite.config.ts`).
 
 The README documents the high-level stack, project layout, feature set, and the
-native (iOS/Android) build flow; don't duplicate that here. See
-`docs/superpowers/specs/native-build-notes.md` for Capacitor setup.
+native (iOS/Android) build flow; don't duplicate that here.
 
 ## Architecture
 
@@ -28,16 +27,20 @@ native (iOS/Android) build flow; don't duplicate that here. See
 
 `src/game/` imports nothing from elsewhere in `src/`. It's a standalone Klondike
 engine: types (`card`, `state`), pure rules (`rules`, `canApply`), the
-`Move`-applying reducer (`moves.applyMove`), the seeded deal (`deck`), and the
-hint / auto-move planners (`hints`, `auto`). Everything else (stores, UI, dnd,
-persistence) sits on top and treats `game/` as a black box.
+`Move`-applying reducer (`moves.applyMove`), the seeded deal (`deck`), the
+hint / auto-move planners (`hints`, `auto`), the bounded winnability solver
+(`solver`, plus its `solver.worker` entry and `solverClient` host wrapper),
+and the win `score` formula. Everything else (stores, UI, dnd, persistence)
+sits on top and treats `game/` as a black box.
 
 Outer layers:
 
 - `store/gameReducer.ts` — thin React reducer wrapper around `applyMove`. Catches
   `InvalidMoveError` and returns the prior state; rethrows everything else.
 - `store/{statsStore,settingsStore}.ts` — Zustand + immer stores, each
-  hydrated from and persisted to IndexedDB.
+  hydrated from and persisted to IndexedDB. `store/records.ts` is a pure
+  helper (not a store) that derives the leaderboard / rankings / medals from
+  the stats store's game log.
 - `persistence/db.ts` — `idb-keyval` wrapped with an `{ schemaVersion, data }`
   envelope per key (`KEY_GAME`, `KEY_STATS`, `KEY_SETTINGS`). All reads return
   `null` on schema mismatch / parse failure rather than throwing.
@@ -47,9 +50,11 @@ Outer layers:
   are short strings: `t:<col>` for tableau, `f:<idx>` for foundation
   (`parseDropId`). `resolveMove` only builds the candidate Move; `applyMove`
   enforces game rules.
-- `ui/` — React components. `App.tsx` boots (hydrate stores → load saved game
-  or deal a new one) then renders `<Board>`. `Board.tsx` is the orchestrator:
-  reducer + dnd context + auto-complete loop + win detection + sheets.
+- `src/App.tsx` (the root component, not under `ui/`) boots: hydrate stores →
+  load saved game or deal a new one → render `<Board>`.
+- `ui/` — React components. `Board.tsx` is the orchestrator: reducer + dnd
+  context + auto-complete loop + win detection + sheets. `i18n/` backs all
+  user-facing strings (`useT`); English + French, locale-auto-detected.
 
 ### Game state is immutable; history lives inside it
 
@@ -114,6 +119,17 @@ the new-game default `drawCount` comes from settings. The saved-game loader
 returns `null` on schema mismatch _and_ on a fully-foundation-stacked state
 (belt-and-braces — the autosave clears on win, but defend anyway).
 
+### Winnable-only deals run off the main thread
+
+When the `requireWinnable` setting is on, `handleNewGame` in `Board.tsx` calls
+`findWinnableSeed` (`game/solverClient.ts`), which drives the bounded solver
+inside a lazily-spawned Web Worker (`solver.worker.ts`) so the hunt for a
+provably-solvable seed never blocks the UI. The solver is budget-bounded
+(`deadlineMs` / `maxNodes`) and may return `unknown`; the feature treats
+`unknown` as unsolvable and reshuffles. Successive new-game clicks must abort
+the in-flight request — `Board` tracks and cancels it (and on unmount). If you
+touch new-game routing, preserve that cancellation or stale deals can land.
+
 ### Native shell
 
 Capacitor 8 wraps the web build (`webDir: dist`). `src/native/lifecycle.ts`
@@ -126,8 +142,11 @@ Vitest + jsdom (`vite.config.ts → test`); setup at `src/test-setup.ts` pulls i
 `@testing-library/jest-dom` matchers. Tests live next to their subject in
 `__tests__/` directories. Shared factories live in `src/test-utils/`. The
 bulk of coverage is on `src/game/` — every `Move` kind has legal/illegal
-cases, undo round-trips, history-cap enforcement, and integration coverage.
-UI tests are limited to `Board.test.tsx`.
+cases, undo round-trips, history-cap enforcement, solver soundness, scoring,
+and integration coverage — with further suites across `store/` (reducer,
+stats, settings, records), `persistence/` (stats backup round-trips), and
+`dnd/`. UI tests cover `Board`, `RecordsPanel`, and the `format` / card-rank
+helpers.
 
 ## Conventions
 
