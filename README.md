@@ -1,6 +1,7 @@
 # Solitaire
 
-A simple Klondike solitaire that runs on the web, iOS, and Android from a single codebase.
+A simple Klondike solitaire that runs on the web and Android.
+NOT tested on iOS yet.
 
 ## Stack
 
