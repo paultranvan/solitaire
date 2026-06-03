@@ -13,7 +13,6 @@
 
 # Capacitor native projects (generated; not yet committed)
 /ios
-/android
 .DS_Store
 
 # misc

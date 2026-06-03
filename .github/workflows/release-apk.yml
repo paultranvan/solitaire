@@ -1,0 +1,104 @@
+# Builds a signed Android APK and attaches it to the GitHub Release.
+#
+# One-time setup — generate a keystore and add these repo secrets
+# (Settings → Secrets and variables → Actions):
+#   keytool -genkeypair -v -keystore solitaire-release.keystore \
+#     -alias solitaire -keyalg RSA -keysize 2048 -validity 10000
+#   base64 -w0 solitaire-release.keystore   # value for ANDROID_KEYSTORE_BASE64
+#
+#   ANDROID_KEYSTORE_BASE64    base64 of the .keystore file
+#   ANDROID_KEYSTORE_PASSWORD  store password
+#   ANDROID_KEY_ALIAS          key alias (e.g. solitaire)
+#   ANDROID_KEY_PASSWORD       key password
+name: Release APK
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to build and attach the APK to
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve tag and version numbers
+        id: ver
+        run: |
+          TAG="${{ github.event.release.tag_name || github.event.inputs.tag }}"
+          if [ -z "$TAG" ]; then echo "No tag provided" >&2; exit 1; fi
+          VERSION_NAME="${TAG#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NAME"
+          VERSION_CODE=$(( 10#${MAJOR:-0} * 10000 + 10#${MINOR:-0} * 100 + 10#${PATCH:-0} ))
+          if [ "$VERSION_CODE" -le 0 ]; then
+            echo "Tag '$TAG' is not numeric semver (vMAJOR.MINOR.PATCH)" >&2; exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web bundle
+        run: npm run build
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Sync Capacitor android project
+        run: npx cap sync android
+
+      - name: Decode keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+
+      - name: Build signed release APK
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_VERSION_NAME: ${{ steps.ver.outputs.name }}
+          ANDROID_VERSION_CODE: ${{ steps.ver.outputs.code }}
+        run: ./gradlew assembleRelease
+
+      - name: Rename APK
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/release/app-release.apk \
+             "out/solitaire-${{ steps.ver.outputs.name }}.apk"
+
+      - name: Verify APK is signed
+        run: |
+          unzip -l "out/solitaire-${{ steps.ver.outputs.name }}.apk" \
+            | grep -qE 'META-INF/.*\.(RSA|EC)' \
+            && echo "APK is signed"
+
+      - name: Upload APK to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ steps.ver.outputs.tag }}" \
+            "out/solitaire-${{ steps.ver.outputs.name }}.apk" --clobber

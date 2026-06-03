@@ -134,7 +134,9 @@ touch new-game routing, preserve that cancellation or stale deals can land.
 
 Capacitor 8 wraps the web build (`webDir: dist`). `src/native/lifecycle.ts`
 guards everything with `Capacitor.isNativePlatform()` so the same bundle runs
-on web. `ios/` and `android/` are gitignored until signing/icons are final.
+on web. `android/` is committed and built by the `release-apk` GitHub
+workflow (signed APK on each release); `ios/` is still gitignored until
+signing/icons are final.
 
 ## Tests
 
