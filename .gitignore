@@ -11,9 +11,13 @@
 /dist
 *.tsbuildinfo
 
-# Capacitor native projects (generated; not yet committed)
+# Capacitor native projects (android/ is tracked; ios/ is not yet committed)
 /ios
 .DS_Store
+
+# Android signing keys — NEVER commit these (CI uses repo secrets instead)
+*.keystore
+*.jks
 
 # misc
 .DS_Store
