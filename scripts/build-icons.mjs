@@ -45,6 +45,26 @@ mkdirSync(resolve(root, 'public'), { recursive: true });
 copyFileSync(resolve(root, 'resources/icon.svg'), resolve(root, 'public/favicon.svg'));
 console.log('  copied public/favicon.svg');
 
+// PWA / web app manifest icons. These land in public/icons so `vite build`
+// copies them verbatim to dist/icons, where manifest.webmanifest points
+// (relative path `icons/...`). "any" icons come from the full rounded icon;
+// "maskable" icons keep the card inside the safe zone over full-bleed felt.
+console.log('Rendering PWA manifest icons...');
+for (const size of [96, 192, 256, 384, 512]) {
+  rasterize(
+    resolve(root, 'resources/icon.svg'),
+    resolve(root, `public/icons/icon-${size}.png`),
+    size,
+  );
+}
+for (const size of [192, 512]) {
+  rasterize(
+    resolve(root, 'resources/icon-maskable.svg'),
+    resolve(root, `public/icons/maskable-${size}.png`),
+    size,
+  );
+}
+
 // If a Capacitor native shell exists, regenerate its icon/splash assets.
 const hasIos = existsSync(resolve(root, 'ios'));
 const hasAndroid = existsSync(resolve(root, 'android'));
