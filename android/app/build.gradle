@@ -35,6 +35,12 @@ android {
                 signingConfig signingConfigs.release
             }
         }
+        debug {
+            // Distinct package + version suffix so a debug build installs
+            // alongside the release build instead of requiring an uninstall.
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
     }
 }
 
