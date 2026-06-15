@@ -1,9 +1,10 @@
 .stock-talon {
-  display: grid;
-  /* In draw-3 the talon column widens to fit the fan. The fan-offset variable
-     is 0 in draw-1 so the column collapses to a single card width — keeping
-     the original two-card-wide layout and the existing top + peek behaviour. */
-  grid-template-columns: var(--card-w) calc(var(--card-w) + 2 * var(--talon-fan-offset));
+  display: flex;
+  /* Flex (not grid) so the group can be row-reversed for right-handed layout.
+     The slots carry explicit widths below, so the row is sized identically to
+     the old two-column grid. In draw-3 the talon slot widens to fit the fan;
+     the fan-offset is 0 in draw-1 so it collapses to a single card width —
+     keeping the original two-card-wide layout and top + peek behaviour. */
   gap: var(--gap-col);
   --talon-fan-offset: 0px;
 }

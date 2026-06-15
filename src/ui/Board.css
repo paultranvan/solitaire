@@ -24,8 +24,15 @@
   gap: var(--gap-col);
 }
 
-/* Left-handed: stock/talon on the right, foundations on the left. */
-.board__top[data-handedness='left'] {
+/* Right-handed: stock/talon on the right, foundations on the left — the deck
+   sits under the right thumb. The stock/talon group is also reversed so the
+   stock is at the extreme right with the talon on its left.
+   Left-handed keeps the natural order (stock on the left). */
+.board__top[data-handedness='right'] {
+  flex-direction: row-reverse;
+}
+
+.board__top[data-handedness='right'] .stock-talon {
   flex-direction: row-reverse;
 }
 
