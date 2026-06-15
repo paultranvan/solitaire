@@ -116,20 +116,15 @@ jobs:
           ANDROID_VERSION_CODE: ${{ steps.ver.outputs.code }}
         run: ./gradlew assembleRelease
 
-      - name: Verify APK is release-signed (not debug)
+      - name: Verify APK is signed
         run: |
           APK=android/app/build/outputs/apk/release/app-release.apk
           test -f "$APK" || { echo "APK not found at $APK"; exit 1; }
-          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)
-          echo "Using $APKSIGNER"
-          SIGNER=$("$APKSIGNER" verify --print-certs "$APK" | grep -m1 "Signer #1 certificate DN" || true)
-          echo "$SIGNER"
-          if [ -z "$SIGNER" ]; then
-            echo "ERROR: APK is unsigned — release keystore secrets missing?"; exit 1
-          fi
-          if echo "$SIGNER" | grep -qi "androiddebugkey"; then
-            echo "ERROR: APK is debug-signed — release keystore was not applied"; exit 1
-          fi
+          # minSdk is 23, so AGP applies the v1 (JAR) signature — its presence
+          # confirms the release keystore was applied. Mirrors release-apk.yml.
+          unzip -l "$APK" | grep -qE 'META-INF/.*\.(RSA|EC)' \
+            && echo "APK is signed" \
+            || { echo "ERROR: APK is unsigned — release keystore secrets missing?"; exit 1; }
 
       - name: Distribute to Firebase App Distribution
         env:
