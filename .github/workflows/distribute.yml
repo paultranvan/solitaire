@@ -1,0 +1,147 @@
+name: Distribute to Firebase App Distribution
+
+# Builds a signed release APK and pushes it to the "testers" group, delivered
+# through the Firebase App Tester app on testers' phones.
+#
+# Triggers:
+#   - pushing a tag like v0.1.0  (the usual release path)
+#   - manual run from the Actions tab (optionally with custom release notes)
+#
+# This is separate from the "Release APK" workflow: that one attaches the APK
+# to a published GitHub Release, this one ships the same signed APK to testers.
+# A tag push runs this; publishing a GitHub Release runs the other.
+#
+# One-time setup
+# --------------
+# 1. Firebase project + Android app (gives the App ID):
+#      - https://console.firebase.google.com → use an existing project (the
+#        mapozy one works) or create a new one → Add app → Android.
+#      - Android package name: com.paultranvan.solitaire (must match exactly).
+#      - google-services.json is NOT needed for App Distribution — the App ID
+#        is enough. Copy it; it looks like 1:1234567890:android:abc0123456789.
+#      - Open App Distribution in the left nav and accept the terms.
+#      - Create a tester group named "testers" (matches TESTER_GROUP below) and
+#        add tester emails.
+#
+# 2. CI token (firebase CLI is already installed locally):
+#      firebase login:ci          # opens a browser, prints a token
+#    The token is per-user and works across all your Firebase projects, so the
+#    same one you use for mapozy is fine.
+#
+# 3. Repo secrets (Settings → Secrets and variables → Actions):
+#      FIREBASE_APP_ID            the 1:...:android:... App ID from step 1
+#      FIREBASE_TOKEN             the token from step 2
+#      ANDROID_KEYSTORE_BASE64    base64 of the release .keystore
+#      ANDROID_KEYSTORE_PASSWORD  store password
+#      ANDROID_KEY_ALIAS          key alias
+#      ANDROID_KEY_PASSWORD       key password
+#    The four ANDROID_* secrets are the same ones the Release APK workflow uses.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to derive the version number from (defaults to the current ref)
+        required: false
+      notes:
+        description: Release notes (defaults to the latest commit subject)
+        required: false
+
+concurrency:
+  group: distribute-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TESTER_GROUP: testers
+
+jobs:
+  build-distribute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Resolve version numbers from tag
+        id: ver
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION_NAME="${TAG#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NAME"
+          VERSION_CODE=$(( 10#${MAJOR:-0} * 10000 + 10#${MINOR:-0} * 100 + 10#${PATCH:-0} ))
+          if [ "$VERSION_CODE" -le 0 ]; then
+            echo "Ref '$TAG' is not numeric semver (vMAJOR.MINOR.PATCH)" >&2; exit 1
+          fi
+          echo "name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web bundle
+        run: npm run build
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Sync Capacitor android project
+        run: npx cap sync android
+
+      - name: Decode keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+
+      - name: Build signed release APK
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_VERSION_NAME: ${{ steps.ver.outputs.name }}
+          ANDROID_VERSION_CODE: ${{ steps.ver.outputs.code }}
+        run: ./gradlew assembleRelease
+
+      - name: Verify APK is release-signed (not debug)
+        run: |
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          test -f "$APK" || { echo "APK not found at $APK"; exit 1; }
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)
+          echo "Using $APKSIGNER"
+          SIGNER=$("$APKSIGNER" verify --print-certs "$APK" | grep -m1 "Signer #1 certificate DN" || true)
+          echo "$SIGNER"
+          if [ -z "$SIGNER" ]; then
+            echo "ERROR: APK is unsigned — release keystore secrets missing?"; exit 1
+          fi
+          if echo "$SIGNER" | grep -qi "androiddebugkey"; then
+            echo "ERROR: APK is debug-signed — release keystore was not applied"; exit 1
+          fi
+
+      - name: Distribute to Firebase App Distribution
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+        run: |
+          NOTES="${{ github.event.inputs.notes }}"
+          if [ -z "$NOTES" ]; then NOTES="$(git log -1 --pretty=%s)"; fi
+          echo "Release notes: $NOTES"
+          npx -y firebase-tools appdistribution:distribute \
+            android/app/build/outputs/apk/release/app-release.apk \
+            --app "$FIREBASE_APP_ID" \
+            --groups "$TESTER_GROUP" \
+            --release-notes "$NOTES" \
+            --token "$FIREBASE_TOKEN"
