@@ -145,7 +145,7 @@
 }
 
 /* Solid center pip — sits low enough to stay hidden under the next card when
-   piles are fanned. --fan-faceup reveals 0.42·card-h (≈ 0.59·card-w) of each
+   piles are fanned. --fan-faceup reveals 0.48·card-h (≈ 0.67·card-w) of each
    covered card; the pip top must clear that strip, otherwise its top edge
    peeks out above the card stacked below. SVG, sized via width to keep its
    appearance identical across platforms. */
@@ -153,7 +153,7 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  top: calc(var(--card-w) * 0.64);
+  top: calc(var(--card-w) * 0.72);
   width: calc(var(--card-w) * 0.6);
   height: calc(var(--card-w) * 0.6);
   pointer-events: none;
