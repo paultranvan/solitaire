@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { computeScore } from '@/game/score';
 import { KEY_STATS, loadKey, saveKey } from '@/persistence/db';
 
 // One record per finished game (won or abandoned). The flat `Stats.games` log
@@ -43,16 +44,6 @@ const emptyMode = (): ModeStats => ({
   bestScore: null,
 });
 
-// Build each mode explicitly so a legacy `wins` field (previous schema) is
-// dropped rather than spread through onto the normalized object.
-const normalizeMode = (m: Partial<ModeStats> | undefined): ModeStats => ({
-  played: m?.played ?? 0,
-  won: m?.won ?? 0,
-  bestTimeSec: m?.bestTimeSec ?? null,
-  fewestMovesWin: m?.fewestMovesWin ?? null,
-  bestScore: m?.bestScore ?? null,
-});
-
 // Previous schema kept per-mode `wins` arrays. Fold them into the flat log;
 // fields the old record never stored default to empty/zero.
 type LegacyWin = Pick<GameRecord, 'score' | 'durationSec' | 'moves' | 'dateMs'>;
@@ -80,15 +71,6 @@ const migrateLegacyWins = (s: Stats): GameRecord[] => {
   }
   return out.sort((a, b) => a.dateMs - b.dateMs);
 };
-
-const normalizeStats = (s: Stats): Stats => ({
-  schemaVersion: 1,
-  byMode: { '1': normalizeMode(s.byMode?.['1']), '3': normalizeMode(s.byMode?.['3']) },
-  currentStreak: s.currentStreak ?? 0,
-  longestStreak: s.longestStreak ?? 0,
-  totalSecondsPlayed: s.totalSecondsPlayed ?? 0,
-  games: Array.isArray(s.games) ? s.games : migrateLegacyWins(s),
-});
 
 export const defaultStats = (): Stats => ({
   schemaVersion: 1,
@@ -130,6 +112,34 @@ const recomputeAggregates = (
     }
   }
   return { byMode, currentStreak, longestStreak, totalSecondsPlayed };
+};
+
+// A won game's score is a pure function of its (durationSec, moves, drawCount),
+// so the persisted `score` is really just a cache of computeScore(). Recompute
+// it for every won record; abandoned games stay null.
+const rescoreGames = (games: GameRecord[]): GameRecord[] =>
+  games.map((g) =>
+    g.outcome === 'won'
+      ? {
+          ...g,
+          score: computeScore({
+            durationSec: g.durationSec,
+            moves: g.moves,
+            drawCount: g.drawCount,
+          }),
+        }
+      : g,
+  );
+
+// Run on every hydration (not as a one-shot migration). Rescoring is idempotent
+// and O(n) trivial arithmetic — sub-millisecond even for thousands of games —
+// so doing it each load keeps history self-healing: any future change to the
+// score formula propagates to past games automatically, with no version flag to
+// bump. Aggregates (bestScore, etc.) are then re-derived from the rescored log,
+// which is the authoritative event source the cached aggregates sit on top of.
+export const normalizeStats = (s: Stats): Stats => {
+  const games = rescoreGames(Array.isArray(s.games) ? s.games : migrateLegacyWins(s));
+  return { schemaVersion: 1, games, ...recomputeAggregates(games) };
 };
 
 export type RecordGameInput = {

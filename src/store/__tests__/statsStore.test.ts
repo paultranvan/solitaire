@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defaultStats, useStatsStore, type GameRecord } from '../statsStore';
+import { computeScore } from '@/game/score';
+import { defaultStats, normalizeStats, useStatsStore, type GameRecord, type Stats } from '../statsStore';
 
 describe('statsStore.recordGame', () => {
   beforeEach(() => {
@@ -68,6 +69,60 @@ describe('statsStore.recordGame', () => {
     const rec = useStatsStore.getState().recordGame;
     rec({ mode: 3, outcome: 'won', durationSec: 90, moves: 70 });
     expect(useStatsStore.getState().stats.byMode['3'].bestScore).toBeNull();
+  });
+});
+
+describe('normalizeStats — score recompute on hydration', () => {
+  const wonRecord = (over: Partial<GameRecord> = {}): GameRecord => ({
+    outcome: 'won',
+    score: 999_999, // deliberately stale / wrong
+    durationSec: 180,
+    moves: 100,
+    dateMs: 1,
+    drawCount: 1,
+    seed: 'a',
+    redealCount: 0,
+    hintsUsed: 0,
+    undosUsed: 0,
+    ...over,
+  });
+
+  const staleStats = (games: GameRecord[]): Stats => ({
+    schemaVersion: 1,
+    byMode: {
+      '1': { played: 9, won: 9, bestTimeSec: 1, fewestMovesWin: 1, bestScore: 999_999 },
+      '3': { played: 9, won: 9, bestTimeSec: 1, fewestMovesWin: 1, bestScore: 999_999 },
+    },
+    currentStreak: 9,
+    longestStreak: 9,
+    totalSecondsPlayed: 999,
+    games,
+  });
+
+  it('recomputes every stored won-game score with the current formula', () => {
+    const norm = normalizeStats(staleStats([wonRecord({ durationSec: 180, moves: 100, drawCount: 1 })]));
+    expect(norm.games[0].score).toBe(computeScore({ durationSec: 180, moves: 100, drawCount: 1 }));
+  });
+
+  it('re-derives bestScore from the recomputed scores, dropping the stale aggregate', () => {
+    const norm = normalizeStats(
+      staleStats([
+        wonRecord({ seed: 'a', dateMs: 1, durationSec: 120, moves: 90, drawCount: 1 }),
+        wonRecord({ seed: 'b', dateMs: 2, durationSec: 300, moves: 200, drawCount: 1 }),
+      ]),
+    );
+    const best = Math.max(
+      computeScore({ durationSec: 120, moves: 90, drawCount: 1 }),
+      computeScore({ durationSec: 300, moves: 200, drawCount: 1 }),
+    );
+    expect(norm.byMode['1'].bestScore).toBe(best);
+  });
+
+  it('leaves abandoned games with a null score', () => {
+    const norm = normalizeStats(
+      staleStats([wonRecord({ outcome: 'abandoned', score: null, durationSec: 30, moves: 5 })]),
+    );
+    expect(norm.games[0].score).toBeNull();
   });
 });
 
