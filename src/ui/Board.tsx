@@ -489,7 +489,6 @@ export function Board({ initial }: { initial: GameState }) {
                 <StockTalon
                   stock={state.stock}
                   talon={state.talon}
-                  drawCount={state.drawCount}
                   onStockClick={handleStockClick}
                   onTalonAutoMove={() => handleAutoMove({ kind: 'talon' })}
                   hint={hint}

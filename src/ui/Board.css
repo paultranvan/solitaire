@@ -26,7 +26,8 @@
 
 /* Right-handed: stock/talon on the right, foundations on the left — the deck
    sits under the right thumb. The stock/talon group is also reversed so the
-   stock is at the extreme right with the talon on its left.
+   stock is at the extreme right with the talon on its left; a short waste fan
+   is then anchored to the right edge of its slot so it stays next to the stock.
    Left-handed keeps the natural order (stock on the left). */
 .board__top[data-handedness='right'] {
   flex-direction: row-reverse;
@@ -34,13 +35,15 @@
 
 .board__top[data-handedness='right'] .stock-talon {
   flex-direction: row-reverse;
+  --talon-fan-anchor-end: 1;
 }
 
 /* Animations toggle: kill the CSS-only motion when the setting is off. The
    motion/react transitions are handled at the component level; these rules
    cover the card-flip and hint-pulse keyframes, plus the confetti is
    suppressed at the React level. */
-.board[data-animations='off'] .card-flip__inner {
+.board[data-animations='off'] .card-flip__inner,
+.board[data-animations='off'] .talon-fan__behind .card__center {
   transition: none;
 }
 

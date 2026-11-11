@@ -1,20 +1,19 @@
 .stock-talon {
   display: flex;
   /* Flex (not grid) so the group can be row-reversed for right-handed layout.
-     The slots carry explicit widths below, so the row is sized identically to
-     the old two-column grid. In draw-3 the talon slot widens to fit the fan;
-     the fan-offset is 0 in draw-1 so it collapses to a single card width —
-     keeping the original two-card-wide layout and top + peek behaviour. */
+     The slots carry explicit widths below. */
   gap: var(--gap-col);
-  --talon-fan-offset: 0px;
-}
-
-/* ~30 % of a card width per step exposes the rank+suit corner cleanly without
-   stealing space from the foundations on a board at its layout cap (the gap
-   between the stock/talon group and the foundations has ~1.36·card-w of
-   slack on a maxed-out board). */
-.stock-talon[data-draw='3'] {
-  --talon-fan-offset: calc(var(--card-w) * 0.3);
+  /* The waste fans its last 3 cards left-to-right, newest on top. Each step
+     leaves a strip of the covered card wide enough for its rank with the suit
+     pip tucked underneath — the widest rank, "10", ends at ~0.50·card-w. Two
+     steps make the slot 2.08·card-w wide, which still fits the top row: stock
+     (1) + waste (2.08) + foundations (4.54) + 2 gaps (0.36) = 7.98 of the
+     8.08·card-w available. */
+  --talon-fan-offset: calc(var(--card-w) * 0.54);
+  /* 0 = a short fan (fewer than 3 cards) starts at the slot's left edge;
+     1 = it ends at the right edge. Board.css flips this with the handedness
+     so the fan always sits against the stock. */
+  --talon-fan-anchor-end: 0;
 }
 
 .stock-talon__slot {
@@ -35,24 +34,30 @@
   width: calc(var(--card-w) + 2 * var(--talon-fan-offset));
 }
 
-/* Each peek card sits one fan-offset further left of the top, so newer cards
-   visually overlap older ones with their leftmost corner exposed. With
-   fan-offset=0 (draw-1) every peek collapses onto the same position and only
-   the immediate "card-behind" — the single card under the top — is visible
-   through the suppressGhost gap when the top is dragged. */
-.talon-fan__behind {
+/* --talon-fan-i / --talon-fan-free are set per card by StockTalon.tsx. */
+.talon-fan__card {
   position: absolute;
   top: 0;
-  left: calc(var(--talon-fan-i, 0) * var(--talon-fan-offset));
+  left: calc(
+    (var(--talon-fan-i, 0) + var(--talon-fan-free, 0) * var(--talon-fan-anchor-end)) *
+      var(--talon-fan-offset)
+  );
   width: var(--card-w);
   height: var(--card-h);
+}
+
+.talon-fan__behind {
   pointer-events: none;
 }
 
-.talon-fan__top {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: var(--card-w);
-  height: var(--card-h);
+/* Compact index for covered cards: the corner suit (top-right) is hidden
+   under the next card, so the centre pip shrinks and tucks under the rank,
+   inside the exposed strip. `is-uncovered` puts it back while the top card is
+   being dragged and the whole card underneath is in view. */
+.talon-fan__behind .card__center {
+  transition: transform 180ms ease-out;
+}
+
+.talon-fan__behind:not(.is-uncovered) .card__center {
+  transform: translate(calc(-50% - var(--card-w) * 0.24), calc(var(--card-w) * -0.2)) scale(0.6);
 }
