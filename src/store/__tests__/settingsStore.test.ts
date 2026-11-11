@@ -33,4 +33,28 @@ describe('settingsStore — cardBack', () => {
     useSettingsStore.getState().hydrate(legacy);
     expect(useSettingsStore.getState().settings.cardBack).toBe('navy');
   });
+
+  it('hydrate() ignores values it would never have written and drops unknown keys', () => {
+    const tampered = {
+      schemaVersion: 1,
+      drawCount: 7,
+      sound: 'yes',
+      handedness: 'up',
+      cardBack: 'navy x-injected',
+      language: 'zz',
+      requireWinnable: true,
+      extra: { nested: true },
+    } as unknown as Settings;
+    useSettingsStore.getState().hydrate(tampered);
+    // Valid field kept, everything else back to its default.
+    expect(useSettingsStore.getState().settings).toEqual({
+      ...defaultSettings(),
+      requireWinnable: true,
+    });
+  });
+
+  it('hydrate() survives a payload that is not an object', () => {
+    useSettingsStore.getState().hydrate('nope' as unknown as Settings);
+    expect(useSettingsStore.getState().settings).toEqual(defaultSettings());
+  });
 });

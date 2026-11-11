@@ -2,7 +2,12 @@ import { useRef, useState } from 'react';
 import { useStatsStore } from '@/store/statsStore';
 import { useSettingsStore, Settings, CARD_BACKS } from '@/store/settingsStore';
 import { useT } from '@/i18n/useT';
-import { parseImport, serializeExport, type ParseResult } from '@/persistence/statsTransfer';
+import {
+  MAX_IMPORT_BYTES,
+  parseImport,
+  serializeExport,
+  type ParseResult,
+} from '@/persistence/statsTransfer';
 import { Sheet } from './Sheet';
 import { RecordsPanel } from './RecordsPanel';
 import { formatWinPct } from './format';
@@ -47,6 +52,11 @@ function BackupRow() {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+    // Reject before reading: file.text() would pull the whole thing into memory.
+    if (file.size > MAX_IMPORT_BYTES) {
+      showFeedback({ kind: 'error', reason: 'too-large' });
+      return;
+    }
     let text: string;
     try {
       text = await file.text();
@@ -306,9 +316,7 @@ function SettingsSection() {
               role="radio"
               aria-label={id}
               aria-checked={settings.cardBack === id}
-              className={`swatch card--back--${id}${
-                settings.cardBack === id ? ' is-active' : ''
-              }`}
+              className={`swatch card--back--${id}${settings.cardBack === id ? ' is-active' : ''}`}
               onClick={() => set({ cardBack: id })}
             />
           ))}
@@ -351,22 +359,13 @@ function GameActions({
   const { t } = useT();
   return (
     <div className="m-game-actions">
-      <button
-        type="button"
-        className="m-game-action m-game-action--accent"
-        onClick={onNewGame}
-      >
+      <button type="button" className="m-game-action m-game-action--accent" onClick={onNewGame}>
         <span className="m-game-action__glyph" aria-hidden="true">
           +
         </span>
         <span className="m-game-action__label">{t('menu.newGame')}</span>
       </button>
-      <button
-        type="button"
-        className="m-game-action"
-        onClick={onRestart}
-        disabled={!canRestart}
-      >
+      <button type="button" className="m-game-action" onClick={onRestart} disabled={!canRestart}>
         <svg
           className="m-game-action__icon"
           viewBox="0 0 24 24"

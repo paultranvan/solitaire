@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   buildExportEnvelope,
+  MAX_IMPORT_BYTES,
   parseImport,
   serializeExport,
 } from '../statsTransfer';
@@ -81,9 +82,10 @@ describe('statsTransfer.parseImport', () => {
   });
 
   it('rejects JSON missing the kind field with reason "wrong-kind"', () => {
-    expect(
-      parseImport(JSON.stringify({ schemaVersion: 1, data: { games: [] } })),
-    ).toEqual({ ok: false, reason: 'wrong-kind' });
+    expect(parseImport(JSON.stringify({ schemaVersion: 1, data: { games: [] } }))).toEqual({
+      ok: false,
+      reason: 'wrong-kind',
+    });
   });
 
   it('rejects JSON with a different kind value with reason "wrong-kind"', () => {
@@ -122,15 +124,67 @@ describe('statsTransfer.parseImport', () => {
       kind: 'solitaire-stats',
       schemaVersion: 1,
       data: {
-        games: [
-          good,
-          { outcome: 'won' },
-          { ...good, dateMs: 'not a number' },
-        ],
+        games: [good, { outcome: 'won' }, { ...good, dateMs: 'not a number' }],
       },
     });
     const result = parseImport(text);
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.games).toEqual([good]);
+  });
+
+  const envelopeOf = (games: unknown[]): string =>
+    JSON.stringify({ kind: 'solitaire-stats', schemaVersion: 1, data: { games } });
+
+  it('drops records whose numbers are non-finite, negative, or absurdly large', () => {
+    const good = sampleGame({ seed: 'g' });
+    // 1e999 is valid JSON that parses to Infinity.
+    const text = envelopeOf([good, { ...good, moves: -1 }, { ...good, dateMs: 9e15 * 10 }]).replace(
+      '"moves":-1',
+      '"moves":1e999',
+    );
+    expect(text).toContain('1e999');
+    const result = parseImport(text);
+    expect(result).toEqual({ ok: true, games: [good] });
+    expect(parseImport(envelopeOf([{ ...good, durationSec: -5 }]))).toEqual({
+      ok: true,
+      games: [],
+    });
+    expect(parseImport(envelopeOf([{ ...good, hintsUsed: 1e12 }]))).toEqual({
+      ok: true,
+      games: [],
+    });
+  });
+
+  it('drops records with an oversized seed', () => {
+    const result = parseImport(envelopeOf([sampleGame({ seed: 'x'.repeat(1000) })]));
+    expect(result).toEqual({ ok: true, games: [] });
+  });
+
+  it('rebuilds records from known fields only, discarding unknown keys', () => {
+    const good = sampleGame({ seed: 'g' });
+    const text = envelopeOf([{ ...good, extra: { nested: 'payload' } }]).replace(
+      '"extra"',
+      '"__proto__":{"polluted":true},"extra"',
+    );
+    const result = parseImport(text);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.games).toEqual([good]);
+    expect(Object.keys(result.games[0]).sort()).toEqual(Object.keys(good).sort());
+    expect(Object.getPrototypeOf(result.games[0])).toBe(Object.prototype);
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+
+  it('rejects an oversized payload without parsing it', () => {
+    const parse = vi.spyOn(JSON, 'parse');
+    try {
+      expect(parseImport(' '.repeat(MAX_IMPORT_BYTES + 1))).toEqual({
+        ok: false,
+        reason: 'too-large',
+      });
+      expect(parse).not.toHaveBeenCalled();
+    } finally {
+      parse.mockRestore();
+    }
   });
 });

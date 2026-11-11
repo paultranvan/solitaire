@@ -39,6 +39,28 @@ export const defaultSettings = (): Settings => ({
   language: detectInitialLang(),
 });
 
+const LANGS: readonly Lang[] = ['en', 'fr'];
+
+// Keeps only the known settings whose stored value is one we'd write ourselves.
+// The persisted blob is untrusted (hand-edited storage, another app on the same
+// origin reusing the key, a downgrade): an unknown `language` would crash every
+// translation lookup at boot, and `cardBack` is interpolated into a class name.
+// Anything missing or invalid simply falls back to its default in hydrate().
+export const sanitizeSettings = (raw: unknown): Partial<Settings> => {
+  if (typeof raw !== 'object' || raw === null) return {};
+  const o = raw as Record<string, unknown>;
+  const out: Partial<Settings> = {};
+  if (o.drawCount === 1 || o.drawCount === 3) out.drawCount = o.drawCount;
+  if (typeof o.sound === 'boolean') out.sound = o.sound;
+  if (typeof o.haptics === 'boolean') out.haptics = o.haptics;
+  if (typeof o.animations === 'boolean') out.animations = o.animations;
+  if (o.handedness === 'right' || o.handedness === 'left') out.handedness = o.handedness;
+  if (CARD_BACKS.includes(o.cardBack as CardBack)) out.cardBack = o.cardBack as CardBack;
+  if (typeof o.requireWinnable === 'boolean') out.requireWinnable = o.requireWinnable;
+  if (LANGS.includes(o.language as Lang)) out.language = o.language as Lang;
+  return out;
+};
+
 type SettingsStore = {
   settings: Settings;
   hydrate: (s: Settings) => void;
@@ -55,7 +77,8 @@ export const useSettingsStore = create<SettingsStore>()(
         // Spread defaults under loaded values so renamed/added fields fall back
         // to their defaults instead of becoming undefined. Lets us evolve the
         // shape without bumping schemaVersion for every rename.
-        state.settings = { ...defaultSettings(), ...s };
+        // Loaded values are validated first — see sanitizeSettings.
+        state.settings = { ...defaultSettings(), ...sanitizeSettings(s) };
       }),
     // persist() must run AFTER set() returns, not inside the producer: idb-keyval's
     // write opens the DB asynchronously and only structured-clones the value once

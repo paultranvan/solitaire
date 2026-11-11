@@ -1,4 +1,4 @@
-import type { GameRecord, Stats } from '@/store/statsStore';
+import { sanitizeGameRecord, type GameRecord, type Stats } from '@/store/statsStore';
 
 export type ExportEnvelope = {
   kind: 'solitaire-stats';
@@ -20,33 +20,23 @@ export function serializeExport(stats: Stats): string {
   return JSON.stringify(buildExportEnvelope(stats), null, 2);
 }
 
+// Backups are small (a few hundred bytes per game), so anything past this is
+// not one of ours. Checked before parsing so an oversized or hostile file
+// can't exhaust memory in JSON.parse or bloat IndexedDB once merged.
+export const MAX_IMPORT_BYTES = 25 * 1024 * 1024;
+
 export type ParseResult =
   | { ok: true; games: GameRecord[] }
-  | { ok: false; reason: 'not-json' | 'wrong-kind' | 'unsupported-version' | 'malformed' };
+  | {
+      ok: false;
+      reason: 'not-json' | 'wrong-kind' | 'unsupported-version' | 'malformed' | 'too-large';
+    };
 
-const isValidOutcome = (v: unknown): v is GameRecord['outcome'] =>
-  v === 'won' || v === 'abandoned';
-
-const isValidDrawCount = (v: unknown): v is GameRecord['drawCount'] => v === 1 || v === 3;
-
-const isValidRecord = (r: unknown): r is GameRecord => {
-  if (typeof r !== 'object' || r === null) return false;
-  const o = r as Record<string, unknown>;
-  return (
-    isValidOutcome(o.outcome) &&
-    (o.score === null || typeof o.score === 'number') &&
-    typeof o.durationSec === 'number' &&
-    typeof o.moves === 'number' &&
-    typeof o.dateMs === 'number' &&
-    isValidDrawCount(o.drawCount) &&
-    typeof o.seed === 'string' &&
-    typeof o.redealCount === 'number' &&
-    typeof o.hintsUsed === 'number' &&
-    typeof o.undosUsed === 'number'
-  );
-};
-
+// The file is untrusted input: only the game log is read, and every record is
+// rebuilt field-by-field by sanitizeGameRecord. The envelope's own aggregates
+// are ignored (mergeImported re-derives them from the log).
 export function parseImport(text: string): ParseResult {
+  if (text.length > MAX_IMPORT_BYTES) return { ok: false, reason: 'too-large' };
   let raw: unknown;
   try {
     raw = JSON.parse(text);
@@ -61,5 +51,10 @@ export function parseImport(text: string): ParseResult {
   if (typeof data !== 'object' || data === null) return { ok: false, reason: 'malformed' };
   const games = (data as Record<string, unknown>).games;
   if (!Array.isArray(games)) return { ok: false, reason: 'malformed' };
-  return { ok: true, games: games.filter(isValidRecord) };
+  const clean: GameRecord[] = [];
+  for (const g of games) {
+    const record = sanitizeGameRecord(g);
+    if (record) clean.push(record);
+  }
+  return { ok: true, games: clean };
 }

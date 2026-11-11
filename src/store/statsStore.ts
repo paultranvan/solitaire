@@ -44,32 +44,86 @@ const emptyMode = (): ModeStats => ({
   bestScore: null,
 });
 
+// Upper bounds for anything read back from storage or an imported backup.
+// Both are untrusted (hand-edited file, another app sharing the origin's
+// IndexedDB, a downgrade), so values outside these are rejected rather than
+// allowed to poison the aggregates with NaN / Infinity / absurd totals.
+const MAX_COUNTER = 1e9;
+const MAX_DATE_MS = 8.64e15; // largest timestamp a Date can represent
+const MAX_SEED_LENGTH = 128;
+
+const isBoundedNumber = (v: unknown, max: number): v is number =>
+  typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= max;
+
+// Validates an untrusted value as a GameRecord and returns a fresh object
+// holding only the known fields, or null if any field is missing or out of
+// range. Rebuilding (rather than passing the input through) drops unknown
+// keys, so stray payload never reaches the store or IndexedDB.
+export const sanitizeGameRecord = (raw: unknown): GameRecord | null => {
+  if (typeof raw !== 'object' || raw === null) return null;
+  const o = raw as Record<string, unknown>;
+  const { outcome, drawCount, durationSec, moves, dateMs, seed } = o;
+  const { redealCount, hintsUsed, undosUsed } = o;
+  const score = o.score ?? null;
+  if (outcome !== 'won' && outcome !== 'abandoned') return null;
+  if (drawCount !== 1 && drawCount !== 3) return null;
+  if (score !== null && !isBoundedNumber(score, MAX_COUNTER)) return null;
+  if (!isBoundedNumber(durationSec, MAX_COUNTER)) return null;
+  if (!isBoundedNumber(moves, MAX_COUNTER)) return null;
+  if (!isBoundedNumber(dateMs, MAX_DATE_MS)) return null;
+  if (typeof seed !== 'string' || seed.length > MAX_SEED_LENGTH) return null;
+  if (!isBoundedNumber(redealCount, MAX_COUNTER)) return null;
+  if (!isBoundedNumber(hintsUsed, MAX_COUNTER)) return null;
+  if (!isBoundedNumber(undosUsed, MAX_COUNTER)) return null;
+  return {
+    outcome,
+    score,
+    durationSec,
+    moves,
+    dateMs,
+    drawCount,
+    seed,
+    redealCount,
+    hintsUsed,
+    undosUsed,
+  };
+};
+
+const sanitizeGameRecords = (raw: readonly unknown[]): GameRecord[] => {
+  const out: GameRecord[] = [];
+  for (const r of raw) {
+    const clean = sanitizeGameRecord(r);
+    if (clean) out.push(clean);
+  }
+  return out;
+};
+
 // Previous schema kept per-mode `wins` arrays. Fold them into the flat log;
 // fields the old record never stored default to empty/zero.
-type LegacyWin = Pick<GameRecord, 'score' | 'durationSec' | 'moves' | 'dateMs'>;
-const migrateLegacyWins = (s: Stats): GameRecord[] => {
-  const out: GameRecord[] = [];
+// The result is unvalidated — normalizeStats runs it through the sanitizer.
+const migrateLegacyWins = (s: Stats): unknown[] => {
+  const out: unknown[] = [];
   for (const dc of [1, 3] as const) {
-    const legacy = (s.byMode?.[String(dc) as '1' | '3'] as { wins?: LegacyWin[] } | undefined)
-      ?.wins;
-    if (Array.isArray(legacy)) {
-      for (const w of legacy) {
-        out.push({
-          outcome: 'won',
-          score: w.score,
-          durationSec: w.durationSec,
-          moves: w.moves,
-          dateMs: w.dateMs,
-          drawCount: dc,
-          seed: '',
-          redealCount: 0,
-          hintsUsed: 0,
-          undosUsed: 0,
-        });
-      }
+    const legacy = (s.byMode?.[String(dc) as '1' | '3'] as { wins?: unknown } | undefined)?.wins;
+    if (!Array.isArray(legacy)) continue;
+    for (const w of legacy) {
+      if (typeof w !== 'object' || w === null) continue;
+      const { score, durationSec, moves, dateMs } = w as Record<string, unknown>;
+      out.push({
+        outcome: 'won',
+        score,
+        durationSec,
+        moves,
+        dateMs,
+        drawCount: dc,
+        seed: '',
+        redealCount: 0,
+        hintsUsed: 0,
+        undosUsed: 0,
+      });
     }
   }
-  return out.sort((a, b) => a.dateMs - b.dateMs);
+  return out;
 };
 
 export const defaultStats = (): Stats => ({
@@ -86,9 +140,7 @@ const dedupeKey = (r: GameRecord): string => `${r.seed}|${r.dateMs}|${r.outcome}
 // Re-derive every cached aggregate from the time-sorted game log so the
 // post-merge state is independent of insert order or the imported file's
 // own aggregate values.
-const recomputeAggregates = (
-  games: GameRecord[],
-): Omit<Stats, 'schemaVersion' | 'games'> => {
+const recomputeAggregates = (games: GameRecord[]): Omit<Stats, 'schemaVersion' | 'games'> => {
   const sorted = [...games].sort((a, b) => a.dateMs - b.dateMs);
   const byMode: Stats['byMode'] = { '1': emptyMode(), '3': emptyMode() };
   let totalSecondsPlayed = 0;
@@ -137,8 +189,15 @@ const rescoreGames = (games: GameRecord[]): GameRecord[] =>
 // score formula propagates to past games automatically, with no version flag to
 // bump. Aggregates (bestScore, etc.) are then re-derived from the rescored log,
 // which is the authoritative event source the cached aggregates sit on top of.
+//
+// The loaded value is untrusted, so every record is validated first; anything
+// malformed is dropped instead of crashing hydration or skewing the totals.
 export const normalizeStats = (s: Stats): Stats => {
-  const games = rescoreGames(Array.isArray(s.games) ? s.games : migrateLegacyWins(s));
+  const games = rescoreGames(
+    Array.isArray(s.games)
+      ? sanitizeGameRecords(s.games)
+      : sanitizeGameRecords(migrateLegacyWins(s)).sort((a, b) => a.dateMs - b.dateMs),
+  );
   return { schemaVersion: 1, games, ...recomputeAggregates(games) };
 };
 

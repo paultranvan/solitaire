@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { computeScore } from '@/game/score';
-import { defaultStats, normalizeStats, useStatsStore, type GameRecord, type Stats } from '../statsStore';
+import {
+  defaultStats,
+  normalizeStats,
+  useStatsStore,
+  type GameRecord,
+  type Stats,
+} from '../statsStore';
 
 describe('statsStore.recordGame', () => {
   beforeEach(() => {
@@ -100,7 +106,9 @@ describe('normalizeStats — score recompute on hydration', () => {
   });
 
   it('recomputes every stored won-game score with the current formula', () => {
-    const norm = normalizeStats(staleStats([wonRecord({ durationSec: 180, moves: 100, drawCount: 1 })]));
+    const norm = normalizeStats(
+      staleStats([wonRecord({ durationSec: 180, moves: 100, drawCount: 1 })]),
+    );
     expect(norm.games[0].score).toBe(computeScore({ durationSec: 180, moves: 100, drawCount: 1 }));
   });
 
@@ -123,6 +131,57 @@ describe('normalizeStats — score recompute on hydration', () => {
       staleStats([wonRecord({ outcome: 'abandoned', score: null, durationSec: 30, moves: 5 })]),
     );
     expect(norm.games[0].score).toBeNull();
+  });
+});
+
+describe('normalizeStats — untrusted storage', () => {
+  const record = (over: Partial<GameRecord> = {}): GameRecord => ({
+    outcome: 'won',
+    score: 0,
+    durationSec: 100,
+    moves: 80,
+    dateMs: 10,
+    drawCount: 1,
+    seed: 's',
+    redealCount: 0,
+    hintsUsed: 0,
+    undosUsed: 0,
+    ...over,
+  });
+
+  it('drops malformed records instead of letting them skew the aggregates', () => {
+    const games = [
+      record(),
+      null,
+      'junk',
+      record({ durationSec: Infinity }),
+      record({ moves: NaN }),
+      record({ drawCount: 2 as unknown as 1 }),
+      { ...record({ dateMs: 20 }), extra: 'dropped' },
+    ] as unknown as GameRecord[];
+    const norm = normalizeStats({ ...defaultStats(), games });
+    expect(norm.games.map((g) => g.dateMs)).toEqual([10, 20]);
+    expect(norm.games[1]).not.toHaveProperty('extra');
+    expect(norm.byMode['1'].played).toBe(2);
+    expect(norm.totalSecondsPlayed).toBe(200);
+  });
+
+  it('survives junk in the legacy per-mode wins arrays', () => {
+    const legacy = {
+      schemaVersion: 1,
+      byMode: {
+        '1': { wins: [null, 5, { score: 1, durationSec: 60, moves: 50, dateMs: 3 }] },
+        '3': { wins: 'not-an-array' },
+      },
+    } as unknown as Stats;
+    const norm = normalizeStats(legacy);
+    expect(norm.games).toHaveLength(1);
+    expect(norm.games[0]).toMatchObject({
+      outcome: 'won',
+      drawCount: 1,
+      durationSec: 60,
+      seed: '',
+    });
   });
 });
 
@@ -265,10 +324,12 @@ describe('statsStore.mergeImported', () => {
   });
 
   it('time-sorted streak walk: an abandoned game later than wins resets currentStreak', () => {
-    useStatsStore.getState().mergeImported([
-      rec({ seed: 'w1', dateMs: 100, outcome: 'won' }),
-      rec({ seed: 'w2', dateMs: 200, outcome: 'won' }),
-    ]);
+    useStatsStore
+      .getState()
+      .mergeImported([
+        rec({ seed: 'w1', dateMs: 100, outcome: 'won' }),
+        rec({ seed: 'w2', dateMs: 200, outcome: 'won' }),
+      ]);
     expect(useStatsStore.getState().stats.currentStreak).toBe(2);
     useStatsStore
       .getState()
