@@ -37,6 +37,7 @@ docs/superpowers/
 # Icon build intermediates — only the SVG sources in resources/ are committed
 resources/*.png
 
-# Unused PWA artifacts that capacitor-assets generates whether asked or not
+# Unused PWA icons that capacitor-assets writes when run without platform
+# flags. The real manifest (public/manifest.webmanifest) is hand-written and
+# tracked; its icons live in public/icons/.
 /icons/
-/public/manifest.webmanifest

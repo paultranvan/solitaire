@@ -76,6 +76,12 @@ if (hasIos || hasAndroid) {
     [
       'capacitor-assets',
       'generate',
+      // Name the native platforms explicitly: with no platform flag the tool
+      // also runs its PWA generator, which rewrites the `icons` array of
+      // public/manifest.webmanifest and deletes public/icons/ files whose
+      // size it doesn't produce itself.
+      ...(hasIos ? ['--ios'] : []),
+      ...(hasAndroid ? ['--android'] : []),
       '--iconBackgroundColor', '#0f3818',
       '--iconBackgroundColorDark', '#0f3818',
       '--splashBackgroundColor', '#0f3818',
