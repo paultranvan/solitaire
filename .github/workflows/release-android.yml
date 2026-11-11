@@ -42,12 +42,25 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+          # Don't leave the write-scoped token in .git/config for later steps
+          # (npm install scripts, Gradle plugins) to read. The upload step
+          # below gets it explicitly through GH_TOKEN.
+          persist-credentials: false
 
       - name: Resolve tag and version numbers
         id: ver
+        env:
+          # Passed through the environment, never interpolated into the script:
+          # a tag name or dispatch input is attacker-influenced text, and
+          # `${{ }}` inside `run:` would paste it in as shell source.
+          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
         run: |
-          TAG="${{ github.event.release.tag_name || github.event.inputs.tag }}"
           if [ -z "$TAG" ]; then echo "No tag provided" >&2; exit 1; fi
+          # Strict allow-list before the value reaches shell arithmetic (which
+          # evaluates expressions) or $GITHUB_OUTPUT (which is line-oriented).
+          if ! [[ "$TAG" =~ ^v?[0-9]+(\.[0-9]+){0,2}$ ]]; then
+            echo "Tag '$TAG' is not numeric semver (vMAJOR.MINOR.PATCH)" >&2; exit 1
+          fi
           VERSION_NAME="${TAG#v}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NAME"
           VERSION_CODE=$(( 10#${MAJOR:-0} * 10000 + 10#${MINOR:-0} * 100 + 10#${PATCH:-0} ))
@@ -97,12 +110,14 @@ jobs:
         run: ./gradlew assembleRelease bundleRelease
 
       - name: Collect artifacts
+        env:
+          VERSION_NAME: ${{ steps.ver.outputs.name }}
         run: |
           mkdir -p out
           cp android/app/build/outputs/apk/release/app-release.apk \
-             "out/solitaire-${{ steps.ver.outputs.name }}.apk"
+             "out/solitaire-$VERSION_NAME.apk"
           cp android/app/build/outputs/bundle/release/app-release.aab \
-             "out/solitaire-${{ steps.ver.outputs.name }}.aab"
+             "out/solitaire-$VERSION_NAME.aab"
 
       - name: Verify artifacts are signed
         run: |
@@ -118,9 +133,13 @@ jobs:
       - name: Upload APK to release
         env:
           GH_TOKEN: ${{ github.token }}
+          # Needed now that checkout no longer persists credentials for gh to
+          # infer the repository from.
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ steps.ver.outputs.tag }}
+          VERSION_NAME: ${{ steps.ver.outputs.name }}
         run: |
-          gh release upload "${{ steps.ver.outputs.tag }}" \
-            "out/solitaire-${{ steps.ver.outputs.name }}.apk" --clobber
+          gh release upload "$TAG" "out/solitaire-$VERSION_NAME.apk" --clobber
 
       - name: Upload AAB for Play Console
         uses: actions/upload-artifact@v4

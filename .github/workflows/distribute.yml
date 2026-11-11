@@ -50,12 +50,20 @@ on:
         description: Release notes (defaults to the latest commit subject)
         required: false
 
+# The job only reads the repo; it never pushes or touches releases. Without
+# this block the token falls back to the repo default, which may be read-write.
+permissions:
+  contents: read
+
 concurrency:
   group: distribute-${{ github.ref }}
   cancel-in-progress: false
 
 env:
   TESTER_GROUP: testers
+  # Pinned so a compromised or broken firebase-tools release can't run in a job
+  # that holds the signing keystore and the Firebase token. Bump deliberately.
+  FIREBASE_TOOLS_VERSION: 15.35.0
 
 jobs:
   build-distribute:
@@ -64,11 +72,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          # Don't leave the token in .git/config for later steps (npm install
+          # scripts, Gradle plugins) to read.
+          persist-credentials: false
 
       - name: Resolve version numbers from tag
         id: ver
+        env:
+          # Passed through the environment, never interpolated into the script:
+          # a tag name or dispatch input is attacker-influenced text, and
+          # `${{ }}` inside `run:` would paste it in as shell source.
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          # Strict allow-list before the value reaches shell arithmetic (which
+          # evaluates expressions) or $GITHUB_OUTPUT (which is line-oriented).
+          if ! [[ "$TAG" =~ ^v?[0-9]+(\.[0-9]+){0,2}$ ]]; then
+            echo "Ref '$TAG' is not numeric semver (vMAJOR.MINOR.PATCH)" >&2; exit 1
+          fi
           VERSION_NAME="${TAG#v}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NAME"
           VERSION_CODE=$(( 10#${MAJOR:-0} * 10000 + 10#${MINOR:-0} * 100 + 10#${PATCH:-0} ))
@@ -128,15 +149,17 @@ jobs:
 
       - name: Distribute to Firebase App Distribution
         env:
+          # firebase-tools reads FIREBASE_TOKEN from the environment, so it is
+          # not passed as --token (argv is visible to every process on the box).
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          INPUT_NOTES: ${{ github.event.inputs.notes }}
         run: |
-          NOTES="${{ github.event.inputs.notes }}"
+          NOTES="$INPUT_NOTES"
           if [ -z "$NOTES" ]; then NOTES="$(git log -1 --pretty=%s)"; fi
           echo "Release notes: $NOTES"
-          npx -y firebase-tools appdistribution:distribute \
+          npx -y "firebase-tools@$FIREBASE_TOOLS_VERSION" appdistribution:distribute \
             android/app/build/outputs/apk/release/app-release.apk \
             --app "$FIREBASE_APP_ID" \
             --groups "$TESTER_GROUP" \
-            --release-notes "$NOTES" \
-            --token "$FIREBASE_TOKEN"
+            --release-notes "$NOTES"
