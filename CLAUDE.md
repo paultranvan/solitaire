@@ -119,6 +119,28 @@ the new-game default `drawCount` comes from settings. The saved-game loader
 returns `null` on schema mismatch _and_ on a fully-foundation-stacked state
 (belt-and-braces — the autosave clears on win, but defend anyway).
 
+### Stored and imported data is untrusted
+
+Anything read back from IndexedDB or from an imported backup file is validated
+and rebuilt field-by-field before it reaches a store: `parseSavedGame`
+(`persistence/gameAutosave.ts`, requires exactly one full deck),
+`sanitizeGameRecord` (`store/statsStore.ts`, used by both hydration and
+`parseImport`), and `sanitizeSettings` (`store/settingsStore.ts`). Invalid
+input falls back to defaults / is dropped rather than thrown. On GitHub Pages
+the origin is shared with other projects, so these blobs can be written by
+code that isn't ours — and a bad one is reloaded on every boot. When you add a
+persisted field, add it to the matching sanitizer or it will be silently
+discarded on load.
+
+### Content-Security-Policy
+
+`vite.config.ts` injects a strict CSP `<meta>` into the production
+`index.html` only (the dev server needs inline scripts). Everything must be
+same-origin: no inline `<script>`, no remote scripts/fonts/images, no network
+calls. If a new dependency needs more, widen the specific directive there
+rather than dropping the policy, and re-check the built app's console for
+violations.
+
 ### Winnable-only deals run off the main thread
 
 When the `requireWinnable` setting is on, `handleNewGame` in `Board.tsx` calls
