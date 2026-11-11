@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- allowBackup is off: the privacy policy promises game data never leaves
+         the device and is gone on uninstall, which Android Auto Backup (cloud
+         copy + restore on reinstall) and `adb backup` would both contradict.
+         Players move their stats with the in-app export / import instead. -->
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
