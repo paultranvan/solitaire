@@ -17,8 +17,8 @@
     "assets:generate": "node scripts/build-icons.mjs"
   },
   "dependencies": {
-    "@capacitor/android": "^8.3.1",
-    "@capacitor/core": "^8.3.1",
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.2",
@@ -32,11 +32,11 @@
     "zustand": "^5.0.2"
   },
   "overrides": {
-    "tar": "^7.5.15"
+    "tar": "^7.5.21"
   },
   "devDependencies": {
-    "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^8.3.1",
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.0",
     "@resvg/resvg-js": "^2.6.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
@@ -54,7 +54,7 @@
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.2",
-    "vite": "^7.3.2",
-    "vitest": "^3.2.4"
+    "vite": "^7.3.8",
+    "vitest": "^5.1.0"
   }
 }
