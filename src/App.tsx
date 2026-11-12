@@ -4,7 +4,9 @@ import { initNativeLifecycle } from '@/native/lifecycle';
 import { loadSavedGame } from '@/persistence/gameAutosave';
 import { hydrateSettingsFromStorage, useSettingsStore } from '@/store/settingsStore';
 import { hydrateStatsFromStorage } from '@/store/statsStore';
+import { SUITS } from '@/game/card';
 import { Board } from '@/ui/Board';
+import { Suit } from '@/ui/Suit';
 import './ui/theme.css';
 
 export default function App() {
@@ -42,20 +44,13 @@ export default function App() {
   }, [language]);
 
   if (!initial) {
+    // Boot screen: the four suits pulsing on the felt while stores hydrate.
+    // Usually on screen for a frame or two, so it carries no text to localize.
     return (
-      <div
-        style={{
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'rgba(255,255,255,0.6)',
-          background: 'var(--felt-dark)',
-          fontFamily: 'system-ui',
-          fontSize: 14,
-        }}
-      >
-        Loading…
+      <div className="app-loading" role="status" aria-label="Loading">
+        {SUITS.map((suit) => (
+          <Suit key={suit} suit={suit} className="app-loading__suit" />
+        ))}
       </div>
     );
   }

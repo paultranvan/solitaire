@@ -18,7 +18,10 @@ const EMPTY_FOUNDATION_SUIT: Record<number, SuitT> = {
 };
 
 function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: HintState }) {
-  const { setNodeRef, isOver } = useDroppable({ id: foundationDropId(idx) });
+  const { setNodeRef, isOver, active } = useDroppable({ id: foundationDropId(idx) });
+  // No drop ring on the pile a card was just lifted from — the pointer starts
+  // over it, so it would light up on every pick-up.
+  const isDropTarget = isOver && active?.id !== foundationDragId(idx);
   const top = pile[pile.length - 1];
   const behind = pile[pile.length - 2];
   const hinted =
@@ -28,7 +31,7 @@ function FoundationSlot({ pile, idx, hint }: { pile: Card[]; idx: number; hint: 
   return (
     <div
       ref={setNodeRef}
-      className={`foundations__slot${isOver ? ' is-drop-over' : ''}${hinted ? ' is-hint-pulse' : ''}`}
+      className={`foundations__slot${isDropTarget ? ' is-drop-over' : ''}${hinted ? ' is-hint-pulse' : ''}`}
     >
       {behind && (
         <div className="card-behind" aria-hidden="true">

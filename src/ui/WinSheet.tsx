@@ -1,11 +1,14 @@
 import { motion } from 'motion/react';
 import { useT } from '@/i18n/useT';
 import type { Ranking } from '@/store/records';
+import { Crown } from './Crown';
 import { Sheet } from './Sheet';
 import { formatMMSS } from './format';
 import './WinSheet.css';
 
-const COLORS = ['#f97316', '#facc15', '#4ade80', '#22d3ee', '#a78bfa', '#f472b6', '#ef4444'];
+// Confetti in the table's own colours: golds and parchment, with the card
+// red, a felt green and the navy of the default card back as accents.
+const COLORS = ['#f0d08c', '#d8b66f', '#f3ecd9', '#e2574c', '#62c184', '#7fa3ea', '#f0d08c'];
 const PIECES = 60;
 
 // "1st", "2nd", "3rd", "21st", "26th"… English only; French uses "{n}e".
@@ -88,9 +91,11 @@ export function WinSheet({
       {open && showConfetti && <Confetti />}
       <Sheet open={open} onClose={onClose} title={t('win.title')}>
         <div className="win">
-          <div className="win__hero">🎉</div>
-          <h2 className="win__title">{t('win.heading')}</h2>
-          <p className="win__subtitle">{t('win.subtitle')}</p>
+          <div className="sheet-hero" aria-hidden="true">
+            <Crown className="win__crown" />
+          </div>
+          <h2 className="sheet-headline">{t('win.heading')}</h2>
+          <p className="sheet-sub">{t('win.subtitle')}</p>
 
           <div className="win__score">
             <div className="win__score-value">{formatNumber(score)}</div>
@@ -115,17 +120,13 @@ export function WinSheet({
           )}
 
           <div className="win__stats win__stats--pair">
-            <div
-              className={`win__stat${ranking && ranking.timeMedal ? ' win__stat--medal' : ''}`}
-            >
+            <div className={`win__stat${ranking && ranking.timeMedal ? ' win__stat--medal' : ''}`}>
               <div className="win__stat-value">{formatMMSS(durationSec)}</div>
               <div className="win__stat-label">
                 {medalLabel('Time', ranking?.timeMedal ?? 0) ?? t('win.time')}
               </div>
             </div>
-            <div
-              className={`win__stat${ranking && ranking.movesMedal ? ' win__stat--medal' : ''}`}
-            >
+            <div className={`win__stat${ranking && ranking.movesMedal ? ' win__stat--medal' : ''}`}>
               <div className="win__stat-value">{formatNumber(moves)}</div>
               <div className="win__stat-label">
                 {medalLabel('Moves', ranking?.movesMedal ?? 0) ?? t('win.moves')}

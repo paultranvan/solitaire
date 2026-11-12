@@ -146,6 +146,64 @@
   }
 }
 
+/* ---- Shared opening for the short, centred sheets (win, auto-complete):
+   a gold-rimmed medallion holding an emblem, a display-serif headline and a
+   quiet line of supporting text. ---- */
+
+.sheet-hero {
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(
+    circle at 50% 32%,
+    rgba(240, 208, 140, 0.3) 0%,
+    rgba(240, 208, 140, 0.07) 68%
+  );
+  border: 1px solid rgba(216, 182, 111, 0.45);
+  box-shadow:
+    0 0 0 7px rgba(216, 182, 111, 0.07),
+    0 0 44px rgba(240, 200, 110, 0.22);
+  animation: sheet-hero-pop 520ms cubic-bezier(0.34, 1.45, 0.64, 1) 120ms both;
+}
+
+.board[data-animations='off'] .sheet-hero {
+  animation: none;
+}
+
+@keyframes sheet-hero-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-hero {
+    animation: none;
+  }
+}
+
+.sheet-headline {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(26px, 5vw, 32px);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.sheet-sub {
+  margin: 0 0 24px;
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--ink-quiet);
+}
+
 .sheet__body::-webkit-scrollbar {
   width: 8px;
 }

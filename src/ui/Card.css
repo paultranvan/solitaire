@@ -45,38 +45,90 @@
   border: 1px solid var(--card-border);
 }
 
-/* Structural rules shared by every back design. The chosen design's
-   background comes from a .card--back--<id> variant class applied
+/* Structural rules shared by every back design: a cream paper margin around
+   the printed pattern, with a hairline where the print starts. The chosen
+   design's background comes from a .card--back--<id> variant class applied
    alongside this one (see Card.tsx). */
 .card--back {
-  border: 1.5px solid #fff;
+  border: max(1.5px, calc(var(--card-w) * 0.045)) solid #fbf8ee;
   box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.4),
-    0 1px 3px rgba(0, 0, 0, 0.35);
+    inset 0 0 0 1px rgba(0, 0, 0, 0.32),
+    0 0 0 0.5px rgba(46, 36, 14, 0.5),
+    0 1px 1.5px rgba(0, 0, 0, 0.3),
+    0 3px 7px rgba(0, 0, 0, 0.26);
 }
 
-/* Design variants — background only. Defined after .card so they win the
-   cascade over .card's --card-bg fill. */
+/* Design variants — background only (they're also used bare, on the menu's
+   swatches and on the crossfade overlay). Defined after .card so they win
+   the cascade over .card's --card-bg fill. Every design is, top to bottom:
+   the shared emblem, its own repeating lattice, a soft sheen, a base tint.
+   --back-step is the lattice pitch, scaled with the card. */
+.card--back--navy,
+.card--back--crimson,
+.card--back--emerald {
+  --back-step: max(5px, calc(var(--card-w) * 0.095));
+  /* Emblem, stretched over the whole back: an inner frame line and a centre
+     lozenge holding a spade. Drawn in cream / translucent black only, so the
+     one image sits on any base colour. */
+  --back-emblem: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140' preserveAspectRatio='none'%3E%3Crect x='5.5' y='5.5' width='89' height='129' rx='5' fill='none' stroke='%23fff' stroke-opacity='.5' stroke-width='1.3'/%3E%3Cpath d='M50 33 L75 70 L50 107 L25 70 Z' fill='%23000' fill-opacity='.3' stroke='%23fff' stroke-opacity='.8' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath transform='translate(38 57.5) scale(.24)' fill='%23fff' fill-opacity='.92' d='M50 6 C50 6 12 36 12 60 C12 74 22 83 33 83 C40 83 46 80 50 75 C49 84 45 92 38 95 L62 95 C55 92 51 84 50 75 C54 80 60 83 67 83 C78 83 88 74 88 60 C88 36 50 6 50 6 Z'/%3E%3C/svg%3E");
+}
+
+/* Navy — fine diamond lattice. */
 .card--back--navy {
   background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.18), transparent 50%),
-    repeating-linear-gradient(45deg, var(--card-back) 0 4px, #2d4ea8 4px 8px);
+    var(--back-emblem) center / 100% 100% no-repeat,
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.15) 0 1.2px,
+      transparent 1.2px var(--back-step)
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.15) 0 1.2px,
+      transparent 1.2px var(--back-step)
+    ),
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.22), transparent 62%),
+    linear-gradient(165deg, #2c50ad 0%, var(--card-back) 55%, #182d6b 100%);
 }
 
+/* Crimson — taller harlequin diamonds. */
 .card--back--crimson {
   background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.16), transparent 55%),
-    repeating-linear-gradient(45deg, transparent 0 10px, rgba(0, 0, 0, 0.22) 10px 12px),
-    repeating-linear-gradient(-45deg, transparent 0 10px, rgba(0, 0, 0, 0.22) 10px 12px),
-    linear-gradient(#9c2727, #7d1a1a);
+    var(--back-emblem) center / 100% 100% no-repeat,
+    repeating-linear-gradient(
+      60deg,
+      rgba(255, 226, 190, 0.17) 0 1.2px,
+      transparent 1.2px var(--back-step)
+    ),
+    repeating-linear-gradient(
+      -60deg,
+      rgba(255, 226, 190, 0.17) 0 1.2px,
+      transparent 1.2px var(--back-step)
+    ),
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.18), transparent 62%),
+    linear-gradient(165deg, #ad2f2f 0%, #8c1f1f 55%, #6b1515 100%);
 }
 
+/* Emerald — two offset dot grids (light and dark) for a quincunx weave. */
 .card--back--emerald {
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.16), transparent 55%),
-    radial-gradient(rgba(255, 255, 255, 0.28) 1.6px, transparent 2px),
-    linear-gradient(#15663a, #0e4a2a);
-  background-size: auto, 12px 12px, auto;
+  background-image:
+    var(--back-emblem), radial-gradient(circle, rgba(255, 255, 255, 0.34) 0 15%, transparent 19%),
+    radial-gradient(circle, rgba(0, 0, 0, 0.24) 0 15%, transparent 19%),
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.18), transparent 62%),
+    linear-gradient(165deg, #1a7a45 0%, #125a33 55%, #0c4326 100%);
+  background-size:
+    100% 100%,
+    var(--back-step) var(--back-step),
+    var(--back-step) var(--back-step),
+    auto,
+    auto;
+  background-position:
+    center,
+    0 0,
+    calc(var(--back-step) / 2) calc(var(--back-step) / 2),
+    0 0,
+    0 0;
+  background-repeat: no-repeat, repeat, repeat, no-repeat, no-repeat;
 }
 
 /* Crossfade overlay: the outgoing design, painted on top of the new back
@@ -106,8 +158,9 @@
   color: var(--card-black);
 }
 
-/* Single-row header: rank top-left, suit top-right. Sits high inside the
-   ~26%-of-card-h fan strip so both indices read clearly on stacked cards. */
+/* Single-row header: rank top-left, suit top-right. Sits high on the card so
+   both indices read clearly in the strip a stacked card leaves showing —
+   down to the 0.30·card-h of a squeezed column (--fan-faceup-min). */
 .card__corner {
   position: absolute;
   top: calc(var(--card-w) * 0.03);
@@ -128,7 +181,13 @@
      the platform supplies (Android's Noto Serif renders bold J/Q with large
      descenders, making face cards read as larger than number cards). */
   font-family: 'Tinos', 'Times New Roman', Times, serif;
-  font-size: calc(var(--card-w) * 0.52);
+  /* 0.52·card-w on phone-sized cards, where legibility needs every pixel,
+     easing to ~0.45 on large desktop cards, which have size to spare. The
+     negative margin lifts the glyphs into the blank top of their line box
+     (Tinos digits start 0.16em below it), so the baseline lands at ≤0.30 of
+     the card height and stays clear of the next card in a squeezed fan. */
+  font-size: min(calc(var(--card-w) * 0.52), calc(var(--card-w) * 0.4 + 6px));
+  margin-top: calc(var(--card-w) * -0.04);
   font-weight: 700;
   letter-spacing: -0.06em;
   font-variant-numeric: tabular-nums;
@@ -159,25 +218,29 @@
   pointer-events: none;
 }
 
-/* Empty pile slot */
+/* Empty pile slot — a shallow well pressed into the felt: darker than the
+   cloth, shadowed along its top edge, with a faint lit rim. */
 .pile-empty {
   width: var(--card-w);
   height: var(--card-h);
   border-radius: var(--card-radius);
   background: var(--pile-empty);
-  border: 1px dashed var(--pile-empty-border);
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.32),
+    inset 0 0 0 1px var(--pile-empty-border),
+    0 1px 0 rgba(255, 255, 255, 0.05);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.2);
 }
 
-/* Decorative SVG suit hint for empty foundation slots — matches the size of
-   the unicode glyph it replaced. */
+/* Decorative SVG mark inside an empty slot: the suit on a foundation, the
+   recycle arrow on the spent stock. */
 .pile-empty__hint {
-  width: calc(var(--card-w) * 0.38);
-  height: calc(var(--card-w) * 0.38);
+  width: calc(var(--card-w) * 0.42);
+  height: calc(var(--card-w) * 0.42);
 }
 
 /* Placeholder shown while a draggable card is lifted: occupies the card's

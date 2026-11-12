@@ -1,26 +1,33 @@
 .board {
   min-height: 100%;
-  background: radial-gradient(
-    ellipse at top,
-    var(--felt-light) 0%,
-    var(--felt-dark) 70%,
-    var(--felt-edge) 100%
-  );
-  padding-bottom: calc(24px + var(--safe-bottom));
+  /* Felt: grain tile soft-light blended over a lamp-lit gradient — brightest
+     above the tableau, darkening to the rail at the edges. */
+  background:
+    var(--felt-grain),
+    radial-gradient(
+      ellipse 85% 78% at 50% 30%,
+      var(--felt-light) 0%,
+      var(--felt-mid) 36%,
+      var(--felt-dark) 74%,
+      var(--felt-edge) 100%
+    );
+  background-blend-mode: soft-light, normal;
+  padding-bottom: var(--board-pad-bottom);
 }
 
 /* The card area caps at a sane width so wide screens don't sprawl. */
 .board__main {
-  max-width: calc(7 * var(--card-w) + 6 * var(--gap-col) + 24px);
+  max-width: var(--board-w);
   margin: 0 auto;
-  padding: 0 calc(12px + var(--safe-right)) 0 calc(12px + var(--safe-left));
+  padding: 0 calc(var(--board-gutter) + var(--safe-right)) 0
+    calc(var(--board-gutter) + var(--safe-left));
 }
 
 .board__top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding-top: 16px;
+  padding-top: var(--board-pad-top);
   gap: var(--gap-col);
 }
 
@@ -50,7 +57,8 @@
 .board[data-animations='off'] .is-hint-pulse,
 .board[data-animations='off'] .tableau-col.is-hinted .pile-empty,
 .board[data-animations='off'] .tableau-col.is-hinted .tableau-col__slot:last-child,
-.board[data-animations='off'] .tableau-col__slot.is-hinted {
+.board[data-animations='off'] .tableau-col__slot.is-hinted,
+.board[data-animations='off'] .drag-stack {
   animation: none;
 }
 
@@ -61,7 +69,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(2, 8, 4, 0.45);
   z-index: 50;
   animation: board-shuffling-fade 160ms ease-out both;
 }
@@ -71,20 +79,22 @@
   align-items: center;
   gap: 12px;
   padding: 14px 22px;
-  border-radius: 14px;
-  background: rgba(20, 22, 28, 0.92);
-  color: #fff;
-  font-size: 15px;
+  border-radius: 999px;
+  background: var(--menu-surface);
+  border: 1px solid var(--rule-strong);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 16px;
   letter-spacing: 0.01em;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 .board__shuffling-spinner {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  border-top-color: #fff;
+  border: 2px solid var(--gold-soft);
+  border-top-color: var(--gold);
   animation: board-shuffling-spin 0.9s linear infinite;
 }
 

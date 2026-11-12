@@ -35,15 +35,20 @@ export function StockTalon({
   // --talon-fan-i is the card's slot from the left (0 = oldest visible);
   // --talon-fan-free is how many of the 3 slots are unused, which the CSS uses
   // to keep a short fan against the stock whichever side the stock is on.
-  const fanStyle = (i: number) =>
+  // `count` is how many cards the fan holds — overridden for the empty-waste
+  // placeholder, which stands in for a single card.
+  const fanStyle = (i: number, count = fanned.length) =>
     ({
       '--talon-fan-i': i,
-      '--talon-fan-free': TALON_FAN_SIZE - fanned.length,
+      '--talon-fan-free': TALON_FAN_SIZE - count,
     }) as CSSProperties;
   const talonHinted =
     isHintSource(hint, { kind: 'talon' }) || isHintTarget(hint, { kind: 'talon' });
   const stockHinted =
     isHintSource(hint, { kind: 'stock' }) || isHintTarget(hint, { kind: 'stock' });
+  // How thick the face-down pile looks: 0 = a single card (or none), up to 2
+  // extra card edges peeking out under the top one. Purely decorative.
+  const stockDepth = stock.length > 12 ? 2 : stock.length > 1 ? 1 : 0;
 
   return (
     <div className="stock-talon">
@@ -52,11 +57,26 @@ export function StockTalon({
         className={`stock-talon__slot stock${stockHinted ? ' is-hint-pulse' : ''}`}
         onClick={onStockClick}
         aria-label={stock.length > 0 ? t('stock.draw') : t('stock.recycle')}
+        data-depth={stockDepth}
       >
         {stock.length > 0 ? (
           <CardView card={{ ...stock[stock.length - 1], faceUp: false }} />
         ) : (
-          <div className="pile-empty">↻</div>
+          <div className={`pile-empty${talon.length === 0 ? ' is-spent' : ''}`}>
+            <svg
+              className="pile-empty__hint"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.8}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 12a8 8 0 1 1-2.6-5.9" />
+              <path d="M20 4v5h-5" />
+            </svg>
+          </div>
         )}
       </button>
       <div className="stock-talon__slot talon" onClick={onTalonAutoMove}>
@@ -85,7 +105,11 @@ export function StockTalon({
             />
           </div>
         ) : (
-          <div className="pile-empty" />
+          // Empty waste: the well sits where the first drawn card will land —
+          // against the stock — not at the far end of the 3-card-wide slot.
+          <div className="talon-fan__card" style={fanStyle(0, 1)}>
+            <div className="pile-empty" />
+          </div>
         )}
       </div>
     </div>

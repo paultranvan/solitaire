@@ -381,24 +381,31 @@
   gap: 8px;
 }
 
-.swatch {
-  width: 34px;
-  height: 48px;
+/* Miniature card backs. .swatches .swatch outranks the .card--back--<id>
+   variant rule, so the lattice pitch can be scaled down to the swatch. */
+.swatches .swatch {
+  --back-step: 4.5px;
+  width: 38px;
+  height: 53px;
   padding: 0;
   border-radius: 5px;
-  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  border: 2px solid #fbf8ee;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-  transition: transform 0.12s;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
 }
 
-.swatch:hover {
-  transform: translateY(-1px);
+.swatches .swatch:hover {
+  transform: translateY(-2px);
 }
 
-.swatch.is-active {
+.swatches .swatch.is-active {
   outline: 2px solid var(--gold);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 /* ---- Backup (export / import) ---- */

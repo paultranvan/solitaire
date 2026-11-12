@@ -16,50 +16,97 @@
 }
 
 :root {
-  /* Surface */
-  --felt-light: #1d5e2e;
+  /* Surface — a lit card table: bright under the lamp, falling off to a
+     dark rail. --felt-dark is also the page / splash / status-bar colour
+     (index.html, manifest, capacitor.config), so keep it in sync there. */
+  --felt-light: #25793e;
+  --felt-mid: #185a2c;
   --felt-dark: #0f3818;
-  --felt-edge: #08280f;
+  --felt-edge: #071f0d;
+  /* Woven-felt grain: a tiny tile of grey fractal noise, soft-light blended
+     over the felt gradient (see .board). Inline SVG so it stays same-origin
+     for the CSP (img-src allows data:). */
+  --felt-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1.5 0 0 0 -0.25 1.5 0 0 0 -0.25 1.5 0 0 0 -0.25 0 0 0 0 0.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* Viewport height that tracks mobile browser chrome where supported. */
+  --vh100: 100vh;
+
+  /* Safe-area insets fall back to 0 */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* Top bar
+     A dark rail above the felt. --topbar-h is the band's border-box
+     height on web; on native, lifecycle.ts raises --safe-top and
+     --topbar-pad-bottom so the padding alone exceeds it and the band grows
+     (--topbar-total mirrors that min-height rule so the layout maths below
+     knows the real height). */
+  --topbar-h: 56px;
+  --topbar-pad-bottom: 10px;
+  --topbar-total: max(var(--topbar-h), calc(max(var(--safe-top), 8px) + var(--topbar-pad-bottom)));
+  --topbar-bg: linear-gradient(180deg, rgba(4, 20, 9, 0.94) 0%, rgba(6, 28, 13, 0.84) 100%);
+  --topbar-fg: rgba(255, 255, 255, 0.95);
+
+  /* Layout
+     Tableau row = 7·card-w + 6·gap-col = (7 + 6·gap-ratio)·card-w. The card
+     is sized by whichever axis is tighter:
+       · width  — the row must fit between the two gutters (the extra 4 px is
+         a sub-pixel rounding budget; safe-area insets stay accounted for so
+         notched screens don't push the last column off-canvas);
+       · height — on wide/short viewports (desktop, landscape) the top row
+         (1 card-h), the gap under it (0.2) and a 4.6-card-tall tableau must
+         fit under the top bar: 5.8·card-h = 8.12·card-w. 4.6 is a full
+         king-to-ace run at the tightest fan (12 × 0.30 + 1), so play never
+         needs page scrolling. Floored at 60 px so a very short window keeps
+         readable cards and scrolls instead.
+     Long columns are then squeezed to fit by TableauColumn.css. */
+  --gap-ratio: 0.18;
+  --board-gutter: 12px;
+  --board-pad-top: 16px;
+  --board-pad-bottom: calc(20px + var(--safe-bottom));
+  --card-w-by-width: calc(
+    (100vw - 2 * var(--board-gutter) - 4px - var(--safe-left) - var(--safe-right)) /
+      (7 + 6 * var(--gap-ratio))
+  );
+  --card-w-by-height: calc(
+    (var(--vh100) - var(--topbar-total) - var(--board-pad-top) - var(--board-pad-bottom)) / 8.12
+  );
+  --card-w: clamp(38px, min(var(--card-w-by-width), max(var(--card-w-by-height), 60px)), 128px);
+  --card-h: calc(var(--card-w) * 1.4);
+  --gap-col: calc(var(--card-w) * var(--gap-ratio));
+  --board-w: calc(7 * var(--card-w) + 6 * var(--gap-col) + 2 * var(--board-gutter));
+  --tableau-gap-top: max(18px, calc(var(--card-h) * 0.2));
+
+  /* Fan steps for stacked tableau cards. The defaults are what a column uses
+     when it has room; the -min values are how far TableauColumn.css may
+     squeeze a long column (0.30·card-h still clears the rank and corner
+     suit — see .card__rank). --tableau-avail is the height a column can
+     take without making the page scroll. */
+  --fan-faceup: calc(var(--card-h) * 0.48);
+  --fan-facedown: calc(var(--card-h) * 0.22);
+  --fan-faceup-min: calc(var(--card-h) * 0.3);
+  --fan-facedown-min: calc(var(--card-h) * 0.08);
+  --tableau-avail: calc(
+    var(--vh100) - var(--topbar-total) - var(--board-pad-top) - var(--card-h) -
+      var(--tableau-gap-top) - var(--board-pad-bottom)
+  );
 
   /* Card */
-  --card-radius: 6px;
-  --card-bg: #fdfcf7;
-  --card-border: rgba(0, 0, 0, 0.28);
+  --card-radius: clamp(4px, calc(var(--card-w) * 0.085), 11px);
+  --card-bg: linear-gradient(176deg, #ffffff 0%, #fcfaf3 52%, #f3eee0 100%);
+  --card-border: rgba(46, 36, 14, 0.34);
   --card-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 2px 5px rgba(0, 0, 0, 0.45),
-    0 0 0 0.5px rgba(0, 0, 0, 0.28);
-  --card-red: #c0392b;
-  --card-black: #1a1a1a;
+    0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 1px 1.5px rgba(0, 0, 0, 0.3),
+    0 3px 7px rgba(0, 0, 0, 0.26);
+  --card-red: #c4272d;
+  --card-black: #17181c;
   --card-back: #1f3a85;
 
   /* Pile */
-  --pile-empty: rgba(0, 0, 0, 0.18);
-  --pile-empty-border: rgba(255, 255, 255, 0.18);
-
-  /* Layout
-     Tableau row = 7·card-w + 6·gap-col, where gap-col = 0.18·card-w → 8.08·card-w.
-     The 28 px reserve covers the board__main 12 px gutter on each side plus
-     a 4 px sub-pixel rounding budget. Safe-area insets stay accounted for so
-     notched/curved screens don't push the rightmost column off-canvas. */
-  --card-w: clamp(38px, calc((100vw - 28px - var(--safe-left) - var(--safe-right)) / 8.08), 120px);
-  --card-h: calc(var(--card-w) * 1.4);
-  --fan-faceup: calc(var(--card-h) * 0.48);
-  --fan-facedown: calc(var(--card-h) * 0.22);
-  --gap-col: calc(var(--card-w) * 0.18);
-
-  /* Top bar
-     Strong, mostly-opaque dark felt — needs to read as a defined band so
-     the buttons clearly sit on a darker ground than the playing felt
-     below. A translucent overlay over the bright top of the radial felt
-     gradient is too subtle.
-     --topbar-pad-bottom defaults to a tight 10px on web (the band reads
-     as a clean strip around the buttons). lifecycle.ts bumps this to
-     22px on native, where the safe-area-top of ~56px sits above the
-     buttons and we need similar breathing room below to balance it. */
-  --topbar-h: clamp(52px, 4.5vh, 64px);
-  --topbar-bg: rgba(6, 26, 12, 0.92);
-  --topbar-fg: rgba(255, 255, 255, 0.95);
-  --topbar-pad-bottom: 10px;
+  --pile-empty: linear-gradient(180deg, rgba(0, 0, 0, 0.26) 0%, rgba(0, 0, 0, 0.13) 100%);
+  --pile-empty-border: rgba(255, 255, 255, 0.09);
 
   /* Menu surface — parchment & aged gold on dark felt */
   --ink: #f3ecd9;
@@ -67,6 +114,7 @@
   --ink-quiet: rgba(243, 236, 217, 0.52);
   --ink-faint: rgba(243, 236, 217, 0.28);
   --gold: #d8b66f;
+  --gold-bright: #f0d08c;
   --gold-soft: rgba(216, 182, 111, 0.18);
   --rule: rgba(243, 236, 217, 0.08);
   --rule-strong: rgba(243, 236, 217, 0.16);
@@ -76,12 +124,30 @@
   --font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
   --font-display: 'Cochin', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   --font-sans: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', Roboto, sans-serif;
+}
 
-  /* Safe-area insets fall back to 0 */
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
+@supports (height: 100dvh) {
+  :root {
+    --vh100: 100dvh;
+  }
+}
+
+/* Phones: every pixel of card width counts, so tighten the gaps between
+   columns and the side gutters. The top row still fits: stock (1) + waste
+   (1.92) + foundations (4 + 3·0.12) + 2 gaps (0.24) = 7.52 of 7.72·card-w. */
+@media (max-width: 600px) {
+  :root {
+    --gap-ratio: 0.12;
+    --board-gutter: 8px;
+    --board-pad-top: 14px;
+  }
+}
+
+@media (min-width: 720px) {
+  :root {
+    --topbar-h: 64px;
+    --board-pad-top: 20px;
+  }
 }
 
 html,
@@ -91,11 +157,74 @@ body,
   color: white;
 }
 
+/* The page itself only scrolls in the rare case a column outgrows even its
+   squeezed fan (or the window is very short). Keep that possible, but hide
+   the page scrollbar: a classic one popping in would narrow the viewport by
+   ~15px and shift the whole centred board sideways mid-game. */
+html {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
   user-select: none;
+}
+
+/* ============================================================
+   Boot screen — shown for a beat while stores hydrate
+   ============================================================ */
+
+.app-loading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background:
+    var(--felt-grain),
+    radial-gradient(ellipse 90% 70% at 50% 40%, var(--felt-mid) 0%, var(--felt-dark) 70%);
+  background-blend-mode: soft-light, normal;
+  color: rgba(243, 236, 217, 0.5);
+}
+
+.app-loading__suit {
+  width: 22px;
+  height: 22px;
+  animation: app-loading-pulse 1.2s ease-in-out infinite;
+}
+
+.app-loading__suit:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.app-loading__suit:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.app-loading__suit:nth-child(4) {
+  animation-delay: 0.45s;
+}
+
+@keyframes app-loading-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-loading__suit {
+    animation: none;
+  }
 }
 
 /* ============================================================
@@ -109,10 +238,16 @@ body {
 @keyframes hint-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 4px rgba(255, 220, 100, 0.55);
+    box-shadow:
+      0 0 0 2px rgba(240, 208, 140, 0.95),
+      0 0 0 5px rgba(240, 208, 140, 0.22),
+      0 0 14px 4px rgba(240, 200, 110, 0.35);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(255, 220, 100, 0.95);
+    box-shadow:
+      0 0 0 3px rgba(255, 226, 150, 1),
+      0 0 0 9px rgba(240, 208, 140, 0.3),
+      0 0 26px 10px rgba(240, 200, 110, 0.6);
   }
 }
 
@@ -121,14 +256,16 @@ body {
   animation: hint-pulse 1.1s ease-in-out infinite;
 }
 
-/* Outline ring shown on drop-target piles while a card hovers over them. */
+/* Gold ring shown on a foundation pile while a card hovers over it. (Tableau
+   columns ring their landing card instead — see TableauColumn.css.) */
 .is-drop-over::before {
   content: '';
   position: absolute;
-  inset: -4px;
-  border-radius: calc(var(--card-radius) + 4px);
-  outline: 2px solid rgba(255, 255, 255, 0.55);
-  outline-offset: var(--drop-over-offset, 0);
+  inset: 0;
+  border-radius: var(--card-radius);
+  box-shadow:
+    0 0 0 2.5px rgba(240, 208, 140, 0.95),
+    0 0 20px 4px rgba(240, 200, 110, 0.45);
   pointer-events: none;
 }
 
@@ -141,7 +278,7 @@ body {
   color: var(--ink);
   border: 1px solid transparent;
   padding: 10px 18px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   font-family: var(--font-sans);
   font-size: 13px;
@@ -150,11 +287,25 @@ body {
   transition:
     background 0.15s,
     border-color 0.15s,
-    color 0.15s;
+    color 0.15s,
+    transform 0.15s;
 }
 
 .btn:hover {
   background: rgba(243, 236, 217, 0.14);
+}
+
+.btn:active {
+  transform: scale(0.985);
+}
+
+.btn:focus-visible,
+.topbar__btn:focus-visible,
+.m-game-action:focus-visible,
+.seg__btn:focus-visible,
+.sheet__close:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .btn--ghost {
@@ -169,16 +320,23 @@ body {
   background: rgba(243, 236, 217, 0.04);
 }
 
+/* The one call-to-action per sheet: a solid aged-gold plate. */
 .btn--primary {
-  background: #4ade80;
-  color: #052e10;
-  font-weight: 700;
-  font-size: 15px;
-  padding: 12px 18px;
+  background: linear-gradient(180deg, #ecd197 0%, #cfa95c 100%);
+  color: #22190a;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  padding: 13px 18px;
+  border-color: rgba(255, 240, 200, 0.35);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.45) inset,
+    0 6px 18px rgba(0, 0, 0, 0.3);
 }
 
 .btn--primary:hover {
-  background: #3acb6d;
+  background: linear-gradient(180deg, #f3dba6 0%, #d8b266 100%);
 }
 
 .btn--danger {
