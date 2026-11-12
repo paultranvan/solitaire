@@ -2,6 +2,8 @@ import { useRef, useState } from 'react';
 import { useStatsStore } from '@/store/statsStore';
 import { useSettingsStore, Settings, CARD_BACKS } from '@/store/settingsStore';
 import { useT } from '@/i18n/useT';
+import { LEADERBOARD_URL } from '@/leaderboard/config';
+import { NAME_MAX_LENGTH, normalizeName } from '@/leaderboard/name';
 import {
   MAX_IMPORT_BYTES,
   parseImport,
@@ -226,6 +228,46 @@ function Toggle({
   );
 }
 
+// Display name used on the shared leaderboard. The draft is committed on blur
+// or Enter if it is acceptable; otherwise the field snaps back to the saved
+// name rather than storing something the server would refuse.
+function PlayerNameRow({ saved, onSave }: { saved: string; onSave: (name: string) => void }) {
+  const { t } = useT();
+  const [draft, setDraft] = useState(saved);
+  const normalized = normalizeName(draft);
+  const invalid = draft !== '' && normalized === null;
+
+  const commit = () => {
+    if (normalized === null) setDraft(saved);
+    else {
+      setDraft(normalized);
+      if (normalized !== saved) onSave(normalized);
+    }
+  };
+
+  return (
+    <label className="m-row m-row--field">
+      <span>{t('settings.playerName')}</span>
+      <input
+        className="text-input"
+        type="text"
+        value={draft}
+        maxLength={NAME_MAX_LENGTH * 2}
+        aria-invalid={invalid}
+        title={invalid ? t('world.nameInvalid') : undefined}
+        autoComplete="off"
+        autoCapitalize="words"
+        spellCheck={false}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') e.currentTarget.blur();
+        }}
+      />
+    </label>
+  );
+}
+
 function SettingsSection() {
   const settings = useSettingsStore((s) => s.settings);
   const update = useSettingsStore((s) => s.update);
@@ -343,6 +385,28 @@ function SettingsSection() {
         value={settings.requireWinnable}
         onChange={(v) => set({ requireWinnable: v })}
       />
+      {LEADERBOARD_URL !== null && (
+        <>
+          <Toggle
+            label={t('settings.leaderboard')}
+            value={settings.leaderboard !== 'off'}
+            // Turning it on without a name goes back to 'ask', so the publish
+            // prompt (with its notice) is what collects the name.
+            onChange={(v) =>
+              set({ leaderboard: !v ? 'off' : settings.playerName !== '' ? 'on' : 'ask' })
+            }
+          />
+          {settings.leaderboard !== 'off' && (
+            <PlayerNameRow
+              // Remount when the saved name changes elsewhere (publish prompt)
+              // so the field never shows a stale draft.
+              key={settings.playerName}
+              saved={settings.playerName}
+              onSave={(playerName) => set({ playerName })}
+            />
+          )}
+        </>
+      )}
     </section>
   );
 }

@@ -348,3 +348,32 @@ body {
 .btn--danger:hover {
   background: #a13333;
 }
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ============================================================
+   Text input — shared across sheets
+   ============================================================ */
+
+.text-input {
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: var(--font-sans);
+  /* 16px keeps iOS Safari from zooming the page when the field is focused. */
+  font-size: 16px;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.text-input[aria-invalid='true'] {
+  border-color: #f87171;
+}

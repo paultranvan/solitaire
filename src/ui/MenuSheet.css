@@ -219,6 +219,14 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 
+/* A settings row whose control is a text field: let the field take the slack. */
+.m-row--field .text-input {
+  flex: 1;
+  min-width: 0;
+  max-width: 220px;
+  text-align: right;
+}
+
 .m-row__hint {
   display: inline-block;
   margin-left: 10px;

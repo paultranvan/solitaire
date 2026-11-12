@@ -1,0 +1,73 @@
+.world {
+  margin: -4px 0 18px;
+  font-size: 13px;
+}
+
+.world--status {
+  color: rgba(255, 255, 255, 0.78);
+  font-variant-numeric: tabular-nums;
+}
+
+.world--ranked {
+  color: #fde68a;
+  font-weight: 600;
+}
+
+.world--sending,
+.world--queued,
+.world--rejected {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.world--prompt {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--rule-strong);
+  background: rgba(255, 255, 255, 0.04);
+  text-align: left;
+}
+
+.world__title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.world__name-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.world__name-row .text-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.world__reroll {
+  flex: none;
+  padding-inline: 12px;
+}
+
+.world__hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-quiet);
+}
+
+.world__hint--err {
+  color: #fca5a5;
+}
+
+.world__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.world__actions .btn {
+  flex: 1;
+}

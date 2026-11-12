@@ -5,6 +5,7 @@ type Envelope<T> = { schemaVersion: number; data: T };
 export const KEY_GAME = 'game';
 export const KEY_STATS = 'stats';
 export const KEY_SETTINGS = 'settings';
+export const KEY_LEADERBOARD = 'leaderboard';
 
 export const loadKey = async <T>(key: string): Promise<T | null> => {
   try {

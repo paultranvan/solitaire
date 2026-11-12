@@ -3,32 +3,14 @@ import { useT } from '@/i18n/useT';
 import type { Ranking } from '@/store/records';
 import { Crown } from './Crown';
 import { Sheet } from './Sheet';
-import { formatMMSS } from './format';
+import { formatMMSS, formatOrdinal } from './format';
+import { WorldRank } from './WorldRank';
 import './WinSheet.css';
 
 // Confetti in the table's own colours: golds and parchment, with the card
 // red, a felt green and the navy of the default card back as accents.
 const COLORS = ['#f0d08c', '#d8b66f', '#f3ecd9', '#e2574c', '#62c184', '#7fa3ea', '#f0d08c'];
 const PIECES = 60;
-
-// "1st", "2nd", "3rd", "21st", "26th"… English only; French uses "{n}e".
-const ordinalEn = (n: number): string => {
-  const mod100 = n % 100;
-  if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
-  switch (n % 10) {
-    case 1:
-      return `${n}st`;
-    case 2:
-      return `${n}nd`;
-    case 3:
-      return `${n}rd`;
-    default:
-      return `${n}th`;
-  }
-};
-
-const ordinal = (n: number, lang: 'en' | 'fr'): string =>
-  lang === 'fr' ? (n === 1 ? '1re' : `${n}e`) : ordinalEn(n);
 
 function Confetti() {
   return (
@@ -105,7 +87,7 @@ export function WinSheet({
           {ranking !== null && bannerKey === null && (
             <p className="win__rank">
               {t('win.rankLine', {
-                rank: ordinal(ranking.rank, lang),
+                rank: formatOrdinal(ranking.rank, lang),
                 total: formatNumber(ranking.total),
               })}
             </p>
@@ -118,6 +100,10 @@ export function WinSheet({
               </span>
             </div>
           )}
+
+          {/* Shared-leaderboard standing or the one-time publish prompt. Renders
+              nothing when the feature is off or this win isn't eligible. */}
+          <WorldRank />
 
           <div className="win__stats win__stats--pair">
             <div className={`win__stat${ranking && ranking.timeMedal ? ' win__stat--medal' : ''}`}>

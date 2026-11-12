@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { KEY_SETTINGS, loadKey, saveKey } from '@/persistence/db';
 import { detectInitialLang, Lang } from '@/i18n/strings';
+import { normalizeName } from '@/leaderboard/name';
 
 export type CardBack = 'navy' | 'crimson' | 'emerald';
 
@@ -25,7 +26,15 @@ export type Settings = {
   // hydrated, the persisted choice wins so a user who explicitly picked
   // English on a French-locale system stays in English.
   language: Lang;
+  // Shared leaderboard participation. 'ask' is the starting state: taking part
+  // is the default, but nothing is sent until the player has seen the publish
+  // prompt on their first eligible win and answered it ('on' / 'off').
+  leaderboard: LeaderboardChoice;
+  // Display name shown on the shared leaderboard; '' until the player picks one.
+  playerName: string;
 };
+
+export type LeaderboardChoice = 'ask' | 'on' | 'off';
 
 export const defaultSettings = (): Settings => ({
   schemaVersion: 1,
@@ -37,6 +46,8 @@ export const defaultSettings = (): Settings => ({
   cardBack: 'navy',
   requireWinnable: false,
   language: detectInitialLang(),
+  leaderboard: 'ask',
+  playerName: '',
 });
 
 const LANGS: readonly Lang[] = ['en', 'fr'];
@@ -58,6 +69,13 @@ export const sanitizeSettings = (raw: unknown): Partial<Settings> => {
   if (CARD_BACKS.includes(o.cardBack as CardBack)) out.cardBack = o.cardBack as CardBack;
   if (typeof o.requireWinnable === 'boolean') out.requireWinnable = o.requireWinnable;
   if (LANGS.includes(o.language as Lang)) out.language = o.language as Lang;
+  if (o.leaderboard === 'ask' || o.leaderboard === 'on' || o.leaderboard === 'off') {
+    out.leaderboard = o.leaderboard;
+  }
+  // Same rules the server enforces; an unacceptable stored name is dropped and
+  // the player is simply asked again.
+  const playerName = normalizeName(o.playerName);
+  if (playerName !== null) out.playerName = playerName;
   return out;
 };
 

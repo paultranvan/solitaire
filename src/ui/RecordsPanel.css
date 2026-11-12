@@ -95,6 +95,33 @@
   color: var(--ink-quiet);
 }
 
+/* Secondary note on the heading line (e.g. how many games are ranked). */
+.records__heading-note {
+  float: right;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The mine / world switch sits directly above the draw-mode tabs. */
+.records__scope {
+  margin-bottom: 8px;
+}
+
+/* World rows carry the player's display name next to the score. */
+.lbrow__name {
+  margin-left: 10px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.lbrow--me .lbrow__name {
+  color: var(--gold);
+  font-weight: 600;
+}
+
 .records__empty {
   text-align: center;
   padding: 24px 12px;

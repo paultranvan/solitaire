@@ -4,6 +4,7 @@ import { initNativeLifecycle } from '@/native/lifecycle';
 import { loadSavedGame } from '@/persistence/gameAutosave';
 import { hydrateSettingsFromStorage, useSettingsStore } from '@/store/settingsStore';
 import { hydrateStatsFromStorage } from '@/store/statsStore';
+import { hydrateLeaderboardFromStorage } from '@/store/leaderboardStore';
 import { SUITS } from '@/game/card';
 import { Board } from '@/ui/Board';
 import { Suit } from '@/ui/Suit';
@@ -22,6 +23,9 @@ export default function App() {
         hydrateStatsFromStorage(),
         initNativeLifecycle(),
       ]);
+      // Not awaited: restoring and retrying queued leaderboard submissions is
+      // background work and must never delay (or break) getting to the board.
+      void hydrateLeaderboardFromStorage().catch(() => {});
       const saved = await loadSavedGame();
       if (cancelled) return;
       if (saved) {

@@ -31,6 +31,7 @@ import { gameReducer } from '@/store/gameReducer';
 import { useGameAutosave } from '@/persistence/gameAutosave';
 import { useStatsStore } from '@/store/statsStore';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useLeaderboardStore } from '@/store/leaderboardStore';
 import { HintState, moveToHint } from './highlight';
 import { SkipLayoutAnimProvider } from './Card';
 import { DragLayer } from './DragLayer';
@@ -222,8 +223,17 @@ export function Board({ initial }: { initial: GameState }) {
       // Rank against the log *after* recordGame has appended this win.
       const wins = modeWins(useStatsStore.getState().stats.games, state.drawCount);
       winRankingRef.current = rankWin(wins, { score, durationSec, moves: state.movesMade });
+      // Hand the game to the shared leaderboard, which decides whether to send
+      // it, ask first, or do nothing (feature off, opted out, no move log).
+      useLeaderboardStore.getState().offerWin({
+        seed: state.seed,
+        drawCount: state.drawCount,
+        durationSec,
+        moves: state.moveLog,
+      });
     } else {
       winRankingRef.current = null;
+      useLeaderboardStore.getState().offerWin(null);
     }
     play('winCascade');
     haptic('win');

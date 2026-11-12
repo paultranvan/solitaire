@@ -53,6 +53,34 @@ describe('settingsStore — cardBack', () => {
     });
   });
 
+  it('defaults to asking before taking part in the shared leaderboard', () => {
+    expect(defaultSettings()).toMatchObject({ leaderboard: 'ask', playerName: '' });
+  });
+
+  it('hydrate() keeps a valid leaderboard choice and normalizes the display name', () => {
+    useSettingsStore.getState().hydrate({
+      schemaVersion: 1,
+      leaderboard: 'on',
+      playerName: '  Zoé   la Brave ',
+    } as unknown as Settings);
+    expect(useSettingsStore.getState().settings).toMatchObject({
+      leaderboard: 'on',
+      playerName: 'Zoé la Brave',
+    });
+  });
+
+  it('hydrate() drops an unknown leaderboard choice or an unacceptable display name', () => {
+    useSettingsStore.getState().hydrate({
+      schemaVersion: 1,
+      leaderboard: 'always',
+      playerName: '<img src=x>',
+    } as unknown as Settings);
+    expect(useSettingsStore.getState().settings).toMatchObject({
+      leaderboard: 'ask',
+      playerName: '',
+    });
+  });
+
   it('hydrate() survives a payload that is not an object', () => {
     useSettingsStore.getState().hydrate('nope' as unknown as Settings);
     expect(useSettingsStore.getState().settings).toEqual(defaultSettings());
