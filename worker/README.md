@@ -60,11 +60,16 @@ Once the existing players have updated, or if that door gets abused, close it
 ## Local development
 
 ```bash
+(cd .. && npm ci)          # the engine's own dependencies (the seeded shuffle)
 npm install
 npm run db:migrate:local   # creates the local SQLite database
 npm run dev                # http://localhost:8787
 npm run typecheck
 ```
+
+The worker bundles files from `../src`, which resolve their imports in the
+repo root's `node_modules` — hence the root install, for `dev` and `deploy`
+alike.
 
 Unit tests for the validation logic live in `src/__tests__` and run with the
 app's suite (`npm run test:run` from the repo root).
@@ -92,6 +97,88 @@ deploy as above.
 
 `ALLOWED_ORIGINS` in `wrangler.jsonc` lists the origins whose pages may call
 the API from a browser.
+
+## Keeping the worker in step with the app
+
+**Nothing deploys the worker automatically.** CI builds and publishes the app
+only. The worker is a snapshot of this repository taken when someone last ran
+`npm run deploy`: it carries its own copy of the game engine and of the shared
+rules, and keeps running that copy until the next deploy.
+
+### When a deploy is needed
+
+Redeploy after any change to:
+
+- `worker/` itself — code, `wrangler.jsonc`, a new migration;
+- `src/game/` — the rules, the moves, the deal, the score formula. Everything
+  `replay.ts` and `score.ts` reach is bundled;
+- `src/leaderboard/name.ts`, `seed.ts`, `pastWins.ts` — the rules both sides
+  apply;
+- the `seedrandom` version in the root `package.json` — the deal depends on it.
+
+When in doubt, deploy: it is quick and harmless when nothing changed.
+
+To see whether the live worker is behind, compare the last deployment with the
+last commit that touched those paths (from the repo root):
+
+```bash
+(cd worker && npx wrangler deployments list)   # "Created:" of the newest entry
+git log -1 --format='%cd  %h %s' -- worker src/game \
+  src/leaderboard/name.ts src/leaderboard/seed.ts src/leaderboard/pastWins.ts
+```
+
+### What goes wrong if it is skipped
+
+- **A rule or move changed:** games from the new app build are replayed with
+  the old rules and refused (`bad-moves`, `illegal-move`, `not-won`). The app
+  does not retry a refusal — the player reads "The leaderboard did not accept
+  this score" and that win is lost to the leaderboard for good.
+- **The score formula changed:** the worker keeps computing the old one, so the
+  world ranking and the score shown on the win screen disagree.
+- **A name or past-win rule changed:** the app accepts input the server then
+  refuses, or the reverse.
+
+### Order of operations
+
+1. `npm run db:migrate:remote`, if `migrations/` has a new file. Write
+   migrations the running worker can live with (add columns, don't rename or
+   drop them), since it keeps serving until step 2.
+2. `npm run deploy`.
+3. Only then release the app build that relies on the change (merge to
+   `master` for the web, publish the Android release).
+
+The reverse matters just as much: **the worker must keep accepting what
+released app versions send.** The web app updates at once, but Android players
+keep an old build for weeks, with its own copy of the engine. So never remove
+or rename a request field, never tighten what an existing build sends, and
+keep engine changes replay-compatible (an old build's winning game must still
+replay as a win). A change that can't meet that needs a new route (`/v2/…`)
+next to the old one.
+
+### After a score formula change
+
+Stored rows keep the score they were given; nothing recomputes them. The app
+rescores its local history on every load (`normalizeStats`), so do the same
+for the board once the new worker is live. The score is a pure function of
+three stored columns — for the formula as of this writing:
+
+```bash
+npx wrangler d1 execute solitaire-leaderboard --remote --command "
+  UPDATE scores SET score =
+    (500 + MAX(0, 6000 - 10 * duration_sec) + MAX(0, 6000 - 20 * moves))
+    * CASE draw_count WHEN 3 THEN 2 ELSE 1 END"
+```
+
+Rewrite that expression to match `src/game/score.ts` before running it.
+
+### Wrangler itself
+
+Wrangler is pinned to an exact version in `package.json`: it runs with the
+Cloudflare login and can change the database, so it is upgraded on purpose,
+not by a stray `npm install`. To upgrade, bump the version, `npm install`,
+`npm run typecheck`, try `npm run dev`, then deploy. `compatibility_date` in
+`wrangler.jsonc` freezes the runtime's behaviour and only needs moving when a
+newer runtime feature is wanted.
 
 ## Switching the app on
 

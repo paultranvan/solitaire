@@ -169,6 +169,17 @@ both sides apply). Its pure validation (`worker/src/submission.ts`) is covered
 by the root vitest run; the HTTP/D1 layer (`worker/src/index.ts`) is not —
 exercise it with `npm run dev` in `worker/`.
 
+**The worker is deployed by hand, and it bundles `src/game/` and the shared
+`src/leaderboard/{name,seed,pastWins}.ts` at that moment.** CI never deploys
+it. So a change to the rules, the moves, the deal, the score formula or those
+shared rules does not reach the server until someone runs `npm run deploy` in
+`worker/` — and until then new builds get their wins refused (a refusal is not
+retried). When you touch any of those, say so: the worker has to be deployed
+_before_ the app build that relies on the change ships, it must keep accepting
+what already-released Android builds send, and a score formula change also
+needs the stored rows rescored. `worker/README.md`, "Keeping the worker in
+step with the app", has the checklist.
+
 ### Shared leaderboard (client side)
 
 The whole feature hangs off the build-time `VITE_LEADERBOARD_URL`
