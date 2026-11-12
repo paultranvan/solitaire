@@ -58,6 +58,22 @@ const collision: CollisionDetection = (args) => {
   return closestCenter(args);
 };
 
+// A long tableau column squeezes its fan in CSS (TableauColumn.css), so the
+// step between two stacked cards isn't a constant. Read it off the live
+// layout — the distance between the grabbed card's slot and the next one —
+// so the drag overlay can fan the lifted stack the same way. Slots are plain
+// (untransformed) boxes, so this holds even mid layout-animation.
+const measureColumnFan = (column: number, fromIndex: number): number | null => {
+  const slots = document.querySelectorAll<HTMLElement>(
+    `.tableau-col[data-column="${column}"] > .tableau-col__slot`,
+  );
+  const grabbed = slots[fromIndex];
+  const next = slots[fromIndex + 1];
+  if (!grabbed || !next) return null;
+  const step = next.getBoundingClientRect().top - grabbed.getBoundingClientRect().top;
+  return step > 0 ? step : null;
+};
+
 // The slice of a recordGame payload that comes straight off the game state.
 const recordContext = (s: GameState) => ({
   mode: s.drawCount,
@@ -71,6 +87,9 @@ const recordContext = (s: GameState) => ({
 export function Board({ initial }: { initial: GameState }) {
   const [state, dispatch] = useReducer(gameReducer, initial);
   const [activeCards, setActiveCards] = useState<Card[] | null>(null);
+  // Fan step of the column a multi-card stack was lifted from (see
+  // measureColumnFan); null for single cards and other sources.
+  const [activeFanPx, setActiveFanPx] = useState<number | null>(null);
   const [hint, setHint] = useState<HintState>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [winOpen, setWinOpen] = useState(false);
@@ -292,6 +311,11 @@ export function Board({ initial }: { initial: GameState }) {
   const handleDragStart = (e: DragStartEvent) => {
     const data = e.active.data.current as DragData | undefined;
     setActiveCards(data?.cards ?? null);
+    setActiveFanPx(
+      data?.source.kind === 'tableauStack' && data.cards.length > 1
+        ? measureColumnFan(data.source.column, data.source.fromIndex)
+        : null,
+    );
     setHint(null);
     feedback('pickup');
   };
@@ -499,7 +523,7 @@ export function Board({ initial }: { initial: GameState }) {
             </div>
           </SkipLayoutAnimProvider>
         </LayoutGroup>
-        <DragLayer cards={activeCards} />
+        <DragLayer cards={activeCards} fanPx={activeFanPx} />
         <AutoCompleteSheet
           open={autoCompleteState === 'prompt'}
           onAccept={() => setAutoCompleteState('running')}

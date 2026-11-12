@@ -9,8 +9,9 @@ export type DraggableCardProps = {
   data: DragData;
   /** True when another draggable in the same stack is dragging this card along. */
   hiddenByStackDrag?: boolean;
-  /** Suppress the dashed placeholder when hidden — the slot already renders
-      a card-behind underneath that should show through instead. */
+  /** Suppress the empty-well placeholder when hidden — another card sits
+      underneath (a card-behind, or the previous card of a tableau stack) and
+      should show through instead. */
   suppressGhost?: boolean;
 };
 

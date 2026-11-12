@@ -1,86 +1,93 @@
+/* Win sheet — same ledger language as the menu: display-serif numerals,
+   parchment ink, aged gold for the things worth celebrating. */
+
 .win {
   text-align: center;
-  padding: 12px 0 8px;
+  padding: 4px 0;
 }
 
-.win__hero {
-  font-size: 56px;
-  line-height: 1;
-  margin-bottom: 6px;
-}
-
-.win__title {
-  margin: 0 0 6px;
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.win__subtitle {
-  margin: 0 0 18px;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 14px;
+.win__crown {
+  width: 50px;
+  height: 25px;
+  overflow: visible;
+  fill: var(--gold-bright);
+  stroke: #5f4510;
+  stroke-width: 4;
+  stroke-linejoin: round;
+  paint-order: stroke;
 }
 
 .win__score {
   position: relative;
-  margin: 0 auto 20px;
-  padding: 18px 14px 14px;
+  margin: 0 auto 18px;
+  padding: 20px 14px 16px;
   border-radius: 14px;
-  background: linear-gradient(180deg, rgba(250, 204, 21, 0.18), rgba(250, 204, 21, 0.06));
-  border: 1px solid rgba(250, 204, 21, 0.35);
+  background: linear-gradient(180deg, rgba(216, 182, 111, 0.17), rgba(216, 182, 111, 0.05));
+  border: 1px solid rgba(216, 182, 111, 0.36);
+  box-shadow: 0 1px 0 rgba(255, 240, 200, 0.08) inset;
 }
 
 .win__score-value {
-  font-size: 40px;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: clamp(44px, 9vw, 56px);
+  font-weight: 400;
   line-height: 1;
-  font-variant-numeric: tabular-nums;
-  color: #fde68a;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'lnum', 'tnum';
+  color: var(--gold-bright);
   letter-spacing: 0.01em;
 }
 
-.win__score-label {
-  margin-top: 6px;
-  font-size: 11px;
+.win__score-label,
+.win__stat-label {
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.2em;
+  color: var(--ink-quiet);
+}
+
+.win__score-label {
+  margin-top: 10px;
 }
 
 .win__rank {
-  margin: -8px 0 18px;
+  margin: -6px 0 18px;
+  font-family: var(--font-sans);
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.66);
+  color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
 }
 
 .win__banner {
   margin: -6px 0 18px;
-  padding: 10px 14px;
+  padding: 11px 14px;
   border-radius: 12px;
-  background: linear-gradient(180deg, rgba(250, 204, 21, 0.2), rgba(250, 204, 21, 0.08));
-  border: 1px solid rgba(250, 204, 21, 0.4);
+  background: linear-gradient(180deg, rgba(216, 182, 111, 0.2), rgba(216, 182, 111, 0.08));
+  border: 1px solid rgba(216, 182, 111, 0.42);
+  font-family: var(--font-sans);
 }
 
 .win__banner-msg {
   display: block;
   font-size: 15px;
-  font-weight: 700;
-  color: #fde68a;
+  font-weight: 600;
+  color: var(--gold-bright);
 }
 
 .win__banner-sub {
   display: block;
-  margin-top: 2px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.55);
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--ink-quiet);
   font-variant-numeric: tabular-nums;
 }
 
 .win__stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 24px;
 }
 
@@ -88,39 +95,47 @@
   grid-template-columns: repeat(2, 1fr);
 }
 
+.win__stat {
+  background: rgba(243, 236, 217, 0.04);
+  border: 1px solid var(--rule);
+  padding: 15px 12px 13px;
+  border-radius: 12px;
+}
+
 .win__stat--medal {
-  background: rgba(250, 204, 21, 0.14);
-  border: 1px solid rgba(250, 204, 21, 0.38);
+  background: rgba(216, 182, 111, 0.13);
+  border-color: rgba(216, 182, 111, 0.4);
 }
 
 .win__stat--medal .win__stat-label {
-  color: rgba(253, 230, 138, 0.85);
-}
-
-.win__stat {
-  background: rgba(255, 255, 255, 0.06);
-  padding: 14px;
-  border-radius: 10px;
+  color: var(--gold);
+  letter-spacing: 0.08em;
 }
 
 .win__stat-value {
-  font-size: 20px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'lnum', 'tnum';
 }
 
 .win__stat-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.5);
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
+/* One gold call-to-action across the full width; the two quiet exits share
+   the row beneath it. */
 .win__actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.win__actions .btn--primary {
+  grid-column: 1 / -1;
 }
 
 .confetti {
@@ -136,5 +151,5 @@
   top: -10px;
   width: 8px;
   height: 14px;
-  border-radius: 1px;
+  border-radius: 1.5px;
 }

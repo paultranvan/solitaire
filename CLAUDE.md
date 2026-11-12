@@ -102,6 +102,33 @@ If you change animation behavior, smoke-test: draw a card, drag a stack onto a
 column, double-tap a card to auto-move to a foundation, and start a new game
 mid-animation. All four are flicker-prone.
 
+### Board sizing and the fan squeeze (CSS-only)
+
+Everything on the board is sized off `--card-w` (`ui/theme.css`); don't size
+board elements in px. The non-obvious couplings:
+
+- `--card-w` is the smaller of a width fit and a height fit, so on
+  desktop / landscape the top row plus a 4.6-card-tall tableau (a full
+  king-to-ace run at the tightest fan) always fits under the top bar and play
+  never needs page scrolling. Phones are width-bound and unaffected.
+- The height fit needs the top bar's real height. `--topbar-total` mirrors
+  `.topbar`'s box model (`--topbar-h`, unless the padding is taller — which is
+  the case on native, where `native/lifecycle.ts` raises `--safe-top` and
+  `--topbar-pad-bottom`). Change one, change the other.
+- Long columns squeeze instead of running off-screen: `TableauColumn.tsx` sets
+  `--n-down` / `--n-up` on the column, and `TableauColumn.css` derives
+  `--fan-up-col` / `--fan-down-col`, clamped between `--fan-*-min` and the
+  defaults so the column fits `--tableau-avail`. The rank's size and offset in
+  `Card.css` are tuned so the 0.30·card-h minimum strip still clears it.
+- The drag overlay can't inherit a per-column fan, so `measureColumnFan` in
+  `Board.tsx` reads the live step at drag start and hands it to `DragLayer`.
+- The page scrollbar is hidden (the page can still scroll in the rare overflow
+  case): a classic scrollbar popping in would shift the centred board sideways.
+- Card-back designs (`.card--back--<id>`) are `background`-only, because the
+  same classes are used bare on the menu swatches and the crossfade overlay.
+  The felt grain and back emblem are inline SVG data URIs — same-origin, so
+  they pass the CSP.
+
 ### Drag/drop collision and activation
 
 `Board.tsx` uses a custom `CollisionDetection`: `pointerWithin` first, falling

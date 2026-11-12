@@ -3,13 +3,17 @@
   /* Flex (not grid) so the group can be row-reversed for right-handed layout.
      The slots carry explicit widths below. */
   gap: var(--gap-col);
-  /* The waste fans its last 3 cards left-to-right, newest on top. Each step
-     leaves a strip of the covered card wide enough for its rank with the suit
-     pip tucked underneath — the widest rank, "10", ends at ~0.50·card-w. Two
-     steps make the slot 2.08·card-w wide, which still fits the top row: stock
-     (1) + waste (2.08) + foundations (4.54) + 2 gaps (0.36) = 7.98 of the
-     8.08·card-w available. */
-  --talon-fan-offset: calc(var(--card-w) * 0.54);
+  /* The waste fans its last 3 cards left-to-right, newest on top, in tight
+     steps so it reads as one pile. A step leaves a 0.46·card-w strip of the
+     covered card: room for its rank — the same size as on every other card —
+     with the suit pip tucked underneath. K and Q fit; on phone-sized cards
+     the widest rank, "10", loses about a third of its zero under the next
+     card and still reads as a 10 — a deliberate trade for the tighter pile
+     (ranks are not condensed or shrunk to avoid it). Two steps make the slot
+     1.92·card-w wide; on the tightest (phone) top row that is stock (1) +
+     waste (1.92) + foundations (4.36) + 2 gaps (0.24) = 7.52 of the
+     7.72·card-w available. */
+  --talon-fan-offset: calc(var(--card-w) * 0.46);
   /* 0 = a short fan (fewer than 3 cards) starts at the slot's left edge;
      1 = it ends at the right edge. Board.css flips this with the handedness
      so the fan always sits against the stock. */
@@ -28,6 +32,44 @@
 .stock-talon__slot.stock {
   width: var(--card-w);
   cursor: pointer;
+  /* Own stacking context, so the pile-thickness edges below can sit behind
+     the top card (negative z-index) without dropping under the felt. */
+  isolation: isolate;
+  --stock-edge: max(1.5px, calc(var(--card-w) * 0.022));
+}
+
+/* Thickness of the face-down pile: one or two cream card edges peeking out
+   under the top card (data-depth is set by StockTalon.tsx from the count). */
+.stock-talon__slot.stock[data-depth='1']::before,
+.stock-talon__slot.stock[data-depth='2']::before,
+.stock-talon__slot.stock[data-depth='2']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: var(--card-radius);
+  background: #e9e4d3;
+  box-shadow:
+    0 0 0 0.5px rgba(46, 36, 14, 0.55),
+    0 2px 5px rgba(0, 0, 0, 0.3);
+  transform: translateY(var(--stock-edge));
+}
+
+.stock-talon__slot.stock[data-depth='2']::after {
+  z-index: -2;
+  background: #d9d3bf;
+  transform: translateY(calc(2 * var(--stock-edge)));
+}
+
+/* Spent stock: the recycle arrow is the affordance, so it reads a little
+   stronger than a foundation's suit hint — unless the waste is empty too and
+   there is nothing left to turn over. */
+.stock-talon__slot.stock .pile-empty {
+  color: rgba(243, 236, 217, 0.42);
+}
+
+.stock-talon__slot.stock .pile-empty.is-spent {
+  color: rgba(243, 236, 217, 0.14);
 }
 
 .stock-talon__slot.talon {
@@ -52,8 +94,10 @@
 
 /* Compact index for covered cards: the corner suit (top-right) is hidden
    under the next card, so the centre pip shrinks and tucks under the rank,
-   inside the exposed strip. `is-uncovered` puts it back while the top card is
-   being dragged and the whole card underneath is in view. */
+   inside the exposed strip. The rank itself is left alone — shrinking it
+   makes the top card of the fan look like a bigger card. `is-uncovered` puts
+   the pip back while the top card is being dragged and the whole card
+   underneath is in view. */
 .talon-fan__behind .card__center {
   transition: transform 180ms ease-out;
 }

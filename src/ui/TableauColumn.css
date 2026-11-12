@@ -4,12 +4,47 @@
   align-items: center;
   min-height: var(--card-h);
   position: relative;
-  --drop-over-offset: 2px;
+
+  /* Fan squeeze. A column of d face-down and u face-up cards is
+     d·fan-down + (u − 1)·fan-up + card-h tall (--n-down / --n-up come from
+     TableauColumn.tsx). When that would run past --tableau-avail the
+     face-up step shrinks first, down to --fan-faceup-min (ranks stay
+     readable); only if that isn't enough do the face-down strips tighten
+     too. Columns with room keep the default steps. Past both minimums the
+     page simply scrolls, as before. */
+  --fan-up-col: clamp(
+    var(--fan-faceup-min),
+    calc(
+      (var(--tableau-avail) - var(--card-h) - var(--n-down, 0) * var(--fan-facedown)) /
+        max(var(--n-up, 1) - 1, 1)
+    ),
+    var(--fan-faceup)
+  );
+  --fan-down-col: clamp(
+    var(--fan-facedown-min),
+    calc(
+      (var(--tableau-avail) - var(--card-h) - (var(--n-up, 1) - 1) * var(--fan-up-col)) /
+        max(var(--n-down, 0), 1)
+    ),
+    var(--fan-facedown)
+  );
 }
 
 .tableau-col__slot {
   position: relative;
   display: block;
+}
+
+/* Drop target: ring the landing spot — the column's top card, or its empty
+   well — rather than the whole column box, which the grid stretches to the
+   height of the tallest column. Same slot-level technique as the hint halo
+   below (a box-shadow on the plain slot, not on the 3D card inside it). */
+.tableau-col.is-drop-target > .tableau-col__slot:last-child,
+.tableau-col.is-drop-target > .pile-empty {
+  border-radius: var(--card-radius);
+  box-shadow:
+    0 0 0 2.5px rgba(240, 208, 140, 0.95),
+    0 0 20px 4px rgba(240, 200, 110, 0.45);
 }
 
 /* Animate on the slot/pile-empty rather than the inner .card-flip — the
