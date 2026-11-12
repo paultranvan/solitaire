@@ -77,8 +77,32 @@ app's suite (`npm run test:run` from the repo root).
 ## Deployment
 
 The worker is live at <https://solitaire-leaderboard.ptranvan.workers.dev>. Its
-D1 database is in Western Europe (the id is in `wrangler.jsonc`) and has the
-schema applied. To publish a change to the worker:
+D1 database is in Western Europe (the id is in `wrangler.jsonc`).
+
+**CI deploys it.** The `worker` job of `.github/workflows/deploy-pages.yml`
+runs on every push to `master`, after lint and tests and before the web app is
+published. When the push touched the worker or anything it bundles (listed
+under "Keeping the worker in step with the app"), the job typechecks the
+worker, applies pending migrations and deploys. Otherwise it does nothing. If
+it fails, the web app is not published either, so the app never ships ahead of
+its server.
+
+The job needs two repository secrets (Settings → Secrets and variables →
+Actions → Secrets):
+
+- `CLOUDFLARE_ACCOUNT_ID` — the account id printed by `npx wrangler whoami`.
+- `CLOUDFLARE_API_TOKEN` — created in the Cloudflare dashboard (My Profile →
+  API Tokens → Create Token) from the "Edit Cloudflare Workers" template, with
+  one permission added: Account · D1 · Edit, which the migrations need. Limit
+  it to this account. Then `gh secret set CLOUDFLARE_API_TOKEN` and paste it
+  at the prompt, so it never lands in a shell history.
+
+Without them the job stops with a message saying so. A token that lacks a
+permission fails later, in the migration or deploy step, with an
+authentication error; fix the permission in the dashboard (the token's value
+does not change) and re-run the job.
+
+To deploy by hand instead — CI unavailable, or trying a branch:
 
 ```bash
 npx wrangler login         # once per machine
@@ -100,34 +124,53 @@ the API from a browser.
 
 ## Keeping the worker in step with the app
 
-**Nothing deploys the worker automatically.** CI builds and publishes the app
-only. The worker is a snapshot of this repository taken when someone last ran
-`npm run deploy`: it carries its own copy of the game engine and of the shared
-rules, and keeps running that copy until the next deploy.
+The worker is a snapshot of this repository taken at its last deploy: it
+carries its own copy of the game engine and of the shared rules, and keeps
+running that copy until the next one. So a change to the game is not live on
+the server until the worker has been redeployed.
 
 ### When a deploy is needed
 
-Redeploy after any change to:
+After any change to:
 
 - `worker/` itself — code, `wrangler.jsonc`, a new migration;
 - `src/game/` — the rules, the moves, the deal, the score formula. Everything
   `replay.ts` and `score.ts` reach is bundled;
 - `src/leaderboard/name.ts`, `seed.ts`, `pastWins.ts` — the rules both sides
   apply;
-- the `seedrandom` version in the root `package.json` — the deal depends on it.
+- the root `package-lock.json` — it pins `seedrandom`, which the deal depends
+  on.
 
-When in doubt, deploy: it is quick and harmless when nothing changed.
+**For pushes to `master`, CI takes care of it**: those are exactly the paths
+the `worker` job watches (the list lives in the workflow — keep the two in
+sync if the worker starts bundling something else). A push that changes none
+of them leaves the worker alone. Running the workflow by hand from the Actions
+tab always deploys.
 
-To see whether the live worker is behind, compare the last deployment with the
-last commit that touched those paths (from the repo root):
+What CI does not do:
+
+- **Android releases.** They are built from a tag by other workflows, which do
+  not touch the worker. Tag a commit that is already on `master` and whose
+  deploy run is green; then the worker it needs is already live.
+- **Anything deployed by hand from a branch** — the next `master` deploy
+  replaces it.
+- **Rescoring** after a score formula change, and **keeping old app versions
+  working** — both below.
+
+To see whether the live worker is behind, look at the last run of the workflow,
+or compare the last deployment with the last commit that touched those paths
+(from the repo root):
 
 ```bash
 (cd worker && npx wrangler deployments list)   # "Created:" of the newest entry
-git log -1 --format='%cd  %h %s' -- worker src/game \
+git log -1 --format='%cd  %h %s' -- worker src/game package-lock.json \
   src/leaderboard/name.ts src/leaderboard/seed.ts src/leaderboard/pastWins.ts
 ```
 
-### What goes wrong if it is skipped
+### What goes wrong when the worker is behind
+
+This is what the job ordering prevents, and what a hand deploy done in the
+wrong order would cause:
 
 - **A rule or move changed:** games from the new app build are replayed with
   the old rules and refused (`bad-moves`, `illegal-move`, `not-won`). The app
@@ -140,12 +183,14 @@ git log -1 --format='%cd  %h %s' -- worker src/game \
 
 ### Order of operations
 
-1. `npm run db:migrate:remote`, if `migrations/` has a new file. Write
-   migrations the running worker can live with (add columns, don't rename or
-   drop them), since it keeps serving until step 2.
-2. `npm run deploy`.
-3. Only then release the app build that relies on the change (merge to
-   `master` for the web, publish the Android release).
+CI follows it; do the same by hand:
+
+1. Apply the migrations, if `migrations/` has a new file. Write migrations
+   the running worker can live with (add columns, don't rename or drop them),
+   since it keeps serving until step 2.
+2. Deploy the worker.
+3. Only then release the app build that relies on the change (the Pages
+   deploy for the web, the Android release).
 
 The reverse matters just as much: **the worker must keep accepting what
 released app versions send.** The web app updates at once, but Android players

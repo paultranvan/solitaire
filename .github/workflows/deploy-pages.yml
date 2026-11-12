@@ -1,10 +1,21 @@
-# Builds the web app and publishes it to GitHub Pages.
+# Publishes the web app to GitHub Pages — and, first, the leaderboard worker
+# it talks to.
+#
+# On every push to master:
+#   build   lint, test, build the web bundle
+#   worker  deploy worker/ to Cloudflare, but only when the push touched the
+#           worker or the code it bundles
+#   deploy  publish the bundle to GitHub Pages — after the worker, so the app
+#           never ships ahead of the server that has to verify its games
 #
 # The playable game is served at https://paultranvan.github.io/solitaire/
 # and the privacy policy (bundled from public/) at
 # https://paultranvan.github.io/solitaire/privacy-policy.html
 #
-# One-time setup: repo Settings -> Pages -> Source: "GitHub Actions".
+# One-time setup:
+#   - repo Settings -> Pages -> Source: "GitHub Actions"
+#   - repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID, for
+#     the worker job (see worker/README.md, "Deployment")
 name: Deploy to GitHub Pages
 
 on:
@@ -63,8 +74,113 @@ jobs:
         with:
           path: dist
 
-  deploy:
+  # The worker carries its own copy of the game engine, so a rule or scoring
+  # change only reaches the server when the worker is redeployed. Doing it
+  # here, between the tests and the Pages deploy, keeps the two in step: if
+  # this job fails, the app is not published.
+  worker:
     needs: build
+    runs-on: ubuntu-latest
+    # Nothing here needs the Pages or OIDC permissions granted above.
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          # Full history, so the commit this push started from is there to
+          # compare against.
+          fetch-depth: 0
+
+      - name: Decide whether the worker needs deploying
+        id: changes
+        env:
+          # A commit id supplied by GitHub; passed through the environment and
+          # shape-checked rather than pasted into the script.
+          BEFORE: ${{ github.event.before }}
+        run: |
+          # What the worker is built from: its own package, the game engine,
+          # the rules it shares with the app, and the lockfile that pins the
+          # engine's dependencies (the seeded shuffle).
+          paths=(
+            worker
+            src/game
+            src/leaderboard/name.ts
+            src/leaderboard/seed.ts
+            src/leaderboard/pastWins.ts
+            package-lock.json
+            .github/workflows/deploy-pages.yml
+          )
+          # Deploy unless we can show that none of it changed. A manual run, a
+          # first push or a force-push has no usable starting commit, and then
+          # deploying is the safe answer.
+          deploy=true
+          if [[ "$BEFORE" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            if git diff --quiet "$BEFORE" "$GITHUB_SHA" -- "${paths[@]}"; then
+              deploy=false
+            fi
+          fi
+          echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
+          echo "Worker deploy needed: $deploy"
+
+      - name: Check Cloudflare credentials
+        if: steps.changes.outputs.deploy == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::The repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are needed to deploy the worker. See worker/README.md, Deployment."
+            exit 1
+          fi
+
+      - name: Setup Node
+        if: steps.changes.outputs.deploy == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            worker/package-lock.json
+
+      # The Cloudflare token is only handed to the two Wrangler steps below,
+      # never to an install, where any package's install script could read it.
+      - name: Install the engine's dependencies
+        if: steps.changes.outputs.deploy == 'true'
+        run: npm ci
+
+      - name: Install the worker's dependencies
+        if: steps.changes.outputs.deploy == 'true'
+        working-directory: worker
+        run: npm ci
+
+      - name: Typecheck the worker
+        if: steps.changes.outputs.deploy == 'true'
+        working-directory: worker
+        run: npm run typecheck
+
+      # Migrations first: the worker about to be deployed may need them, and
+      # they are written so that the one still running can live with them.
+      - name: Apply database migrations
+        if: steps.changes.outputs.deploy == 'true'
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run db:migrate:remote
+
+      - name: Deploy the worker
+        if: steps.changes.outputs.deploy == 'true'
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run deploy
+
+  deploy:
+    needs: [build, worker]
     runs-on: ubuntu-latest
     environment:
       name: github-pages

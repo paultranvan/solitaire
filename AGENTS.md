@@ -169,16 +169,20 @@ both sides apply). Its pure validation (`worker/src/submission.ts`) is covered
 by the root vitest run; the HTTP/D1 layer (`worker/src/index.ts`) is not —
 exercise it with `npm run dev` in `worker/`.
 
-**The worker is deployed by hand, and it bundles `src/game/` and the shared
-`src/leaderboard/{name,seed,pastWins}.ts` at that moment.** CI never deploys
-it. So a change to the rules, the moves, the deal, the score formula or those
-shared rules does not reach the server until someone runs `npm run deploy` in
-`worker/` — and until then new builds get their wins refused (a refusal is not
-retried). When you touch any of those, say so: the worker has to be deployed
-_before_ the app build that relies on the change ships, it must keep accepting
-what already-released Android builds send, and a score formula change also
-needs the stored rows rescored. `worker/README.md`, "Keeping the worker in
-step with the app", has the checklist.
+**The worker bundles `src/game/` and the shared
+`src/leaderboard/{name,seed,pastWins}.ts` when it is deployed**, so a change to
+the rules, the moves, the deal, the score formula or those shared rules only
+reaches the server with a new deploy — and a build that gets ahead of its
+worker has its wins refused (a refusal is not retried). The `worker` job in
+`.github/workflows/deploy-pages.yml` handles this for pushes to `master`: when
+the push touched one of the paths it lists, it migrates and deploys the worker
+before the web app is published, and a failure there holds the app back. Keep
+that list of paths in step with what the worker imports. What stays manual,
+and worth saying out loud when you touch those files: the worker must keep
+accepting what already-released Android builds send, an Android release must
+be tagged from a commit whose `master` deploy went through, and a score
+formula change needs the stored rows rescored. `worker/README.md`, "Keeping
+the worker in step with the app", has the details.
 
 ### Shared leaderboard (client side)
 
