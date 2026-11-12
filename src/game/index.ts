@@ -6,3 +6,4 @@ export * from './moves';
 export * from './canApply';
 export * from './hints';
 export * from './auto';
+export * from './replay';

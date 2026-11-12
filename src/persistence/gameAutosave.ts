@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Card, cardId, RANKS, Rank, Suit, SUITS } from '@/game/card';
 import { GameState } from '@/game/state';
+import { parseMoveLog } from '@/game/replay';
 import { isWon } from '@/game/rules';
 import { KEY_GAME, loadKey, removeKey, saveKey } from './db';
 
@@ -96,6 +97,10 @@ export const parseSavedGame = (raw: unknown): GameState | null => {
   const talon = readPile(o.talon, seen);
   if (!tableau || !foundations || !stock || !talon || seen.size !== DECK_SIZE) return null;
 
+  // The log is only useful if it accounts for every move made; a save from
+  // before it existed, or one that doesn't line up, resumes as unverifiable.
+  const moveLog = parseMoveLog(o.moveLog);
+
   return {
     schemaVersion: 1,
     tableau,
@@ -114,6 +119,7 @@ export const parseSavedGame = (raw: unknown): GameState | null => {
     undosUsed: isCounter(o.undosUsed) ? o.undosUsed : 0,
     hintsUsed: isCounter(o.hintsUsed) ? o.hintsUsed : 0,
     seed: o.seed,
+    moveLog: moveLog !== null && moveLog.length === o.movesMade ? moveLog : null,
     history: [],
   };
 };

@@ -26,6 +26,20 @@ describe('parseSavedGame', () => {
     expect(parseSavedGame(blob)).toMatchObject({ activeMs: 0, undosUsed: 0, hintsUsed: 0 });
   });
 
+  it('resumes as unverifiable (null log) when the log is missing, invalid or out of step', () => {
+    const state = applyMove(fresh(), { kind: 'draw' });
+
+    const missing = saved(state);
+    delete missing.moveLog;
+    expect(parseSavedGame(missing)).toMatchObject({ moveLog: null, movesMade: 1 });
+
+    const invalid = { ...saved(state), moveLog: [{ kind: 'teleport' }] };
+    expect(parseSavedGame(invalid)).toMatchObject({ moveLog: null });
+
+    const outOfStep = { ...saved(state), moveLog: [] };
+    expect(parseSavedGame(outOfStep)).toMatchObject({ moveLog: null });
+  });
+
   it('drops unknown keys, including on cards', () => {
     const blob = saved(fresh());
     blob.extra = 'x';

@@ -15,6 +15,7 @@ export const blankGameState = (over: Partial<GameState> = {}): GameState => ({
   undosUsed: 0,
   hintsUsed: 0,
   seed: 't',
+  moveLog: [],
   history: [],
   ...over,
 });

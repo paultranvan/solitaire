@@ -22,6 +22,13 @@ export class InvalidMoveError extends Error {
 
 const HISTORY_CAP = 200;
 
+// Longest move log kept. Far beyond any real game; past it the log is dropped
+// (set to null) so a runaway session can't grow state and autosave unbounded.
+export const MAX_MOVE_LOG = 5000;
+
+const appendToLog = (log: Move[] | null, move: Move): Move[] | null =>
+  log === null || log.length >= MAX_MOVE_LOG ? null : [...log, move];
+
 const cloneState = (s: GameState): GameState => ({
   ...s,
   tableau: s.tableau.map((c) => c.slice()),
@@ -149,6 +156,7 @@ export const applyMove = (state: GameState, move: Move): GameState => {
 
   pushHistory(next, state);
   next.movesMade = state.movesMade + 1;
+  next.moveLog = appendToLog(state.moveLog, move);
   return next;
 };
 
@@ -162,5 +170,8 @@ export const undo = (state: GameState): GameState => {
     // lower values, but undosUsed / hintsUsed are monotonic for the game.
     undosUsed: state.undosUsed + 1,
     hintsUsed: state.hintsUsed,
+    // Same for play time: the snapshot's activeMs predates any time flushed
+    // since, and restoring it would hand that time back to the player.
+    activeMs: state.activeMs,
   };
 };
