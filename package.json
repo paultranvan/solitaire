@@ -32,7 +32,13 @@
     "zustand": "^5.0.2"
   },
   "overrides": {
-    "tar": "^7.5.21"
+    "tar": "^7.5.21",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    },
+    "xcode": {
+      "uuid": "^14.0.0"
+    }
   },
   "devDependencies": {
     "@capacitor/assets": "^4.0.0",
