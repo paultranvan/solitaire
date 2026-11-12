@@ -1,0 +1,37 @@
+// Cloudflare Worker serving the shared leaderboard. See README.md.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "solitaire-leaderboard",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  // Keep our own console output (unhandled errors) but not the per-request
+  // invocation logs: those record request metadata, and the privacy policy
+  // promises that nothing about the caller is kept.
+  "observability": { "enabled": true, "logs": { "enabled": true, "invocation_logs": false } },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "solitaire-leaderboard",
+      // Not a secret: it only names the database within the Cloudflare account.
+      "database_id": "5b109563-1b54-48b5-837c-b516ce53f814",
+      "migrations_dir": "migrations",
+    },
+  ],
+  // Per-client-IP limits, enforced by Cloudflare — nothing about the caller is
+  // stored on our side. namespace_id only has to be unique within the account.
+  "ratelimits": [
+    { "name": "SUBMIT_LIMITER", "namespace_id": "1001", "simple": { "limit": 6, "period": 60 } },
+    { "name": "READ_LIMITER", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } },
+    // Past wins can't be verified, so that door is much narrower.
+    { "name": "PAST_LIMITER", "namespace_id": "1003", "simple": { "limit": 2, "period": 60 } },
+  ],
+  "vars": {
+    // "on" accepts unverified past wins (POST /v1/past-scores). Set it to
+    // anything else and redeploy to close that door for good; entries already
+    // stored stay until deleted (see README, Moderation).
+    "PAST_SCORES": "on",
+    // Origins allowed to call the API from a browser: the GitHub Pages site,
+    // the Capacitor shells (Android / iOS), and the local dev servers.
+    "ALLOWED_ORIGINS": "https://paultranvan.github.io,https://localhost,capacitor://localhost,http://localhost:5173,http://localhost:4173",
+  },
+}

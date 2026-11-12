@@ -41,3 +41,13 @@ resources/*.png
 # flags. The real manifest (public/manifest.webmanifest) is hand-written and
 # tracked; its icons live in public/icons/.
 /icons/
+
+# Leaderboard worker (worker/): dependencies, local Wrangler state, local-only
+# vars, and the binding types `wrangler types` regenerates on every typecheck
+/worker/node_modules
+/worker/.wrangler
+/worker/.dev.vars
+/worker/worker-configuration.d.ts
+
+# Agent session worktrees — full copies of the repo
+/.claude/worktrees/
