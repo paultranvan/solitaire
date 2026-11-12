@@ -146,6 +146,65 @@ the new-game default `drawCount` comes from settings. The saved-game loader
 returns `null` on schema mismatch _and_ on a fully-foundation-stacked state
 (belt-and-braces — the autosave clears on win, but defend anyway).
 
+### Move log and replay verification
+
+`GameState.moveLog` records every applied `Move` (`applyMove` appends, `undo`
+drops the last entry by restoring a snapshot), so the log replayed from `seed`
+always reproduces the current position. `game/replay.ts` does exactly that
+from untrusted input (`parseMoveLog` → `replayGame`) and is what the
+leaderboard worker runs on a submission. `moveLog` is `null` when the game
+can't be verified (a save that predates the log, or one that doesn't line up
+with `movesMade`). Two things to preserve: a `draw` may only override the
+game's draw count once `isAutoCompletable` holds (that's the auto-complete
+loop's single-card draws — `replayGame` rejects it anywhere else), and any new
+`Move` kind must be added to `parseMove`.
+
+### Leaderboard worker (`worker/`)
+
+A separate npm package (own `package.json`, pinned Wrangler) holding the
+Cloudflare Worker + D1 schema for the shared leaderboard; see
+`worker/README.md`. It imports `src/game/` directly, so `game/` must stay free
+of DOM and React — as must `src/leaderboard/name.ts` (the display-name rules
+both sides apply). Its pure validation (`worker/src/submission.ts`) is covered
+by the root vitest run; the HTTP/D1 layer (`worker/src/index.ts`) is not —
+exercise it with `npm run dev` in `worker/`.
+
+### Shared leaderboard (client side)
+
+The whole feature hangs off the build-time `VITE_LEADERBOARD_URL`
+(`src/leaderboard/config.ts`). Unset — the default — nothing is offered, shown
+or sent, and the CSP allows no outbound request; set, that one origin is added
+to `connect-src` by `vite.config.ts`. The GitHub workflows take it from the
+repository variable `LEADERBOARD_URL`, which is therefore the on/off switch
+for shipped builds. What the app sends is described to players in
+`public/privacy-policy.html` — keep that page true when the payload, the
+stored columns or the worker's logging change.
+
+- `src/leaderboard/api.ts` — HTTP client; never throws, returns
+  `ranked` / `rejected` / `retry`.
+- `store/leaderboardStore.ts` — `Board` calls `offerWin` on every recorded
+  win; the store sends it, asks first, or ignores it depending on the
+  `leaderboard` setting (`'ask'` → `'on'` / `'off'`). `'ask'` is the default:
+  taking part is on by default, but **nothing is sent before the player has
+  answered the one-time publish prompt** — keep that property. Undeliverable
+  submissions go to a small persisted queue, retried at boot and on `online`.
+- `ui/WorldRank.tsx` (inside the win sheet: prompt or world rank) and
+  `ui/WorldLeaderboard.tsx` (the "World" scope of `RecordsPanel`).
+
+Cheat wins and games without a `moveLog` are never offered.
+
+**Past wins.** Wins logged before the leaderboard existed have no move list,
+so they can't be verified; a one-off import carries them over for the app's
+first players. `src/leaderboard/pastWins.ts` (shared with the worker, like
+`name.ts` and `seed.ts`) holds the plausibility rules — including the
+1 December 2026 cutoff on a win's date — and `selectPastWins`, which picks the
+best three per draw mode. The store sends that batch once (`pastPending` →
+`pastDone`, both persisted), only for a player who is `'on'` with a name, and
+never the deal being published as verified. Players see these entries like any
+other; the worker flags them `verified = 0` for moderation only. This path is
+trust-based by nature — don't widen it (more entries, laxer bounds, a later
+cutoff) without weighing what a hand-written request could then claim.
+
 ### Stored and imported data is untrusted
 
 Anything read back from IndexedDB or from an imported backup file is validated

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -12,8 +12,14 @@
         max-width: 44rem;
         margin: 0 auto;
         padding: 2.5rem 1.25rem 4rem;
-        font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+        font:
+          16px/1.65 -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
         color: #1a1a1a;
         background: #fff;
       }
@@ -33,6 +39,10 @@
       h2 {
         font-size: 1.2rem;
         margin-top: 2rem;
+      }
+      h3 {
+        font-size: 1rem;
+        margin-top: 1.5rem;
       }
       .meta {
         color: #777;
@@ -55,64 +65,145 @@
   <body>
     <h1>Privacy Policy</h1>
     <p class="meta">
-      Solitaire (<code>com.paultranvan.solitaire</code>) &middot; Effective date:
-      4 June 2026
+      Solitaire (<code>com.paultranvan.solitaire</code>) &middot; Effective date: 12 November 2026
     </p>
 
     <p>
-      Solitaire is a single-player card game developed by Paul Tran-Van ("we",
-      "us"). We designed it to respect your privacy completely:
-      <strong>the app does not collect, transmit, sell, or share any personal
-      data.</strong>
-    </p>
-
-    <h2>Information we collect</h2>
-    <p>
-      <strong>None.</strong> The app has no accounts, no login, and no servers.
-      We do not ask for, gather, or receive any personal or identifying
-      information about you.
+      Solitaire is a single-player card game developed by Paul Tran-Van ("we", "us"). It has no
+      accounts, no advertising and no tracking.
+      <strong
+        >Nothing leaves your device unless you choose to publish a score to the world
+        leaderboard</strong
+      >, and we never sell or share data.
     </p>
 
     <h2>Data stored on your device</h2>
     <p>
-      To make the game work, the app saves the following locally on your device
-      only, using your device's private app storage:
+      To make the game work, the app saves the following locally, in your device's private app
+      storage (or your browser's storage for the web version):
     </p>
     <ul>
       <li>Your current game in progress, so you can resume it later.</li>
       <li>Your game statistics and records (wins, times, scores).</li>
-      <li>Your preferences (such as draw count, language, and sound settings).</li>
+      <li>
+        Your preferences (such as draw count, language, sound settings, and your leaderboard choice
+        and display name).
+      </li>
     </ul>
     <p>
-      This information never leaves your device. It is not uploaded anywhere,
-      and we cannot see it. Uninstalling the app, or clearing the app's data in
-      your device settings, permanently deletes all of it.
+      We cannot see any of it. Uninstalling the app, or clearing the app's data in your device
+      settings, permanently deletes it. If you export your statistics to a backup file, that file
+      goes only where you save it.
+    </p>
+
+    <h2>World leaderboard (optional)</h2>
+    <p>
+      The app can publish your winning games to a leaderboard shared by all players. The first time
+      you win a game, the app asks whether you want to take part.
+      <strong>Nothing is sent before you answer</strong>, and if you choose "Don't take part",
+      nothing is ever sent. You can change your answer at any time with the "World leaderboard"
+      switch in the settings.
+    </p>
+
+    <h3>What is sent</h3>
+    <p>If you take part, each game you win sends the following to our leaderboard server:</p>
+    <ul>
+      <li>
+        The display name you chose. The app suggests a random pseudonym, which you can edit; it is
+        shown publicly, so do not enter anything you would not want others to read.
+      </li>
+      <li>
+        The game itself: the identifier of the deal, the draw mode, the list of moves you played,
+        and how long the game took. The server replays the moves to check that the win is genuine
+        and to compute the score.
+      </li>
+    </ul>
+    <p>
+      If you are offline, the game waits on your device and is sent when the connection returns.
+    </p>
+    <p>
+      The first time you take part, the app also sends, once, your best wins from before 1 December
+      2026 (up to three per draw mode) so that they appear on the leaderboard: for each, the
+      identifier of the deal, the draw mode, the duration, the number of moves and the date it was
+      won. The question you answer before anything is sent tells you when this applies.
+    </p>
+
+    <h3>What is kept and shown</h3>
+    <p>
+      For each published game the server keeps the display name, the score, the duration, the number
+      of moves, the deal identifier, the draw mode, the date, and whether the game could be checked
+      by replaying its moves. The display name, score, duration, number of moves and date are
+      visible to everyone who opens the leaderboard. The list of moves is used for the check and is
+      not kept.
+    </p>
+    <p>
+      The server receives no account, email address, device identifier, advertising identifier, or
+      location. An entry is not linked to you or to your device in any way other than the display
+      name you gave it.
+    </p>
+
+    <h3>Viewing the leaderboard</h3>
+    <p>
+      Opening the "World" tab of the records downloads the current leaderboard from the server,
+      whether or not you take part. This request carries no information about you or your games.
+    </p>
+
+    <h3>Hosting and your IP address</h3>
+    <p>
+      The leaderboard is hosted by Cloudflare, with its database located in Western Europe. As with
+      any internet request, your IP address reaches Cloudflare when the app contacts the server. It
+      is used to deliver the response and to limit abuse (a cap on requests per minute). We do not
+      store it with leaderboard entries and we keep no log of individual requests. Cloudflare
+      handles it under its own
+      <a href="https://www.cloudflare.com/privacypolicy/">privacy policy</a>.
+    </p>
+
+    <h3>Retention and removal</h3>
+    <p>
+      Leaderboard entries are kept for as long as the leaderboard exists. Turning the "World
+      leaderboard" switch off stops any further sending but does not remove entries already
+      published. To have an entry removed, write to the address below with its display name and
+      approximate date. Because entries are not tied to an identity, we may ask for a detail such as
+      the score to find the right one. We may also remove entries whose display name is offensive or
+      misleading.
+    </p>
+    <p>
+      Publishing is based on your consent, which you can withdraw at any time as described above. If
+      you are in the European Union you also have the right to lodge a complaint with your data
+      protection authority.
     </p>
 
     <h2>Network and tracking</h2>
     <p>
-      The app works fully offline. It contains no analytics, no advertising, no
-      tracking or fingerprinting technologies, and no third-party SDKs that
-      collect data. It does not request access to your location, contacts,
-      camera, microphone, photos, or files.
+      Apart from the leaderboard requests described above, the app makes no network requests and
+      works fully offline. It contains no analytics, no advertising, no tracking or fingerprinting
+      technologies, and no third-party SDKs that collect data. It does not request access to your
+      location, contacts, camera, microphone, photos, or files.
+    </p>
+    <p>
+      The web version is served by GitHub Pages; loading it involves GitHub in the same way as
+      visiting any website.
     </p>
 
     <h2>Permissions</h2>
     <p>
-      The app may use device vibration (haptic feedback) to enhance gameplay.
-      This does not involve collecting any data.
+      The app may use device vibration (haptic feedback) to enhance gameplay, and internet access
+      for the world leaderboard only. Neither involves collecting any data beyond what is described
+      above.
     </p>
 
     <h2>Children's privacy</h2>
     <p>
-      The app is suitable for all ages. Because it collects no data from anyone,
-      it collects no data from children.
+      The app is suitable for all ages and does not knowingly collect personal information from
+      children. The only information that can leave the device is a chosen display name and game
+      results, and only if the leaderboard is used. A parent or guardian can ask us to remove an
+      entry at the address below.
     </p>
 
     <h2>Changes to this policy</h2>
     <p>
-      If this policy changes, the updated version will be posted at this same
-      address with a new effective date.
+      If this policy changes, the updated version will be posted at this same address with a new
+      effective date.
     </p>
 
     <h2>Contact</h2>
@@ -122,8 +213,8 @@
     </p>
 
     <footer>
-      &copy; 2026 Paul Tran-Van. This policy applies to the Solitaire app
-      published on Google Play.
+      &copy; 2026 Paul Tran-Van. This policy applies to the Solitaire app published on Google Play
+      and to its web version.
     </footer>
   </body>
 </html>
