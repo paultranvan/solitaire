@@ -47,6 +47,12 @@ jobs:
         run: npm run test:run
 
       - name: Build web bundle
+        env:
+          # Repo variable (Settings → Secrets and variables → Actions →
+          # Variables) holding the leaderboard worker's URL. Unset or empty,
+          # the shared leaderboard stays off and the CSP allows no outbound
+          # request. See worker/README.md.
+          VITE_LEADERBOARD_URL: ${{ vars.LEADERBOARD_URL }}
         run: npm run build
 
       - name: Configure Pages
