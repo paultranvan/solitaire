@@ -138,18 +138,25 @@
   grid-column: 1 / -1;
 }
 
-.confetti {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 70;
-  overflow: hidden;
+/* The sheet holds one step at a time (the publish question, then the
+   results); each one eases in when it takes over. */
+.win-step {
+  animation: win-step-in 260ms ease-out both;
 }
 
-.confetti__piece {
-  position: absolute;
-  top: -10px;
-  width: 8px;
-  height: 14px;
-  border-radius: 1.5px;
+@keyframes win-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.board[data-animations='off'] .win-step {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .win-step {
+    animation: none;
+  }
 }

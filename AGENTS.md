@@ -203,8 +203,17 @@ stored columns or the worker's logging change.
   taking part is on by default, but **nothing is sent before the player has
   answered the one-time publish prompt** — keep that property. Undeliverable
   submissions go to a small persisted queue, retried at boot and on `online`.
-- `ui/WorldRank.tsx` (inside the win sheet: prompt or world rank) and
-  `ui/WorldLeaderboard.tsx` (the "World" scope of `RecordsPanel`).
+- The win sheet (`ui/WinSheet.tsx`) holds one step at a time. While the store
+  says `prompt`, it shows `ui/PublishStep.tsx` alone — the publish question is
+  a step of its own so it can't be scrolled past — and the results only after
+  an answer. In the results, `ui/WorldRank.tsx` shows the world standing: a
+  plain line, or `ui/WorldCelebration.tsx` when a newly stored entry lands in
+  the world's top ten (one entrance each for 1st, 2nd and 3rd, one shared by
+  4th–10th; `ui/worldTier.ts` maps the rank). The animations are CSS-only and,
+  like the rest of the sheet, are switched off by
+  `.board[data-animations='off']` and `prefers-reduced-motion`; base styles
+  are the resting state, so the banner still shows.
+- `ui/WorldLeaderboard.tsx` is the "World" scope of `RecordsPanel`.
 
 Cheat wins and games without a `moveLog` are never offered.
 

@@ -1,0 +1,379 @@
+/* World top-ten banner. One block, four moods: the tier class sets the metal
+   (ink, outline, rim, wash) and picks the entrance. Base styles are always
+   the resting state, so with animations off the banner is simply there. */
+
+.wcel {
+  --wcel-ink: var(--gold-bright);
+  --wcel-deep: #5f4510;
+  --wcel-rim: rgba(216, 182, 111, 0.42);
+  --wcel-wash: rgba(216, 182, 111, 0.16);
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin: -6px 0 18px;
+  padding: 16px 14px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--wcel-rim);
+  background: linear-gradient(180deg, var(--wcel-wash), rgba(0, 0, 0, 0) 140%);
+  font-family: var(--font-sans);
+  animation: wcel-in 380ms cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+
+.wcel--gold {
+  --wcel-ink: #f6dc9a;
+  --wcel-rim: rgba(246, 220, 154, 0.62);
+  --wcel-wash: rgba(240, 208, 140, 0.28);
+  box-shadow: 0 0 34px rgba(240, 200, 110, 0.18);
+}
+
+.wcel--silver {
+  --wcel-ink: #e4e9f0;
+  --wcel-deep: #47505c;
+  --wcel-rim: rgba(214, 222, 233, 0.5);
+  --wcel-wash: rgba(214, 222, 233, 0.2);
+}
+
+.wcel--bronze {
+  --wcel-ink: #e9b98f;
+  --wcel-deep: #5a3418;
+  --wcel-rim: rgba(222, 160, 112, 0.5);
+  --wcel-wash: rgba(222, 160, 112, 0.2);
+}
+
+@keyframes wcel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+/* ---- Emblem ---- */
+
+.wcel__emblem {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 8px;
+}
+
+.wcel__art {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: var(--wcel-ink);
+  stroke: var(--wcel-deep);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+/* Trophy handles: open strokes in the metal's colour. */
+.wcel__art-line {
+  fill: none;
+  stroke: var(--wcel-ink);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+/* The star engraved on the cup. */
+.wcel__art-cut {
+  fill: var(--wcel-deep);
+  stroke: none;
+  opacity: 0.5;
+}
+
+.wcel__art-ribbon {
+  fill: #c4473f;
+}
+
+.wcel__art-ribbon--back {
+  fill: #8f322d;
+}
+
+.wcel__art-ring {
+  fill: none;
+  stroke: var(--wcel-deep);
+  stroke-width: 1.4;
+  opacity: 0.45;
+}
+
+.wcel__art-num {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  fill: var(--wcel-deep);
+  stroke: none;
+}
+
+.wcel__art-disc {
+  fill: var(--gold-soft);
+  stroke: var(--wcel-ink);
+  stroke-width: 1.6;
+}
+
+/* ---- Text ---- */
+
+.wcel__title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  color: var(--wcel-ink);
+}
+
+.wcel__sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ink-quiet);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 1st: a trophy rising in front of slowly turning rays ---- */
+
+.wcel__rays {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 250px;
+  height: 250px;
+  margin: -125px 0 0 -125px;
+  border-radius: 50%;
+  z-index: -1;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(246, 220, 154, 0.3) 0deg 9deg,
+    rgba(246, 220, 154, 0) 9deg 22.5deg
+  );
+  /* Fades out before it reaches the title, which has to stay crisp. */
+  -webkit-mask-image: radial-gradient(circle, #000 12%, transparent 60%);
+  mask-image: radial-gradient(circle, #000 12%, transparent 60%);
+  animation:
+    wcel-fade-in 700ms ease-out both,
+    wcel-spin 18s linear infinite;
+}
+
+.wcel--gold .wcel__art {
+  transform-origin: 50% 90%;
+  animation: wcel-trophy 950ms cubic-bezier(0.3, 1.4, 0.5, 1) 120ms both;
+}
+
+@keyframes wcel-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes wcel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes wcel-trophy {
+  0% {
+    opacity: 0;
+    transform: translateY(26px) scale(0.3) rotate(-14deg);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1.16) rotate(6deg);
+  }
+  76% {
+    transform: translateY(0) scale(0.96) rotate(-3deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* ---- 2nd: a medal swinging in on its ribbon, then a glint across ---- */
+
+.wcel--silver .wcel__art {
+  transform-origin: 50% -6px;
+  animation: wcel-swing 1500ms cubic-bezier(0.3, 0.6, 0.4, 1) 100ms both;
+}
+
+.wcel--silver::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: 0;
+  width: 38%;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.24),
+    rgba(255, 255, 255, 0)
+  );
+  /* Parked off the left edge; the banner clips it. */
+  transform: translateX(-140%) skewX(-18deg);
+  animation: wcel-glint 1100ms ease-in-out 750ms both;
+}
+
+@keyframes wcel-swing {
+  0% {
+    opacity: 0;
+    transform: rotate(-58deg);
+  }
+  12% {
+    opacity: 1;
+  }
+  30% {
+    transform: rotate(30deg);
+  }
+  50% {
+    transform: rotate(-17deg);
+  }
+  68% {
+    transform: rotate(9deg);
+  }
+  84% {
+    transform: rotate(-4deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes wcel-glint {
+  to {
+    transform: translateX(420%) skewX(-18deg);
+  }
+}
+
+/* ---- 3rd: a medal dropping in and bouncing to rest ---- */
+
+.wcel--bronze .wcel__art {
+  transform-origin: 50% 100%;
+  animation: wcel-drop 1100ms linear 80ms both;
+}
+
+@keyframes wcel-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-64px) scale(0.85);
+    animation-timing-function: ease-in;
+  }
+  38% {
+    opacity: 1;
+    transform: translateY(0) scale(1.08, 0.9);
+    animation-timing-function: ease-out;
+  }
+  56% {
+    transform: translateY(-17px) scale(1);
+    animation-timing-function: ease-in;
+  }
+  72% {
+    transform: translateY(0) scale(1.03, 0.96);
+    animation-timing-function: ease-out;
+  }
+  85% {
+    transform: translateY(-5px) scale(1);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* ---- 4th to 10th: a star popping in, with a ripple around it ---- */
+
+.wcel--top10 .wcel__art {
+  animation: wcel-badge 700ms cubic-bezier(0.34, 1.45, 0.64, 1) 80ms both;
+}
+
+.wcel__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--wcel-ink);
+  /* At rest the ring is not there; it only exists while it ripples out. */
+  opacity: 0;
+  animation: wcel-ripple 1300ms ease-out 350ms 2;
+}
+
+@keyframes wcel-badge {
+  from {
+    opacity: 0;
+    transform: scale(0.2) rotate(-70deg);
+  }
+}
+
+@keyframes wcel-ripple {
+  from {
+    opacity: 0.7;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+/* ---- Sparkles (3rd place and the top ten) ---- */
+
+.wcel__spark {
+  position: absolute;
+  width: 17px;
+  height: 17px;
+  fill: var(--wcel-ink);
+  opacity: 0.8;
+  animation: wcel-twinkle 1900ms ease-in-out infinite backwards;
+}
+
+.wcel__spark--a {
+  left: calc(50% - 78px);
+  top: 18px;
+  animation-delay: 700ms;
+}
+
+.wcel__spark--b {
+  left: calc(50% + 58px);
+  top: 36px;
+  width: 14px;
+  height: 14px;
+  animation-delay: 1050ms;
+}
+
+.wcel__spark--c {
+  left: calc(50% + 42px);
+  top: 9px;
+  width: 11px;
+  height: 11px;
+  animation-delay: 1400ms;
+}
+
+@keyframes wcel-twinkle {
+  0%,
+  100% {
+    opacity: 0.1;
+    transform: scale(0.45) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+}
+
+/* ---- No motion: animations setting off, or reduced motion requested ---- */
+
+.board[data-animations='off'] .wcel,
+.board[data-animations='off'] .wcel::after,
+.board[data-animations='off'] .wcel * {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wcel,
+  .wcel::after,
+  .wcel * {
+    animation: none;
+  }
+}

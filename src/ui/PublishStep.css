@@ -1,0 +1,128 @@
+/* The publish question — a step of its own in the win sheet. Same opening as
+   the other short sheets (medallion, headline, quiet line), then one field
+   and one gold call-to-action. */
+
+.publish__globe {
+  width: 44px;
+  height: 44px;
+  fill: none;
+  stroke: var(--gold-bright);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.publish .sheet-sub {
+  margin-bottom: 16px;
+}
+
+/* The score at stake, small: the full results come right after the answer. */
+.publish__score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 20px;
+  padding: 7px 16px 6px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  border: 1px solid rgba(216, 182, 111, 0.36);
+}
+
+.publish__score-label {
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ink-quiet);
+}
+
+.publish__score-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--gold-bright);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'lnum', 'tnum';
+}
+
+.publish__label {
+  display: block;
+  margin: 0 0 7px;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
+
+.publish__name-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.publish__name-row .text-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.publish__reroll {
+  flex: none;
+  padding-inline: 12px;
+}
+
+.publish__hint {
+  margin: 14px 0 0;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-quiet);
+}
+
+.publish__hint--err {
+  margin-top: 8px;
+  text-align: left;
+  color: #fca5a5;
+}
+
+/* The gold button is the answer the step is asking for; the way out sits
+   under it, quiet but full-width so it is never a hunt. */
+.publish__actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* Short screens: shrink the opening so both answers are on screen without
+   scrolling — the whole point of the step is that they can't be missed. */
+@media (max-height: 720px) {
+  .publish .sheet-hero {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 10px;
+  }
+
+  .publish__globe {
+    width: 30px;
+    height: 30px;
+  }
+
+  .publish .sheet-headline {
+    font-size: 23px;
+    margin-bottom: 6px;
+  }
+
+  .publish .sheet-sub {
+    font-size: 13.5px;
+    margin-bottom: 12px;
+  }
+
+  .publish__score {
+    margin-bottom: 14px;
+  }
+
+  .publish__actions {
+    margin-top: 14px;
+  }
+}
